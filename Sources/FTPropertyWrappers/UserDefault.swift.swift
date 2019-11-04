@@ -25,7 +25,8 @@
 
 import Foundation
 
-final class DefaultsStore<Value: Codable> {
+@propertyWrapper
+public final class DefaultsStore<Value: Codable> {
 
     private let defaults: UserDefaults
 
@@ -33,24 +34,24 @@ final class DefaultsStore<Value: Codable> {
     private let decoder: PropertyListDecoder
 
     private let key: String
-    private let initialValue: Value?
+    private let defaultValue: Value?
 
-    init(initialValue: Value? = nil, key: String = #function, defaults: UserDefaults = .standard, encoder: PropertyListEncoder = PropertyListEncoder(), decoder: PropertyListDecoder = PropertyListDecoder()) {
+    public init(key: String = #function, defaultValue: Value? = nil, defaults: UserDefaults = .standard, encoder: PropertyListEncoder = PropertyListEncoder(), decoder: PropertyListDecoder = PropertyListDecoder()) {
         self.key = key
-        self.initialValue = initialValue
         self.defaults = defaults
         self.encoder = encoder
         self.decoder = decoder
+        self.defaultValue = defaultValue
     }
 
-    var value: Value? {
+    public var wrappedValue: Value? {
         get {
             if let data = defaults.data(forKey: key), let value = try? decoder.decode(Value.self, from: data) {
                 return value
             } else if let value = defaults.value(forKey: key) as? Value {
                 return value
             }
-            return initialValue
+            return defaultValue
         }
         set {
             if let data = try? encoder.encode(newValue) {

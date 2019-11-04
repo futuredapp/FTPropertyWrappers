@@ -25,7 +25,7 @@
 
 import Foundation
 
-protocol JSONCodedKeyValueSecureStorageAdapter: KeyValueSecureStorageAdapter {
+public protocol JSONCodedKeyValueSecureStorageAdapter: KeyValueSecureStorageAdapter {
     var jsonEncoder: JSONEncoder { get }
     var jsonDecoder: JSONDecoder { get }
 
@@ -33,7 +33,7 @@ protocol JSONCodedKeyValueSecureStorageAdapter: KeyValueSecureStorageAdapter {
     func save<Property: Codable>(value: Property, for key: String) throws
 }
 
-extension JSONCodedKeyValueSecureStorageAdapter {
+public extension JSONCodedKeyValueSecureStorageAdapter {
     func load<Property: Codable>(for key: String) throws -> Property {
         let saved: Data = try load(for: key)
         return try jsonDecoder.decode(Property.self, from: saved)
@@ -45,12 +45,12 @@ extension JSONCodedKeyValueSecureStorageAdapter {
     }
 }
 
-final class CodableKeychainAdapter: KeychainAdapter, JSONCodedKeyValueSecureStorageAdapter {
+public final class CodableKeychainAdapter: KeychainAdapter, JSONCodedKeyValueSecureStorageAdapter {
 
-    let jsonDecoder: JSONDecoder
-    let jsonEncoder: JSONEncoder
+    public let jsonDecoder: JSONDecoder
+    public let jsonEncoder: JSONEncoder
 
-    init(serviceIdentifier: String, biometricAuthRequired: Bool, jsonEncoder: JSONEncoder = JSONEncoder(), jsonDecoder: JSONDecoder = JSONDecoder()) {
+    public init(serviceIdentifier: String, biometricAuthRequired: Bool, jsonEncoder: JSONEncoder = JSONEncoder(), jsonDecoder: JSONDecoder = JSONDecoder()) {
         self.jsonEncoder = jsonEncoder
         self.jsonDecoder = jsonDecoder
 
@@ -58,16 +58,17 @@ final class CodableKeychainAdapter: KeychainAdapter, JSONCodedKeyValueSecureStor
     }
 }
 
-final class CodableKeychainElement<Property> where Property: Codable {
+@propertyWrapper
+public final class CodableKeychainElement<Property> where Property: Codable {
     let key: String
     let storageAdapter: JSONCodedKeyValueSecureStorageAdapter
 
-    init(storageAdapter: JSONCodedKeyValueSecureStorageAdapter, key: String) {
+    public init(storageAdapter: JSONCodedKeyValueSecureStorageAdapter, key: String) {
         self.storageAdapter = storageAdapter
         self.key = key
     }
 
-    var value: Property? {
+    public var wrappedValue: Property? {
         get {
             return try? storageAdapter.load(for: key)
         }
@@ -131,7 +132,7 @@ enum KeychainError: Error {
     case unhandledError(status: OSStatus)
 }
 
-protocol KeyValueSecureStorageAdapter {
+public protocol KeyValueSecureStorageAdapter {
     func load(for key: String) throws -> Data
     func loadAll() throws -> [(String, Data)]
     func save(value: Data, for key: String) throws
@@ -139,7 +140,7 @@ protocol KeyValueSecureStorageAdapter {
     func delete(for key: String) throws
 }
 
-class KeychainAdapter: KeyValueSecureStorageAdapter {
+public class KeychainAdapter: KeyValueSecureStorageAdapter {
     let serviceIdentifier: String
     let biometricAuthRequired: Bool
 
@@ -148,7 +149,7 @@ class KeychainAdapter: KeyValueSecureStorageAdapter {
         self.biometricAuthRequired = biometricAuthRequired
     }
 
-    func load(for key: String) throws -> Data {
+    public func load(for key: String) throws -> Data {
         let queryResult: AnyObject? = try getResult(account: key, single: true)
 
         guard let item = queryResult as? KeychainQuery, let data = item[kSecValueData as String] as? Data else {
@@ -158,7 +159,7 @@ class KeychainAdapter: KeyValueSecureStorageAdapter {
         return data
     }
 
-    func loadAll() throws -> [(String, Data)] {
+    public func loadAll() throws -> [(String, Data)] {
         let queryResult: AnyObject? = try getResult(account: nil, single: false)
 
         guard let array = queryResult as? [[String: Any]] else {
@@ -177,7 +178,7 @@ class KeychainAdapter: KeyValueSecureStorageAdapter {
         return values
     }
 
-    func save(value: Data, for key: String) throws {
+    public func save(value: Data, for key: String) throws {
         // delete item if already exists
         var deleteQuery = getQuery(account: key)
         deleteQuery[kSecReturnData as String] = kCFBooleanFalse
@@ -197,7 +198,7 @@ class KeychainAdapter: KeyValueSecureStorageAdapter {
         }
     }
 
-    func deleteAll() throws {
+    public func deleteAll() throws {
         let query = getQuery()
         let status = SecItemDelete(query as CFDictionary)
 
@@ -206,7 +207,7 @@ class KeychainAdapter: KeyValueSecureStorageAdapter {
         }
     }
 
-    func delete(for key: String) throws {
+    public func delete(for key: String) throws {
         var deleteQuery = getQuery(account: key)
         deleteQuery[kSecReturnData as String] = kCFBooleanFalse
         let status = SecItemDelete(deleteQuery as CFDictionary)

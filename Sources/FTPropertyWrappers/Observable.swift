@@ -27,49 +27,7 @@ import Foundation
 
 protocol Disposable {}
 
-final class ObservationTokenWrapper<Value> {
-    weak var token: ObservationToken<Value>?
-
-    init(token: ObservationToken<Value>) {
-       self.token = token
-    }
-}
-
-final class ObservationToken<Value>: Disposable {
-    var id: UUID = UUID()
-    let closure: (Value) -> Void
-
-    weak var subject: Subject<Value>?
-
-    init(closure: @escaping (Value) -> Void) {
-        self.closure = closure
-    }
-
-    deinit {
-        subject?.removeObserver(with: id)
-    }
-}
-
-final class Subject<Value> {
-    private var observers: [UUID: ObservationTokenWrapper<Value>] = [:]
-
-    func update(value: Value) {
-        observers.values.forEach { $0.token?.closure(value) }
-    }
-
-    func observe(_ observer: @escaping (Value) -> Void) -> Disposable {
-        let token = ObservationToken(closure: observer)
-        token.subject = self
-        observers[token.id] = ObservationTokenWrapper(token: token)
-        return token
-    }
-
-    func removeObserver(with id: UUID) {
-        observers.removeValue(forKey: id)
-    }
-}
-
-final class StoredObservationTokenWrapper<Value> {
+public final class StoredObservationTokenWrapper<Value> {
     weak var token: StoredObservationToken<Value>?
 
     init(token: StoredObservationToken<Value>) {
@@ -77,7 +35,7 @@ final class StoredObservationTokenWrapper<Value> {
     }
 }
 
-final class StoredObservationToken<Value>: Disposable {
+public final class StoredObservationToken<Value>: Disposable {
     var uuid: UUID = UUID()
     let closure: StoredSubject<Value>.UpdateHandler
 
@@ -92,42 +50,39 @@ final class StoredObservationToken<Value>: Disposable {
     }
 }
 
-final class StoredSubject<Value> {
-    typealias UpdateHandler = ((_ old: Value, _ new: Value) -> Void)
+@propertyWrapper
+public final class StoredSubject<Value> {
+    public typealias UpdateHandler = ((_ old: Value, _ new: Value) -> Void)
 
-    var value: Value {
+    public var wrappedValue: Value {
         didSet {
-            observers.values.forEach { $0.token?.closure(oldValue, value) }
-            endOfUpdatesObservers.values.forEach { $0.token?.closure(oldValue, value) }
+            observers.values.forEach { $0.token?.closure(oldValue, wrappedValue) }
+            endOfUpdatesObservers.values.forEach { $0.token?.closure(oldValue, wrappedValue) }
         }
     }
 
-    init(value: Value) {
-        self.value = value
+    public init(wrappedValue: Value) {
+        self.wrappedValue = wrappedValue
     }
 
     private var observers: [UUID: StoredObservationTokenWrapper<Value>] = [:]
     private var endOfUpdatesObservers: [UUID: StoredObservationTokenWrapper<Value>] = [:]
 
-    func update(value: Value) {
-        self.value = value
-    }
-
-    func observe(_ observer: @escaping UpdateHandler) -> StoredObservationToken<Value> {
+    public func observe(_ observer: @escaping UpdateHandler) -> StoredObservationToken<Value> {
         let token = StoredObservationToken(closure: observer)
         token.subject = self
         observers[token.uuid] = StoredObservationTokenWrapper(token: token)
         return token
     }
 
-    func observeEndOfUpdates(_ observer: @escaping UpdateHandler) -> StoredObservationToken<Value> {
+    public func observeEndOfUpdates(_ observer: @escaping UpdateHandler) -> StoredObservationToken<Value> {
         let token = StoredObservationToken(closure: observer)
         token.subject = self
         endOfUpdatesObservers[token.uuid] = StoredObservationTokenWrapper(token: token)
         return token
     }
 
-    func removeObserver(with uuid: UUID) {
+    public func removeObserver(with uuid: UUID) {
         observers.removeValue(forKey: uuid)
         endOfUpdatesObservers.removeValue(forKey: uuid)
     }
