@@ -1,15 +1,145 @@
 import XCTest
 @testable import FTPropertyWrappers
 
+struct SecureEnclaveStorageTestStruct {
+    @CodableKeychainElement var number: Int?
+
+    init() {
+        self._number = CodableKeychainElement(storageAdapter: CodableKeychainAdapter(serviceIdentifier: "org.ftpropertywrappers.keychain", biometricAuthRequired: false), key: "tester.number")
+    }
+}
+
+struct ObservableTestStruct {
+    @StoredSubject var number: Int
+    var numberWrapper: StoredSubject<Int> { _number }
+}
+
+struct SerializedTestStruct {
+    @Serialized var number: Int
+}
+
+struct UserDefaultsTestStruct {
+    @DefaultsStore(defaultValue: 15) var nonParams: Int?
+    @DefaultsStore(key: "Param", defaultValue: 30) var param: Int?
+    @DefaultsStore var constructed: Int?
+
+    init() {
+        self._constructed = DefaultsStore(defaultValue: 45, defaults: .standard, encoder: PropertyListEncoder(), decoder: PropertyListDecoder())
+    }
+}
+
 final class FTPropertyWrappersTests: XCTestCase {
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-        //XCTAssertEqual(FTPropertyWrappers().text, "Hello, World!")
+
+    func testSerialized() {
+        let tester = SerializedTestStruct(number: 15)
+        XCTAssertEqual(tester.number, 15)
+        tester.number = 30
+        XCTAssertEqual(tester.number, 30)
+
+    }
+
+    func testStoredSubject() {
+        var disposables: [Disposable] = []
+
+        var testDict: [String: Int] = [:]
+        let tester = ObservableTestStruct(number: 30)
+
+        let first = "first"
+        disposables.append(tester.numberWrapper.observe { old, new in
+            XCTAssertEqual(testDict[first], old)
+            testDict[first] = new
+        })
+
+        let second = "second"
+        disposables.append(tester.numberWrapper.observe { old, new in
+            XCTAssertEqual(testDict[second], old)
+            testDict[second] = new
+        })
+
+
+        let third = "third"
+        disposables.append(tester.numberWrapper.observe { old, new in
+            XCTAssertEqual(testDict[third], old)
+            testDict[third] = new
+        })
+
+
+        let end = "end"
+        disposables.append(tester.numberWrapper.observeEndOfUpdates { old, new in
+            XCTAssertEqual(testDict[end], old)
+            testDict[end] = new
+            XCTAssertEqual(testDict[first], new)
+            XCTAssertEqual(testDict[second], new)
+            XCTAssertEqual(testDict[third], new)
+        })
+
+        testDict = [first: 30, second: 30, third: 30, end: 30];
+
+        tester.number = 15
+
+        XCTAssertEqual(testDict[end], 15)
+        XCTAssertEqual(testDict[first], 15)
+        XCTAssertEqual(testDict[second], 15)
+        XCTAssertEqual(testDict[third], 15)
+    }
+
+    func testSecureEnclave() {
+        defer {
+            SecureEnclaveStorageTestStruct().number = nil
+        }
+
+        let tester = SecureEnclaveStorageTestStruct()
+        XCTAssertNil(tester.number)
+        tester.number = 15
+        XCTAssertEqual(tester.number, 15)
+
+        let tester2 = SecureEnclaveStorageTestStruct()
+        XCTAssertEqual(tester2.number, 15)
+        tester2.number = 30
+        XCTAssertEqual(tester.number, 30)
+        XCTAssertEqual(tester2.number, 30)
+
+    }
+
+    func testUserDefaults() {
+        defer {
+            let tidy = UserDefaultsTestStruct()
+            tidy.constructed = nil
+            tidy.nonParams = nil
+            tidy.param = nil
+        }
+
+        let tester = UserDefaultsTestStruct()
+        XCTAssertEqual(tester.nonParams, 15)
+        XCTAssertEqual(tester.param, 30)
+        XCTAssertEqual(tester.constructed, 45)
+
+        tester.nonParams = 115
+        tester.param = 130
+        tester.constructed = 145
+
+        let tester2 = UserDefaultsTestStruct()
+        XCTAssertEqual(tester2.nonParams, 115)
+        XCTAssertEqual(tester2.param, 130)
+        XCTAssertEqual(tester2.constructed, 145)
+
+        tester.nonParams = 215
+        tester.param = 230
+        tester.constructed = 245
+
+        XCTAssertEqual(tester.nonParams, 215)
+        XCTAssertEqual(tester.param, 230)
+        XCTAssertEqual(tester.constructed, 245)
+        XCTAssertEqual(tester2.nonParams, 215)
+        XCTAssertEqual(tester2.param, 230)
+        XCTAssertEqual(tester2.constructed, 245)
+
     }
 
     static var allTests = [
-        ("testExample", testExample),
+        ("test serialized", testSerialized),
+        ("test stored subject", testStoredSubject),
+        ("test secure enclave", testSecureEnclave),
+        ("test user defaults", testUserDefaults),
     ]
 }
