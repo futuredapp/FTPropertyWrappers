@@ -5,7 +5,7 @@ import Foundation
 public final class Serialized<Value> {
 
     /// Synchronization queue for the property. Read or write to the property must be perforimed on this queue
-    private let queue = DispatchQueue(label: "org.ftpropertywrapper.serialization")
+    private let queue = DispatchQueue(label: "app.futured.ftpropertywrappers.serialized")
 
     /// The value itself with did-set observing.
     private var value: Value {
@@ -24,11 +24,7 @@ public final class Serialized<Value> {
 
     /// Defaul access interface for enclodes property. Setter and getter are both sync.
     public var wrappedValue: Value {
-        get {
-            return queue.sync {
-                return value
-            }
-        }
+        get { queue.sync { value } }
         set {
             queue.sync {
                 value = newValue

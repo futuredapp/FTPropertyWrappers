@@ -11,7 +11,7 @@ public final class DefaultsStore<Value: Codable> {
     private let key: String
     private let defaultValue: Value?
 
-    public init(key: String = #function, defaultValue: Value? = nil, defaults: UserDefaults = .standard, encoder: PropertyListEncoder = PropertyListEncoder(), decoder: PropertyListDecoder = PropertyListDecoder()) {
+    public init(key: String, defaultValue: Value? = nil, defaults: UserDefaults = .standard, encoder: PropertyListEncoder = PropertyListEncoder(), decoder: PropertyListDecoder = PropertyListDecoder()) {
         self.key = key
         self.defaults = defaults
         self.encoder = encoder
