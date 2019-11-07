@@ -3,14 +3,12 @@ import XCTest
 
 struct KeychainStorageTestStruct {
     @KeychainStore(key: "tester.number") var number: Int?
-
+    @KeychainStore(key: "tester.number") var collection: [Int]?
 }
 
 final class KeychainTests: XCTestCase {
-    func testSecureEnclave() {
-        defer {
-            KeychainStorageTestStruct().number = nil
-        }
+    func testKeychainBuiltin() {
+        addTeardownBlock { self.teardownEach() }
 
         let tester = KeychainStorageTestStruct()
         XCTAssertNil(tester.number)
@@ -25,7 +23,71 @@ final class KeychainTests: XCTestCase {
 
     }
 
+    func testKeychainCollection() {
+        addTeardownBlock { self.teardownEach() }
+
+        let tester = KeychainStorageTestStruct()
+        XCTAssertNil(tester.collection)
+        tester.collection = [10, 20, 30]
+        XCTAssertEqual(tester.collection, [10, 20, 30])
+
+        let tester2 = KeychainStorageTestStruct()
+        XCTAssertEqual(tester.collection, [10, 20, 30])
+        tester2.collection?[1] = 50
+        XCTAssertEqual(tester.collection, [10, 50, 30])
+        XCTAssertEqual(tester2.collection, [10, 50, 30])
+
+    }
+
+    func testKeychainDeletions() {
+        addTeardownBlock { self.teardownEach() }
+
+        let tester = KeychainStorageTestStruct()
+        XCTAssertNil(tester.collection)
+        XCTAssertNil(tester.number)
+
+        tester.number = 15
+        XCTAssertEqual(tester.number, 15)
+
+        tester.collection = [10, 20, 30]
+        XCTAssertEqual(tester.collection, [10, 20, 30])
+
+        XCTAssertNoThrow(try CodableKeychainAdapter.defaultDomain.deleteAll()) 
+        XCTAssertNil(tester.collection)
+        XCTAssertNil(tester.number)
+
+        tester.number = 15
+        XCTAssertEqual(tester.number, 15)
+
+        tester.collection = [10, 20, 30]
+        XCTAssertEqual(tester.collection, [10, 20, 30])
+
+
+        tester.number = nil
+        XCTAssertNil(tester.number)
+
+        tester.collection = nil
+        XCTAssertNil(tester.collection)
+
+    }
+
+    override func setUp() {
+        super.setUp()
+        let tidy = KeychainStorageTestStruct()
+        tidy.number = nil
+        tidy.number = nil
+    }
+
+    func teardownEach() {
+        let tidy = KeychainStorageTestStruct()
+        tidy.number = nil
+        tidy.number = nil
+    }
+
+
     static var allTests = [
-        ("testSecureEnclave", testSecureEnclave),
+        ("testKeychainBuiltin", testKeychainBuiltin),
+        ("testKeychainCollection", testKeychainCollection),
+        ("testKeychainDeletions", testKeychainDeletions)
     ]
 }
