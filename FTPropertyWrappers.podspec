@@ -18,8 +18,6 @@ Pod::Spec.new do |s|
   s.tvos.deployment_target = "9.0"
   s.source       = { :git => "https://github.com/thefuntasty/FTPropertyWrappers.git", :tag => s.version.to_s }
 
-  s.subspec 'Core' do |ss|
-    ss.source_files  = "Sources/FTPropertyWrappers/*"
-    ss.framework  = "Foundation"
-  end
+  s.source_files  = "Sources/FTPropertyWrappers/*"
+  s.framework  = "Foundation"
 end
