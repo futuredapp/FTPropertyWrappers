@@ -1,7 +1,7 @@
 import Foundation
 
 @propertyWrapper
-public final class CodableKeychainElement<Property> where Property: Codable {
+public final class KeychainStore<Property> where Property: Codable {
     let key: String
     let storageAdapter: CodableKeychainAdapter
 

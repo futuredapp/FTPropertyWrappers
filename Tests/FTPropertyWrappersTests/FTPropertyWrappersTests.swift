@@ -1,8 +1,8 @@
 import XCTest
 @testable import FTPropertyWrappers
 
-struct SecureEnclaveStorageTestStruct {
-    @CodableKeychainElement(key: "tester.number") var number: Int?
+struct KeychainStorageTestStruct {
+    @KeychainStore(key: "tester.number") var number: Int?
 
 }
 
@@ -81,15 +81,15 @@ final class FTPropertyWrappersTests: XCTestCase {
 
     func testSecureEnclave() {
         defer {
-            SecureEnclaveStorageTestStruct().number = nil
+            KeychainStorageTestStruct().number = nil
         }
 
-        let tester = SecureEnclaveStorageTestStruct()
+        let tester = KeychainStorageTestStruct()
         XCTAssertNil(tester.number)
         tester.number = 15
         XCTAssertEqual(tester.number, 15)
 
-        let tester2 = SecureEnclaveStorageTestStruct()
+        let tester2 = KeychainStorageTestStruct()
         XCTAssertEqual(tester2.number, 15)
         tester2.number = 30
         XCTAssertEqual(tester.number, 30)
