@@ -36,4 +36,9 @@ final class StoredSubjectTests: XCTestCase {
 
         XCTAssertEqual(values, [])
     }
+
+    static var allTests = [
+        ("testStoredSubjectObserving", testStoredSubjectObserving),
+        ("testStoredSubjectDisposing", testStoredSubjectDisposing),
+    ]
 }
