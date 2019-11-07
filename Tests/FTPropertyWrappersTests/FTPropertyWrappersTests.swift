@@ -6,11 +6,6 @@ struct KeychainStorageTestStruct {
 
 }
 
-struct ObservableTestStruct {
-    @StoredSubject var number: Int
-    var numberWrapper: StoredSubject<Int> { _number }
-}
-
 struct SerializedTestStruct {
     @Serialized var number: Int
 }
@@ -32,51 +27,6 @@ final class FTPropertyWrappersTests: XCTestCase {
         tester.number = 30
         XCTAssertEqual(tester.number, 30)
 
-    }
-
-    func testStoredSubject() {
-        var disposables: [Disposable] = []
-
-        var testDict: [String: Int] = [:]
-        let tester = ObservableTestStruct(number: 30)
-
-        let first = "first"
-        disposables.append(tester.numberWrapper.observe { old, new in
-            XCTAssertEqual(testDict[first], old)
-            testDict[first] = new
-        })
-
-        let second = "second"
-        disposables.append(tester.numberWrapper.observe { old, new in
-            XCTAssertEqual(testDict[second], old)
-            testDict[second] = new
-        })
-
-
-        let third = "third"
-        disposables.append(tester.numberWrapper.observe { old, new in
-            XCTAssertEqual(testDict[third], old)
-            testDict[third] = new
-        })
-
-
-        let end = "end"
-        disposables.append(tester.numberWrapper.observeEndOfUpdates { old, new in
-            XCTAssertEqual(testDict[end], old)
-            testDict[end] = new
-            XCTAssertEqual(testDict[first], new)
-            XCTAssertEqual(testDict[second], new)
-            XCTAssertEqual(testDict[third], new)
-        })
-
-        testDict = [first: 30, second: 30, third: 30, end: 30];
-
-        tester.number = 15
-
-        XCTAssertEqual(testDict[end], 15)
-        XCTAssertEqual(testDict[first], 15)
-        XCTAssertEqual(testDict[second], 15)
-        XCTAssertEqual(testDict[third], 15)
     }
 
     func testSecureEnclave() {
@@ -127,7 +77,6 @@ final class FTPropertyWrappersTests: XCTestCase {
 
     static var allTests = [
         ("test serialized", testSerialized),
-        ("test stored subject", testStoredSubject),
         ("test secure enclave", testSecureEnclave),
         ("test user defaults", testUserDefaults),
     ]
