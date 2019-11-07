@@ -1,12 +1,9 @@
 import XCTest
 @testable import FTPropertyWrappers
 
-struct SecureEnclaveStorageTestStruct {
-    @CodableKeychainElement var number: Int?
+struct KeychainStorageTestStruct {
+    @KeychainStore(key: "tester.number") var number: Int?
 
-    init() {
-        self._number = CodableKeychainElement(storageAdapter: CodableKeychainAdapter(serviceIdentifier: "org.ftpropertywrappers.keychain", biometricAuthRequired: false), key: "tester.number")
-    }
 }
 
 struct SerializedTestStruct {
@@ -14,12 +11,11 @@ struct SerializedTestStruct {
 }
 
 struct UserDefaultsTestStruct {
-    @DefaultsStore(defaultValue: 15) var nonParams: Int?
     @DefaultsStore(key: "Param", defaultValue: 30) var param: Int?
     @DefaultsStore var constructed: Int?
 
     init() {
-        self._constructed = DefaultsStore(defaultValue: 45, defaults: .standard, encoder: PropertyListEncoder(), decoder: PropertyListDecoder())
+        self._constructed = DefaultsStore(key: "constructed", defaultValue: 45, defaults: .standard, encoder: PropertyListEncoder(), decoder: PropertyListDecoder())
     }
 }
 
@@ -35,15 +31,15 @@ final class FTPropertyWrappersTests: XCTestCase {
 
     func testSecureEnclave() {
         defer {
-            SecureEnclaveStorageTestStruct().number = nil
+            KeychainStorageTestStruct().number = nil
         }
 
-        let tester = SecureEnclaveStorageTestStruct()
+        let tester = KeychainStorageTestStruct()
         XCTAssertNil(tester.number)
         tester.number = 15
         XCTAssertEqual(tester.number, 15)
 
-        let tester2 = SecureEnclaveStorageTestStruct()
+        let tester2 = KeychainStorageTestStruct()
         XCTAssertEqual(tester2.number, 15)
         tester2.number = 30
         XCTAssertEqual(tester.number, 30)
@@ -55,32 +51,25 @@ final class FTPropertyWrappersTests: XCTestCase {
         defer {
             let tidy = UserDefaultsTestStruct()
             tidy.constructed = nil
-            tidy.nonParams = nil
             tidy.param = nil
         }
 
         let tester = UserDefaultsTestStruct()
-        XCTAssertEqual(tester.nonParams, 15)
         XCTAssertEqual(tester.param, 30)
         XCTAssertEqual(tester.constructed, 45)
 
-        tester.nonParams = 115
         tester.param = 130
         tester.constructed = 145
 
         let tester2 = UserDefaultsTestStruct()
-        XCTAssertEqual(tester2.nonParams, 115)
         XCTAssertEqual(tester2.param, 130)
         XCTAssertEqual(tester2.constructed, 145)
 
-        tester.nonParams = 215
         tester.param = 230
         tester.constructed = 245
 
-        XCTAssertEqual(tester.nonParams, 215)
         XCTAssertEqual(tester.param, 230)
         XCTAssertEqual(tester.constructed, 245)
-        XCTAssertEqual(tester2.nonParams, 215)
         XCTAssertEqual(tester2.param, 230)
         XCTAssertEqual(tester2.constructed, 245)
 
