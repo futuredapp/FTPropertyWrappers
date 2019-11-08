@@ -10,7 +10,6 @@ Pod::Spec.new do |s|
   s.license      = { :type => "MIT", :file => "LICENSE" }
   s.author             = { "Matěj Kašpar Jirásek" => "matej.jirasek@thefuntasty.com" }
   s.social_media_url   = "https://twitter.com/thefuntasty"
-  s.default_subspec = 'Core'
   s.swift_version = "5.1"
   s.ios.deployment_target = "8.0"
   s.osx.deployment_target = "10.10"
