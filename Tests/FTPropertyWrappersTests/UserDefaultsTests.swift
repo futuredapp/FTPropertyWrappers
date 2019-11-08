@@ -73,7 +73,7 @@ final class UserDefaultsTests: XCTestCase {
 
     }
 
-    func testUserDefaultsCollection() {
+    func testCodableUserDefault() {
         let tester = UserDefaultsTestStruct()
         XCTAssertNil(tester.person)
 
@@ -83,7 +83,7 @@ final class UserDefaultsTests: XCTestCase {
         let tester2 = UserDefaultsTestStruct()
         XCTAssertEqual(tester2.person, Person(age: 15, name: "Peter"))
 
-        tester2.defaultCollection = Person(age: 25, name: "Lukas")
+        tester2.person = Person(age: 25, name: "Lukas")
 
         XCTAssertEqual(tester.person, Person(age: 25, name: "Lukas"))
         XCTAssertEqual(tester2.person, Person(age: 25, name: "Lukas"))
@@ -117,5 +117,6 @@ final class UserDefaultsTests: XCTestCase {
     static var allTests = [
         ("testUserDefaults", testUserDefaults),
         ("testUserDefaultsCollection", testUserDefaultsCollection),
+        ("testCodableUserDefault", testCodableUserDefault),
     ]
 }
