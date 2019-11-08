@@ -9,6 +9,8 @@ struct Person: Codable, Equatable {
 struct UserDefaultsTestStruct {
     @DefaultsStore(key: "Param", defaultValue: 30) var param: Int?
     @DefaultsStore var constructed: Int?
+    @DefaultsStore(key: "text") var text: String?
+    @DefaultsStore(key: "number") var number: Int?
     @DefaultsStore(key: "defaultCollection", defaultValue: [10, 20]) var defaultCollection: [Int]?
     @DefaultsStore(key: "collection") var collection: [Int]?
     @DefaultsStore(key: "person") var person: Person?
@@ -94,6 +96,39 @@ final class UserDefaultsTests: XCTestCase {
         XCTAssertNil(tester.person)
     }
 
+    func testPromitiveValues() {
+        let tester = UserDefaultsTestStruct()
+
+        XCTAssertNil(tester.text)
+        XCTAssertNil(tester.number)
+        XCTAssertEqual(UserDefaults.standard.integer(forKey: "number"), 0)
+        XCTAssertNil(UserDefaults.standard.string(forKey: "text"))
+
+        tester.text = "Samuel"
+        tester.number = 199
+
+        XCTAssertEqual(UserDefaults.standard.string(forKey: "text"), tester.text)
+        XCTAssertEqual(UserDefaults.standard.integer(forKey: "number"), tester.number)
+        XCTAssertEqual(UserDefaults.standard.string(forKey: "text"), "Samuel")
+        XCTAssertEqual(UserDefaults.standard.integer(forKey: "number"), 199)
+
+        UserDefaults.standard.removeObject(forKey: "text")
+        UserDefaults.standard.removeObject(forKey: "number")
+
+        XCTAssertNil(tester.text)
+        XCTAssertNil(tester.number)
+        XCTAssertEqual(UserDefaults.standard.integer(forKey: "number"), 0)
+        XCTAssertNil(UserDefaults.standard.string(forKey: "text"))
+
+        UserDefaults.standard.set(250, forKey: "number")
+        UserDefaults.standard.set("Eliska", forKey: "text")
+
+        XCTAssertEqual(UserDefaults.standard.string(forKey: "text"), tester.text)
+        XCTAssertEqual(UserDefaults.standard.integer(forKey: "number"), tester.number)
+        XCTAssertEqual(UserDefaults.standard.string(forKey: "text"), "Eliska")
+        XCTAssertEqual(UserDefaults.standard.integer(forKey: "number"), 250)
+    }
+
     override func setUp() {
         super.setUp()
         let tidy = UserDefaultsTestStruct()
@@ -102,6 +137,8 @@ final class UserDefaultsTests: XCTestCase {
         tidy.collection = nil
         tidy.defaultCollection = nil
         tidy.person = nil
+        tidy.text = nil
+        tidy.number = nil
     }
 
     override func tearDown() {
@@ -111,6 +148,8 @@ final class UserDefaultsTests: XCTestCase {
         tidy.collection = nil
         tidy.defaultCollection = nil
         tidy.person = nil
+        tidy.text = nil
+        tidy.number = nil
         super.tearDown()
     }
 
@@ -118,5 +157,6 @@ final class UserDefaultsTests: XCTestCase {
         ("testUserDefaults", testUserDefaults),
         ("testUserDefaultsCollection", testUserDefaultsCollection),
         ("testCodableUserDefault", testCodableUserDefault),
+        ("testPromitiveValues", testPromitiveValues),
     ]
 }
