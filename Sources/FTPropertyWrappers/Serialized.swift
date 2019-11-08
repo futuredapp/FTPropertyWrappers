@@ -5,7 +5,7 @@ import Foundation
 public final class Serialized<Value> {
 
     /// Synchronization queue for the property. Read or write to the property must be perforimed on this queue
-    private let queue = DispatchQueue(label: "app.futured.ftpropertywrappers.serialized")
+    private let queue: DispatchQueue
 
     /// The value itself with did-set observing.
     private var value: Value {
@@ -19,6 +19,17 @@ public final class Serialized<Value> {
 
     /// Inserting initial value to the property. Notice, that this operation is NOT DONE on the synchronization queue.
     public init(wrappedValue: Value) {
+        queue = DispatchQueue(label: "app.futured.ftpropertywrappers.serialized")
+        value = wrappedValue
+    }
+
+
+    /// Initialized for property wrapper. Default value is NOT inserted on synchronization queue. This initializer allows to specify custom queue name. This initializer must be overloaded. If we use default value in constructor, compiler can not syntetie default constructor for enclosing types that accepts generic type argument of Serialized.
+    /// - Parameters:
+    ///   - wrappedValue: Default value, not inserted on synchronization queue
+    ///   - label: Label for synchronization queue.
+    public init(wrappedValue: Value, customQueue label: String) {
+        queue = DispatchQueue(label: label)
         value = wrappedValue
     }
 
