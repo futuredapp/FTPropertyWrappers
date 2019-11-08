@@ -65,6 +65,42 @@ final class KeychainTests: XCTestCase {
 
     }
 
+    testKeychainPlayground() {
+        var query: [String: Any] = [
+            kSecClass as String: kSecClassInternetPassword,
+            kSecAtt
+        ]
+
+        /*
+         Query obsahuje
+         ** kSecClass -> Typ dat (Password, Generic password atd.)      | VŽDY |    DÁNO TYPEM PROPERTY WRAPPERU
+         ** kSecValueData –> Data objekt který šifrujeme                | VŽDY |    DÁNO GENERICKÝM TYPEM HDONOTY
+         ** Atributy:
+            -> G- kSecAccessControl (biometické autorizace např)        bio, code, any, appPassword
+            -> GI kSecAttrAccessGroup (sdílení položek, TODO)
+            –> GI kSecAttrAccesible (nastavení přístupu, ne macOS, vylučuje access control a vice-versa)
+            -> GI kSecAttrCreationDate (read only)
+            -> GI kSecAttrModificationDate (read only)
+            -> GI kSecAttrDesription (uživateslky čitelný popis druhu obsahu)
+            -> GI kSecAttrComment (uživatelsky editovatelný popis)
+            -> GI kSecAttrCreator (tvůrce - unsigned int)
+            -> GI kSecAttrType (typ obsahu - unsigned int)
+            -> GI kSecAttrLabel (popis pro uživatele)
+            -> GI kSecAttrIsInvisible (CFBool , neviditelný pro uživatele)
+            -> GI kSecAttrIsNegative (CGBool, pokud je uživatel nucen zadat heslo vždy a není uloženo)
+            -> GI kSecAttrAccount (název účtu)
+            -> G- kSecAttrService (doméne služby pro identifikace)
+            -> G- kSecAttrGeneric (dodefinované atributy)
+            -> GI kSecAttrSynchronizable (bool - definuje zdali je synchronizováno)
+            -> -I kSecAttrSecurityDomain (string - reprezentuje "Internet security domain")
+            -> -I kSecAttrServcer (string obsahující jménu doménu nabo IP)
+            -> -I kSecAttrProtocol (number, enum Protocol (viz dokumentace))
+            -> -I kSecAttrAuthenticationType (number, viz enum Authentication type)
+            -> -I kSecAttrPort (number, port)
+            -> -I kSecAttrPath (string, path component url)
+         */
+    }
+
     override func setUp() {
         super.setUp()
         let tidy = KeychainStorageTestStruct()
