@@ -14,8 +14,6 @@ struct UserDefaultsTestStruct {
 
 final class UserDefaultsTests: XCTestCase {
     func testUserDefaults() {
-        addTeardownBlock { self.teardownEach() }
-
         let tester = UserDefaultsTestStruct()
         XCTAssertEqual(tester.param, 30)
         XCTAssertEqual(tester.constructed, 45)
@@ -37,8 +35,6 @@ final class UserDefaultsTests: XCTestCase {
     }
 
     func testUserDefaultsCollection() {
-        addTeardownBlock { self.teardownEach() }
-
         let tester = UserDefaultsTestStruct()
         XCTAssertEqual(tester.defaultCollection, [10, 20])
 
@@ -80,12 +76,13 @@ final class UserDefaultsTests: XCTestCase {
         tidy.defaultCollection = nil
     }
 
-    func teardownEach() {
+    override func tearDown() {
         let tidy = UserDefaultsTestStruct()
         tidy.constructed = nil
         tidy.param = nil
         tidy.collection = nil
         tidy.defaultCollection = nil
+        super.tearDown()
     }
 
     static var allTests = [

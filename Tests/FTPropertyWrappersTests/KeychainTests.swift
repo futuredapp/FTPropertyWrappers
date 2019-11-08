@@ -8,8 +8,6 @@ struct KeychainStorageTestStruct {
 
 final class KeychainTests: XCTestCase {
     func testKeychainBuiltin() {
-        addTeardownBlock { self.teardownEach() }
-
         let tester = KeychainStorageTestStruct()
         XCTAssertNil(tester.number)
         tester.number = 15
@@ -24,8 +22,6 @@ final class KeychainTests: XCTestCase {
     }
 
     func testKeychainCollection() {
-        addTeardownBlock { self.teardownEach() }
-
         let tester = KeychainStorageTestStruct()
         XCTAssertNil(tester.collection)
         tester.collection = [10, 20, 30]
@@ -40,8 +36,6 @@ final class KeychainTests: XCTestCase {
     }
 
     func testKeychainDeletions() {
-        addTeardownBlock { self.teardownEach() }
-
         let tester = KeychainStorageTestStruct()
         XCTAssertNil(tester.collection)
         XCTAssertNil(tester.number)
@@ -78,7 +72,7 @@ final class KeychainTests: XCTestCase {
         tidy.number = nil
     }
 
-    func teardownEach() {
+    override func tearDown() {
         let tidy = KeychainStorageTestStruct()
         tidy.number = nil
         tidy.number = nil
