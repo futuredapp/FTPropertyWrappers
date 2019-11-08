@@ -1,7 +1,7 @@
 import Foundation
 
-/// This class provides user with easy way to serialize access to a property in multiplatform environment. This class is written with future PropertyWrapper feature of swift in mind.
 @propertyWrapper
+/// This class provides user with easy way to serialize access to a property in multiplatform environment.
 public final class Serialized<Value> {
 
     /// Synchronization queue for the property. Read or write to the property must be perforimed on this queue
@@ -14,10 +14,12 @@ public final class Serialized<Value> {
         }
     }
 
+
     /// Did set observer for stored property. Notice, that didSet event is called on the synchronization queue. You should free this thread asap with async call, since complex operations would slow down sync access to the property.
     public var didSet: ((Value) -> Void)?
 
-    /// Inserting initial value to the property. Notice, that this operation is NOT DONE on the synchronization queue.
+    /// Inserting initial value to the property. Notice, that this operation is NOT DONE on the synchronization queue. This initializer uses predefined label for dispatch queue.
+    /// - Parameter wrappedValue: Default value, not inserted on synchronization queue
     public init(wrappedValue: Value) {
         queue = DispatchQueue(label: "app.futured.ftpropertywrappers.serialized")
         value = wrappedValue
@@ -33,7 +35,7 @@ public final class Serialized<Value> {
         value = wrappedValue
     }
 
-    /// Defaul access interface for enclodes property. Setter and getter are both sync.
+    /// Defaul access interface for enclodes property. Setter and getter are both dispatched sync on the queue.
     public var wrappedValue: Value {
         get { queue.sync { value } }
         set {
@@ -43,7 +45,8 @@ public final class Serialized<Value> {
         }
     }
 
-    /// It is enouraged to use this method to make more complex operations with the stored property, like read-and-write. Do not perform any time-demading operations in this block since it will stop other uses of the stored property.
+    /// This method dispatches it's block argument on the synchronization queue, allowing user to modify enclosed value. It is enouraged to use this method to make more complex operations with the stored property, like read-and-write. Do not perform any time-demading operations in this block since it will stop other uses of the stored property.
+    /// - Parameter transform: Opration block, argument is current value of enclosed property, return is then stored into enclosed property.
     public func asyncAccess(transform: @escaping (Value) -> Value) {
         queue.async {
             self.value = transform(self.value)
