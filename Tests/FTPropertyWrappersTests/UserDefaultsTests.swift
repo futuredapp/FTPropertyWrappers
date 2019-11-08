@@ -1,11 +1,17 @@
 import XCTest
 @testable import FTPropertyWrappers
 
+struct Person: Codable, Equatable {
+    let age: Int
+    let name: String
+}
+
 struct UserDefaultsTestStruct {
     @DefaultsStore(key: "Param", defaultValue: 30) var param: Int?
     @DefaultsStore var constructed: Int?
     @DefaultsStore(key: "defaultCollection", defaultValue: [10, 20]) var defaultCollection: [Int]?
     @DefaultsStore(key: "collection") var collection: [Int]?
+    @DefaultsStore(key: "person") var person: Person?
 
     init() {
         self._constructed = DefaultsStore(key: "constructed", defaultValue: 45, defaults: .standard, encoder: PropertyListEncoder(), decoder: PropertyListDecoder())
@@ -67,6 +73,27 @@ final class UserDefaultsTests: XCTestCase {
 
     }
 
+    func testUserDefaultsCollection() {
+        let tester = UserDefaultsTestStruct()
+        XCTAssertNil(tester.person)
+
+        tester.person = Person(age: 15, name: "Peter")
+        XCTAssertEqual(tester.person, Person(age: 15, name: "Peter"))
+
+        let tester2 = UserDefaultsTestStruct()
+        XCTAssertEqual(tester2.person, Person(age: 15, name: "Peter"))
+
+        tester2.defaultCollection = Person(age: 25, name: "Lukas")
+
+        XCTAssertEqual(tester.person, Person(age: 25, name: "Lukas"))
+        XCTAssertEqual(tester2.person, Person(age: 25, name: "Lukas"))
+
+        tester2.person = nil
+
+        XCTAssertNil(tester2.person)
+        XCTAssertNil(tester.person)
+    }
+
     override func setUp() {
         super.setUp()
         let tidy = UserDefaultsTestStruct()
@@ -74,6 +101,7 @@ final class UserDefaultsTests: XCTestCase {
         tidy.param = nil
         tidy.collection = nil
         tidy.defaultCollection = nil
+        tidy.person = nil
     }
 
     override func tearDown() {
@@ -82,11 +110,12 @@ final class UserDefaultsTests: XCTestCase {
         tidy.param = nil
         tidy.collection = nil
         tidy.defaultCollection = nil
+        tidy.person = nil
         super.tearDown()
     }
 
     static var allTests = [
-    ("testUserDefaults", testUserDefaults),
-    ("testUserDefaultsCollection", testUserDefaultsCollection),
+        ("testUserDefaults", testUserDefaults),
+        ("testUserDefaultsCollection", testUserDefaultsCollection),
     ]
 }
