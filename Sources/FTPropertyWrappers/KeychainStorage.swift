@@ -1,5 +1,67 @@
 import Foundation
 
+public enum KeychainRefreshPolicy {
+    case manual, onAccess
+}
+
+public protocol KeychainCommonAttributes {
+    
+}
+
+@propertyWrapper
+public final class GenericPassword<Property> where Property: Codable {
+
+    private var cache: Property?
+    private let encoder: PropertyListEncoder = {
+        let newEncoder = PropertyListEncoder()
+        newEncoder.outputFormat = .binary
+        return newEncoder
+    }()
+
+    private let decoder: PropertyListDecoder = PropertyListDecoder()
+
+    public private(set) var refreshPolicy: KeychainRefreshPolicy
+    public private(set) var syncedWithPersistence: Bool = false
+
+    public var wrappedValue: Property? {
+        get {
+            if refreshPolicy == .onAccess {
+                load()
+            }
+            return cache
+        }
+        set {
+            cache = newValue
+            syncedWithPersistence = false
+            if refreshPolicy == .onAccess {
+                if let value = newValue {
+                    store(newValue: value)
+                } else {
+                    remove()
+                }
+            }
+        }
+    }
+
+    public func load() {
+        syncedWithPersistence = true
+    }
+
+    public func store(newValue: Property) {
+        syncedWithPersistence = true
+    }
+
+    public func remove() {
+        syncedWithPersistence = true
+    }
+
+    public init(wrappedValue initialValue: Property? = nil, refreshPolicy: KeychainRefreshPolicy = .onAccess) {
+        self.cache = initialValue
+        self.refreshPolicy = refreshPolicy
+    }
+
+}
+
 @propertyWrapper
 public final class KeychainStore<Property> where Property: Codable {
     let key: String
@@ -11,14 +73,25 @@ public final class KeychainStore<Property> where Property: Codable {
     }
 
     public var wrappedValue: Property? {
-        get { try? storageAdapter.load(for: key) }
-        set {
-            guard let newValue = newValue else {
-                try? storageAdapter.delete(for: key)
-                return
+        get {
+            do {
+                return try storageAdapter.load(for: key)
+            } catch {
+                print(error)
+                return nil
             }
+        }
+        set {
+            do {
+                guard let newValue = newValue else {
+                    try storageAdapter.delete(for: key)
+                    return
+                }
 
-            try? storageAdapter.save(value: newValue, for: key)
+                try storageAdapter.save(value: newValue, for: key)
+            } catch {
+                print(error)
+            }
         }
     }
 }

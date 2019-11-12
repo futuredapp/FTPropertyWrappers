@@ -3,7 +3,7 @@ import XCTest
 
 struct KeychainStorageTestStruct {
     @KeychainStore(key: "tester.number") var number: Int?
-    @KeychainStore(key: "tester.number") var collection: [Int]?
+    @KeychainStore(key: "tester.collection") var collection: [Int]?
 }
 
 final class KeychainTests: XCTestCase {
