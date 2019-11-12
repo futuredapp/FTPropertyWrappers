@@ -9,29 +9,29 @@ public protocol KeychainReadOnlyAttributes {
     var modificationDate: Date { get }
 }
 
-public enum AccesibleOption: String, CaseIterable {
+public enum AccesibleOption: CaseIterable {
     case whenPasswordSetThisDeviceOnly
     case whenUnlockedThisDeviceOnly
     case whenUnlocked
     case afterFirstUnlockThisDeviceOnly
     case afterFirstUnlock
 
-    public var rawValue: String {
+    public var rawValue: CFString {
         switch self {
         case .whenPasswordSetThisDeviceOnly:
-            return kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly as String
+            return kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
         case .whenUnlockedThisDeviceOnly:
-            return kSecAttrAccessibleWhenUnlockedThisDeviceOnly as String
+            return kSecAttrAccessibleWhenUnlockedThisDeviceOnly
         case .whenUnlocked:
-            return kSecAttrAccessibleWhenUnlocked as String
+            return kSecAttrAccessibleWhenUnlocked
         case .afterFirstUnlockThisDeviceOnly:
-            return kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly as String
+            return kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
         case .afterFirstUnlock:
-            return kSecAttrAccessibleAfterFirstUnlock as String
+            return kSecAttrAccessibleAfterFirstUnlock
         }
     }
 
-    public init?(rawValue: String) {
+    public init?(rawValue: CFString) {
         guard let value = AccesibleOption.allCases.first(where: { rawValue == $0.rawValue }) else {
             return nil
         }
@@ -53,35 +53,77 @@ public protocol KeychainCommonAttributes {
 }
 
 public protocol GenericPasswordAttributes: KeychainCommonAttributes {
-    var accessControl: ()? { get set }
-    var service: String? { get set }
+    var accessControl: SecAccessControlCreateFlags? { get set }
+    var service: String { get set }
     /// notice: kSecAttrGeneric counterpart is not implemented
 }
 
-@propertyWrapper
-public final class GenericPassword<Property> where Property: Codable {
+public protocol GenericPasswordQueryAttributes: GenericPasswordAttributes {
 
-    private var cache: Property?
+}
+
+public extension GenericPasswordQueryAttributes {
+    var isNegative: Bool? { return false }
+    var isInvisible: Bool? { return true }
+
+    var accessControl: SecAccessControlCreateFlags? { return nil }
+    var accesible: AccesibleOption? { return nil }
+    var description: String? { return nil }
+    var comment: String? { return nil }
+    var creator: UInt64? { return nil }
+    var type: UInt64? { return nil }
+    var label: String? { return nil }
+    var account: String? { return nil }
+    var synchronizable: Bool? { return nil }
+}
+
+@propertyWrapper
+public final class GenericPassword<Value> where Value: Codable {
+
     private let encoder: PropertyListEncoder = {
         let newEncoder = PropertyListEncoder()
         newEncoder.outputFormat = .binary
         return newEncoder
     }()
-
     private let decoder: PropertyListDecoder = PropertyListDecoder()
+
+    private var cached: Value?
+    private var cachedAttributes: GenericPasswordAttributes?
 
     public private(set) var refreshPolicy: KeychainRefreshPolicy
     public private(set) var syncedWithPersistence: Bool = false
 
-    public var wrappedValue: Property? {
+    public let queryAttributes: GenericPasswordQueryAttributes
+
+    public var attributes: GenericPasswordAttributes? {
         get {
             if refreshPolicy == .onAccess {
                 load()
             }
-            return cache
+            return cachedAttributes
         }
         set {
-            cache = newValue
+            cachedAttributes = newValue
+            syncedWithPersistence = false
+            if refreshPolicy == .onAccess {
+                if let value = cached {
+                    store(newValue: value)
+                } else {
+                    remove()
+                }
+            }
+        }
+    }
+
+    public var wrappedValue: Value? {
+        get {
+            if refreshPolicy == .onAccess {
+                load()
+            }
+            return cached
+        }
+        set {
+            cached = newValue
             syncedWithPersistence = false
             if refreshPolicy == .onAccess {
                 if let value = newValue {
@@ -97,7 +139,7 @@ public final class GenericPassword<Property> where Property: Codable {
         syncedWithPersistence = true
     }
 
-    public func store(newValue: Property) {
+    public func store(newValue: Value) {
         syncedWithPersistence = true
     }
 
@@ -105,12 +147,24 @@ public final class GenericPassword<Property> where Property: Codable {
         syncedWithPersistence = true
     }
 
-    public init(wrappedValue initialValue: Property? = nil, refreshPolicy: KeychainRefreshPolicy = .onAccess) {
-        self.cache = initialValue
+    public init(wrappedValue initialValue: Value? = nil, queryAttributes: GenericPasswordQueryAttributes, refreshPolicy: KeychainRefreshPolicy = .onAccess) {
+        self.cached = initialValue
         self.refreshPolicy = refreshPolicy
+        self.queryAttributes = queryAttributes
     }
 
 }
+
+
+public protocol InternetPasswordAttributes: KeychainCommonAttributes {
+    var domain: String? { get set }
+    var server: String? { get set }
+    var aProtocol: String? { get set }
+    var authenticationType: String? { get set }
+    var port: UInt16? { get set }
+    var path: String? { get set }
+}
+
 
 @propertyWrapper
 public final class KeychainStore<Property> where Property: Codable {

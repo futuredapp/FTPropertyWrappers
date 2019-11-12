@@ -65,11 +65,7 @@ final class KeychainTests: XCTestCase {
 
     }
 
-    testKeychainPlayground() {
-        var query: [String: Any] = [
-            kSecClass as String: kSecClassInternetPassword,
-            kSecAtt
-        ]
+    func testKeychainPlayground() {
 
         /*
          Query obsahuje
