@@ -4,8 +4,58 @@ public enum KeychainRefreshPolicy {
     case manual, onAccess
 }
 
+public protocol KeychainReadOnlyAttributes {
+    var creationDate: Date { get }
+    var modificationDate: Date { get }
+}
+
+public enum AccesibleOption: String, CaseIterable {
+    case whenPasswordSetThisDeviceOnly
+    case whenUnlockedThisDeviceOnly
+    case whenUnlocked
+    case afterFirstUnlockThisDeviceOnly
+    case afterFirstUnlock
+
+    public var rawValue: String {
+        switch self {
+        case .whenPasswordSetThisDeviceOnly:
+            return kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly as String
+        case .whenUnlockedThisDeviceOnly:
+            return kSecAttrAccessibleWhenUnlockedThisDeviceOnly as String
+        case .whenUnlocked:
+            return kSecAttrAccessibleWhenUnlocked as String
+        case .afterFirstUnlockThisDeviceOnly:
+            return kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly as String
+        case .afterFirstUnlock:
+            return kSecAttrAccessibleAfterFirstUnlock as String
+        }
+    }
+
+    public init?(rawValue: String) {
+        guard let value = AccesibleOption.allCases.first(where: { rawValue == $0.rawValue }) else {
+            return nil
+        }
+        self = value
+    }
+}
+
 public protocol KeychainCommonAttributes {
-    
+    var accesible: AccesibleOption? { get set }
+    var description: String? { get set }
+    var comment: String? { get set }
+    var creator: UInt64? { get set }
+    var type: UInt64? { get set }
+    var label: String? { get set }
+    var isInvisible: Bool? { get set }
+    var isNegative: Bool? { get set }
+    var account: String? { get set }
+    var synchronizable: Bool? { get set }
+}
+
+public protocol GenericPasswordAttributes: KeychainCommonAttributes {
+    var accessControl: ()? { get set }
+    var service: String? { get set }
+    /// notice: kSecAttrGeneric counterpart is not implemented
 }
 
 @propertyWrapper

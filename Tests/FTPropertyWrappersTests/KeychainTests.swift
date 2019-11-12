@@ -77,7 +77,6 @@ final class KeychainTests: XCTestCase {
          ** kSecValueData –> Data objekt který šifrujeme                | VŽDY |    DÁNO GENERICKÝM TYPEM HDONOTY
          ** Atributy:
             -> G- kSecAccessControl (biometické autorizace např)        bio, code, any, appPassword
-            -> GI kSecAttrAccessGroup (sdílení položek, TODO)
             –> GI kSecAttrAccesible (nastavení přístupu, ne macOS, vylučuje access control a vice-versa)
             -> GI kSecAttrCreationDate (read only)
             -> GI kSecAttrModificationDate (read only)
