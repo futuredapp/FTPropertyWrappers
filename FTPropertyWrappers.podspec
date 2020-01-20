@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.homepage     = "https://github.com/futuredapp/FTPropertyWrappers"
   s.license      = { :type => "MIT", :file => "LICENSE" }
   s.author             = { "Mikoláš Stuchlík" => "mikolas.stuchlik@futured.app" }
-  s.social_media_url   = "https://twitter.com/thefuntasty"
+  s.social_media_url   = "https://twitter.com/FuturedApps"
   s.swift_version = "5.1"
   s.ios.deployment_target = "8.0"
   s.osx.deployment_target = "10.10"
