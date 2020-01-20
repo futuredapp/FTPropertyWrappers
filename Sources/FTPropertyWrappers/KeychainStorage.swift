@@ -52,6 +52,25 @@ public protocol KeychainCommonAttributes {
     var synchronizable: Bool? { get set }
 }
 
+public protocol KeychainCommonQuery {
+    /// notice: kSecMathPolicy counterpart is not implemented
+    /// notice: kSecMatchItemList counterpart is not implemented
+    /// notice: kSecMatchSearchList counterpart is not implemented
+    /// notice: kSecMatchIssuers counterpart is not implemented
+    var matchEmailAddress: String? { get set }
+    /// notice: kSecMatchSubjectContains counterpart is not implemented
+    /// notice: kSecMatchSubjectStartsWith counterpart is not implemented
+    /// notice: kSecMatchSubjectEndsWith counterpart is not implemented
+    /// notice: kSecMatchSubjectWholeString counterpart is not implemented
+    var matchCaseInsensitive: Bool? { get set }
+    var matchDiacriticInsensitive: Bool? { get set }
+    var matchWidthInsensitive: Bool? { get set }
+    /// notice: kSecMatchTrustedOnly counterpart is not implemented
+    /// notice: kSecMatchTrustedOnly counterpart is not implemented
+    /// notice: kSecMatchValidOnDate counterpart is not implemented
+    /// notice: kSecMatchlimit counterpart is not implemented  ~ PropertyWrapper shall represent one value at most
+}
+
 public protocol GenericPasswordAttributes: KeychainCommonAttributes {
     var accessControl: SecAccessControlCreateFlags? { get set }
     var service: String { get set }
@@ -199,6 +218,24 @@ public final class KeychainStore<Property> where Property: Codable {
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 public typealias KeychainQuery = [String: AnyObject]
 
