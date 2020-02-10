@@ -6,7 +6,7 @@ public final class DisposeBag {
 
     public init() {}
 
-    func add(disposable: Disposable) {
+    public func add(disposable: Disposable) {
         disposables.append(disposable)
     }
 }
