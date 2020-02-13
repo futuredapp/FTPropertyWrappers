@@ -1,12 +1,14 @@
 import Foundation
 
-public enum KeychainRefreshPolicy {
-    case manual, onAccess
+// MARK: - Keychain item commons
+
+public enum KeychainError: Error {
+    case noData, unexpectedFormat
+    case unhandledError(status: OSStatus)
 }
 
-public protocol KeychainReadOnlyAttributes {
-    var creationDate: Date { get }
-    var modificationDate: Date { get }
+public enum KeychainRefreshPolicy {
+    case manual, onAccess
 }
 
 public enum AccesibleOption: CaseIterable {
@@ -39,143 +41,217 @@ public enum AccesibleOption: CaseIterable {
     }
 }
 
-public protocol KeychainCommonAttributes {
-    var accesible: AccesibleOption? { get set }
-    var description: String? { get set }
-    var comment: String? { get set }
-    var creator: UInt64? { get set }
-    var type: UInt64? { get set }
-    var label: String? { get set }
-    var isInvisible: Bool? { get set }
-    var isNegative: Bool? { get set }
-    var account: String? { get set }
-    var synchronizable: Bool? { get set }
+public struct KeychainQueryConfiguration {
+    var matchCaseInsensitive: Bool
+    var matchDiacriticInsensitive: Bool
+    var matchWidthInsensitive: Bool
+
+    func insertParameters(into query: inout [String : Any]) {
+        query[kSecMatchCaseInsensitive as String] = matchCaseInsensitive
+        query[kSecMatchDiacriticInsensitive as String] = matchDiacriticInsensitive
+        query[kSecMatchWidthInsensitive as String] = matchWidthInsensitive
+    }
 }
 
-public protocol KeychainCommonQuery {
-    /// notice: kSecMathPolicy counterpart is not implemented
-    /// notice: kSecMatchItemList counterpart is not implemented
-    /// notice: kSecMatchSearchList counterpart is not implemented
-    /// notice: kSecMatchIssuers counterpart is not implemented
-    var matchEmailAddress: String? { get set }
-    /// notice: kSecMatchSubjectContains counterpart is not implemented
-    /// notice: kSecMatchSubjectStartsWith counterpart is not implemented
-    /// notice: kSecMatchSubjectEndsWith counterpart is not implemented
-    /// notice: kSecMatchSubjectWholeString counterpart is not implemented
-    var matchCaseInsensitive: Bool? { get set }
-    var matchDiacriticInsensitive: Bool? { get set }
-    var matchWidthInsensitive: Bool? { get set }
-    /// notice: kSecMatchTrustedOnly counterpart is not implemented
-    /// notice: kSecMatchTrustedOnly counterpart is not implemented
-    /// notice: kSecMatchValidOnDate counterpart is not implemented
-    /// notice: kSecMatchlimit counterpart is not implemented  ~ PropertyWrapper shall represent one value at most
+public struct KeychainCommonAttributes {
+    public var accesible: AccesibleOption?
+    public var description: String?
+    public var comment: String?
+    public var creator: UInt64?
+    public var type: UInt64?
+    public var label: String?
+    public var isInvisible: Bool?
+    public var isNegative: Bool?
+    public var account: String?
+    public var synchronizable: Bool?
+
+    func insertParameters(into query: inout [String : Any]) {
+        query[kSecAttrAccessible as String] = accesible?.rawValue
+        query[kSecAttrDescription as String] = description
+        query[kSecAttrComment as String] = comment
+        query[kSecAttrCreator as String] = creator
+        query[kSecAttrType as String] = type
+        query[kSecAttrLabel as String] = label
+        query[kSecAttrIsInvisible as String] = isInvisible
+        query[kSecAttrIsNegative as String] = isNegative
+        query[kSecAttrAccount as String] = account
+        query[kSecAttrSynchronizable as String] = synchronizable
+    }
+
+    func readParameters(from response: [String : Any]) {
+
+    }
 }
 
-public protocol GenericPasswordAttributes: KeychainCommonAttributes {
-    var accessControl: SecAccessControlCreateFlags? { get set }
-    var service: String { get set }
-    /// notice: kSecAttrGeneric counterpart is not implemented
+public struct KeychainReadOnlyCommonAttributes {
+    public private(set) var creationDate: Date?
+    public private(set) var modificationDate: Date?
+
+    func readParameters(from response: [String : Any]) {
+        // TODO!
+    }
 }
 
-public protocol GenericPasswordQueryAttributes: GenericPasswordAttributes {
+open class KeychainItem {
 
-}
+    // MARK: Properties
+    public private(set) var commonReadOnlyAttributes = KeychainReadOnlyCommonAttributes()
 
-public extension GenericPasswordQueryAttributes {
-    var isNegative: Bool? { return false }
-    var isInvisible: Bool? { return true }
+    public var matchAttributes = KeychainQueryConfiguration(matchCaseInsensitive: false,
+                                                       matchDiacriticInsensitive: false,
+                                                           matchWidthInsensitive: true)
+    public var commonAttributes = KeychainCommonAttributes()
 
-    var accessControl: SecAccessControlCreateFlags? { return nil }
-    var accesible: AccesibleOption? { return nil }
-    var description: String? { return nil }
-    var comment: String? { return nil }
-    var creator: UInt64? { return nil }
-    var type: UInt64? { return nil }
-    var label: String? { return nil }
-    var account: String? { return nil }
-    var synchronizable: Bool? { return nil }
-}
 
-@propertyWrapper
-public final class GenericPassword<Value> where Value: Codable {
+    // MARK: Override support
 
-    private let encoder: PropertyListEncoder = {
-        let newEncoder = PropertyListEncoder()
-        newEncoder.outputFormat = .binary
-        return newEncoder
-    }()
-    private let decoder: PropertyListDecoder = PropertyListDecoder()
+    open var itemClassIdentity: [String: Any] { fatalError("FTPropertyWrappers KeychainItem: error: empty class identity!") }
 
-    private var cached: Value?
-    private var cachedAttributes: GenericPasswordAttributes?
+    open var itemData: Data {
+        get { fatalError("FTPropertyWrappers KeychainItem: error: empty data!") }
+        set { fatalError("FTPropertyWrappers KeychainItem: error: empty data!") }
+    }
 
-    public private(set) var refreshPolicy: KeychainRefreshPolicy
-    public private(set) var syncedWithPersistence: Bool = false
+    open var itemAttributes: [String: Any] {
+        var attributes = [String: Any]()
+        commonAttributes.insertParameters(into: &attributes)
+        return attributes
+    }
 
-    public let queryAttributes: GenericPasswordQueryAttributes
+    open var searchMatchOptions: [String: Any] {
+        var query = [String: Any]()
 
-    public var attributes: GenericPasswordAttributes? {
-        get {
-            if refreshPolicy == .onAccess {
-                load()
-            }
-            return cachedAttributes
+        matchAttributes.insertParameters(into: &query)
+
+        return query
+    }
+
+    open func configure(from searchResult: [String: Any]) {
+        // TODO
+    }
+
+    // MARK: Query execution support
+    public var insertQuery: [String: Any] {
+        var query = itemClassIdentity.merging(itemAttributes) { lhs, rhs in
+            print("FTPropertyWrappers KeychainItem insertQuery: notice: collision found at instance \(self) between \(lhs) and \(rhs)")
+            return lhs
         }
-        set {
-            cachedAttributes = newValue
-            syncedWithPersistence = false
-            if refreshPolicy == .onAccess {
-                if let value = cached {
-                    store(newValue: value)
-                } else {
-                    remove()
-                }
-            }
+
+        if query[kSecValueData as String] != nil {
+            print("FTPropertyWrappers KeychainItem insertQuery: warning: changing of kSecValueData is not allowed!")
+        }
+        query[kSecValueData as String] = itemData
+    }
+
+    public var fetchQuery: [String: Any] {
+        var query: [String: Any] = itemClassIdentity
+
+        query.merge(searchMatchOptions) { lhs, rhs in
+            print("FTPropertyWrappers KeychainItem fetchQuery: notice: collision found at instance \(self) between \(lhs) and \(rhs)")
+            return lhs
+        }
+
+        if query[kSecMatchLimit as String] != nil {
+            print("FTPropertyWrappers KeychainItem fetchQuery: warning: changing of kSecMatchLimit is not allowed!")
+        }
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
+
+        if query[kSecReturnAttributes as String] != nil {
+            print("FTPropertyWrappers KeychainItem fetchQuery: warning: changing of kSecReturnAttributes is not allowed!")
+        }
+        query[kSecReturnAttributes as String] = true
+
+        if query[kSecReturnData as String] != nil {
+            print("FTPropertyWrappers KeychainItem fetchQuery: warning: changing of kSecReturnData is not allowed!")
+        }
+        query[kSecReturnData as String] = true
+
+        return query
+    }
+
+
+    public var updateFetchQuery: [String: Any] {
+        var query: [String: Any] = itemClassIdentity
+
+        query.merge(searchMatchOptions) { lhs, rhs in
+            print("FTPropertyWrappers KeychainItem updateQuery: notice: collision found at instance \(self) between \(lhs) and \(rhs)")
+            return lhs
+        }
+
+        return query
+    }
+
+    public var updateAttributesQuery: [String: Any] {
+        var query = itemAttributes
+
+        if query[kSecValueData as String] != nil {
+            print("FTPropertyWrappers KeychainItem insertQuery: warning: changing of kSecValueData is not allowed!")
+        }
+        query[kSecValueData as String] = itemData
+
+        return query
+    }
+
+    open var deleteQuery: [String: Any] {
+        var query: [String: Any] = itemClassIdentity
+
+        query.merge(searchMatchOptions) { lhs, rhs in
+            print("FTPropertyWrappers KeychainItem deleteQuery: notice: collision found at instance \(self) between \(lhs) and \(rhs)")
+            return lhs
+        }
+
+        return query
+    }
+
+    public func executeInsertQuery() throws {
+        let status = SecItemAdd(insertQuery as CFDictionary, nil)
+        guard status == errSecSuccess else {
+            throw KeychainError.unhandledError(status: status)
+        }
+        // TODO: set common read only attributes
+    }
+
+    public func executeFetchQuery() throws {
+        var item: CFTypeRef?
+        let status = SecItemCopyMatching(fetchQuery as CFDictionary, &item)
+
+        guard status != errSecItemNotFound else {
+            throw KeychainError.noData
+        }
+        guard status == errSecSuccess else {
+            throw KeychainError.unhandledError(status: status)
+        }
+        guard let response = item as? [String : Any] else {
+            throw KeychainError.unexpectedFormat
+        }
+
+        configure(from: response)
+    }
+
+    public func executeUpdateQuery() throws {
+        let status = SecItemUpdate(updateFetchQuery as CFDictionary, updateAttributesQuery as CFDictionary)
+
+        guard status != errSecItemNotFound else {
+            throw KeychainError.noData
+        }
+
+        guard status == errSecSuccess else {
+            throw KeychainError.unhandledError(status: status)
         }
     }
 
-    public var wrappedValue: Value? {
-        get {
-            if refreshPolicy == .onAccess {
-                load()
-            }
-            return cached
+    public func executeDeleteQuery() throws {
+        let status = SecItemDelete(deleteQuery as CFDictionary)
+        guard status == errSecSuccess || status == errSecItemNotFound else {
+            throw KeychainError.unhandledError(status: status)
         }
-        set {
-            cached = newValue
-            syncedWithPersistence = false
-            if refreshPolicy == .onAccess {
-                if let value = newValue {
-                    store(newValue: value)
-                } else {
-                    remove()
-                }
-            }
-        }
-    }
-
-    public func load() {
-        syncedWithPersistence = true
-    }
-
-    public func store(newValue: Value) {
-        syncedWithPersistence = true
-    }
-
-    public func remove() {
-        syncedWithPersistence = true
-    }
-
-    public init(wrappedValue initialValue: Value? = nil, queryAttributes: GenericPasswordQueryAttributes, refreshPolicy: KeychainRefreshPolicy = .onAccess) {
-        self.cached = initialValue
-        self.refreshPolicy = refreshPolicy
-        self.queryAttributes = queryAttributes
     }
 
 }
 
 
-public protocol InternetPasswordAttributes: KeychainCommonAttributes {
+// MARK: - Internet password item
+public protocol InternetPasswordAttributes {
     var domain: String? { get set }
     var server: String? { get set }
     var aProtocol: String? { get set }
@@ -184,39 +260,11 @@ public protocol InternetPasswordAttributes: KeychainCommonAttributes {
     var path: String? { get set }
 }
 
-
-@propertyWrapper
-public final class KeychainStore<Property> where Property: Codable {
-    let key: String
-    let storageAdapter: CodableKeychainAdapter
-
-    public init(key: String, storageAdapter: CodableKeychainAdapter = .defaultDomain) {
-        self.storageAdapter = storageAdapter
-        self.key = key
-    }
-
-    public var wrappedValue: Property? {
-        get {
-            do {
-                return try storageAdapter.load(for: key)
-            } catch {
-                print(error)
-                return nil
-            }
-        }
-        set {
-            do {
-                guard let newValue = newValue else {
-                    try storageAdapter.delete(for: key)
-                    return
-                }
-
-                try storageAdapter.save(value: newValue, for: key)
-            } catch {
-                print(error)
-            }
-        }
-    }
+// MARK: - Generic password item
+public protocol GenericPasswordAttributes {
+    var accessControl: SecAccessControlCreateFlags? { get set }
+    var service: String { get set }
+    // notice: kSecAttrGeneric counterpart is not implemented
 }
 
 
@@ -232,10 +280,15 @@ public final class KeychainStore<Property> where Property: Codable {
 
 
 
+/*
 
-
-
-
+ // MARK: Internal coding
+ private let encoder: PropertyListEncoder = {
+     let newEncoder = PropertyListEncoder()
+     newEncoder.outputFormat = .binary
+     return newEncoder
+ }()
+ private let decoder: PropertyListDecoder = PropertyListDecoder()
 
 public typealias KeychainQuery = [String: AnyObject]
 
@@ -384,3 +437,4 @@ open class KeychainAdapter {
         return query
     }
 }
+*/

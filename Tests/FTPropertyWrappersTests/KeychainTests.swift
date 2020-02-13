@@ -1,6 +1,6 @@
 import XCTest
 @testable import FTPropertyWrappers
-
+/*
 struct KeychainStorageTestStruct {
     @KeychainStore(key: "tester.number") var number: Int?
     @KeychainStore(key: "tester.collection") var collection: [Int]?
@@ -116,3 +116,4 @@ final class KeychainTests: XCTestCase {
         ("testKeychainDeletions", testKeychainDeletions)
     ]
 }
+*/
