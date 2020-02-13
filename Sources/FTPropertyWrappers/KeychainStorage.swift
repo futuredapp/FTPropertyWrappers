@@ -92,7 +92,7 @@ public struct KeychainReadOnlyCommonAttributes {
     }
 }
 
-open class KeychainItem {
+public class KeychainItem {
 
     // MARK: Properties
     public private(set) var commonReadOnlyAttributes = KeychainReadOnlyCommonAttributes()
@@ -102,23 +102,22 @@ open class KeychainItem {
                                                            matchWidthInsensitive: true)
     public var commonAttributes = KeychainCommonAttributes()
 
-
     // MARK: Override support
 
-    open var itemClassIdentity: [String: Any] { fatalError("FTPropertyWrappers KeychainItem: error: empty class identity!") }
+    var itemClassIdentity: [String: Any] { fatalError("FTPropertyWrappers KeychainItem: error: empty class identity!") }
 
-    open var itemData: Data {
+    var itemData: Data {
         get { fatalError("FTPropertyWrappers KeychainItem: error: empty data!") }
         set { fatalError("FTPropertyWrappers KeychainItem: error: empty data!") }
     }
 
-    open var itemAttributes: [String: Any] {
+    var itemAttributes: [String: Any] {
         var attributes = [String: Any]()
         commonAttributes.insertParameters(into: &attributes)
         return attributes
     }
 
-    open var searchMatchOptions: [String: Any] {
+    var searchMatchOptions: [String: Any] {
         var query = [String: Any]()
 
         matchAttributes.insertParameters(into: &query)
@@ -126,12 +125,19 @@ open class KeychainItem {
         return query
     }
 
-    open func configure(from searchResult: [String: Any]) {
-        // TODO
+    func configure(from searchResult: [String: Any]) {
+        commonAttributes.readParameters(from: searchResult)
+        commonReadOnlyAttributes.readParameters(from: searchResult)
+
+        if let data = searchResult[kSecValueData as String] as? Data {
+            itemData = data
+        } else {
+            print("FTPropertyWrappers KeychainItem insertQuery: warning: update request without data")
+        }
     }
 
     // MARK: Query execution support
-    public var insertQuery: [String: Any] {
+    var insertQuery: [String: Any] {
         var query = itemClassIdentity.merging(itemAttributes) { lhs, rhs in
             print("FTPropertyWrappers KeychainItem insertQuery: notice: collision found at instance \(self) between \(lhs) and \(rhs)")
             return lhs
@@ -141,9 +147,11 @@ open class KeychainItem {
             print("FTPropertyWrappers KeychainItem insertQuery: warning: changing of kSecValueData is not allowed!")
         }
         query[kSecValueData as String] = itemData
+
+        return query
     }
 
-    public var fetchQuery: [String: Any] {
+    var fetchQuery: [String: Any] {
         var query: [String: Any] = itemClassIdentity
 
         query.merge(searchMatchOptions) { lhs, rhs in
@@ -170,7 +178,7 @@ open class KeychainItem {
     }
 
 
-    public var updateFetchQuery: [String: Any] {
+    var updateFetchQuery: [String: Any] {
         var query: [String: Any] = itemClassIdentity
 
         query.merge(searchMatchOptions) { lhs, rhs in
@@ -181,7 +189,7 @@ open class KeychainItem {
         return query
     }
 
-    public var updateAttributesQuery: [String: Any] {
+    var updateAttributesQuery: [String: Any] {
         var query = itemAttributes
 
         if query[kSecValueData as String] != nil {
@@ -192,7 +200,7 @@ open class KeychainItem {
         return query
     }
 
-    open var deleteQuery: [String: Any] {
+    var deleteQuery: [String: Any] {
         var query: [String: Any] = itemClassIdentity
 
         query.merge(searchMatchOptions) { lhs, rhs in
@@ -203,7 +211,7 @@ open class KeychainItem {
         return query
     }
 
-    public func executeInsertQuery() throws {
+    func executeInsertQuery() throws {
         let status = SecItemAdd(insertQuery as CFDictionary, nil)
         guard status == errSecSuccess else {
             throw KeychainError.unhandledError(status: status)
@@ -211,7 +219,7 @@ open class KeychainItem {
         // TODO: set common read only attributes
     }
 
-    public func executeFetchQuery() throws {
+    func executeFetchQuery() throws {
         var item: CFTypeRef?
         let status = SecItemCopyMatching(fetchQuery as CFDictionary, &item)
 
@@ -228,7 +236,7 @@ open class KeychainItem {
         configure(from: response)
     }
 
-    public func executeUpdateQuery() throws {
+    func executeUpdateQuery() throws {
         let status = SecItemUpdate(updateFetchQuery as CFDictionary, updateAttributesQuery as CFDictionary)
 
         guard status != errSecItemNotFound else {
@@ -240,7 +248,7 @@ open class KeychainItem {
         }
     }
 
-    public func executeDeleteQuery() throws {
+    func executeDeleteQuery() throws {
         let status = SecItemDelete(deleteQuery as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw KeychainError.unhandledError(status: status)
@@ -249,6 +257,123 @@ open class KeychainItem {
 
 }
 
+public class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
+
+    private let encoder: PropertyListEncoder = {
+        let newEncoder = PropertyListEncoder()
+        newEncoder.outputFormat = .binary
+        return newEncoder
+    }()
+
+    private let decoder: PropertyListDecoder = PropertyListDecoder()
+
+    private var defaultValue: T?
+
+    private var cachedValue: T?
+
+    public let refreshPolicy: KeychainRefreshPolicy
+
+    public private(set) var synced = false
+
+    public var wrappedProperty: T? {
+        get {
+            switch (refreshPolicy, synced) {
+            case (.manual, _):
+                return cachedValue ?? defaultValue
+            case (.onAccess, true):
+                return cachedValue ?? defaultValue
+            case (.onAccess, false):
+                do {
+                    try loadFromKeychain()
+                } catch {
+                    print("Error loading \(self) from keychain: \(error)")
+                }
+                return cachedValue ?? defaultValue
+            }
+        }
+        set {
+            switch refreshPolicy {
+            case .manual:
+                cachedValue = newValue
+                synced = false
+            case .onAccess:
+                cachedValue = newValue
+                do {
+                    try saveToKeychain()
+                    synced = true
+                } catch {
+                    print("Error saving \(self) into keychain: \(error)")
+                    synced = false
+                }
+            }
+        }
+    }
+
+    override var itemData: Data {
+        get {
+            // CachedValue -> Data
+        }
+        set {
+            // Data -> cachedValue
+        }
+    }
+
+    public init(refreshPolicy: KeychainRefreshPolicy, defaultValue: T? = nil) {
+        self.refreshPolicy = refreshPolicy
+        self.defaultValue = defaultValue
+    }
+
+    public func saveToKeychain() throws {
+        let cachedValueBeforeUpdates = cachedValue
+
+        let currentStatus: Result<Void, Error> = Result { () -> Void in
+            try executeFetchQuery()
+        }
+
+        switch (currentStatus, cachedValueBeforeUpdates) {
+        case (.success, .some(let value)):
+            cachedValue = value
+            try executeUpdateQuery()
+            synced = true
+        case (.success, nil):
+            try deleteKeychain()
+            case (.failure(KeychainError.noData), .some(let value)):
+            cachedValue = value
+            try executeInsertQuery()
+            synced = true
+        case (.failure(KeychainError.noData), nil):
+            break
+        case (.failure(let error), _):
+            throw error
+        }
+    }
+
+    public func loadFromKeychain() throws {
+        let currentStatus: Result<Void, Error> = Result { () -> Void in
+            try executeFetchQuery()
+        }
+
+        switch currentStatus {
+        case .success:
+            synced = true
+        case .failure(KeychainError.noData):
+            synced = true
+            cachedValue = nil
+        case .failure(let error):
+            throw error
+        }
+
+    }
+
+    public func deleteKeychain() throws {
+        try executeDeleteQuery()
+        cachedValue = nil
+        synced = true
+    }
+
+    
+
+}
 
 // MARK: - Internet password item
 public protocol InternetPasswordAttributes {
