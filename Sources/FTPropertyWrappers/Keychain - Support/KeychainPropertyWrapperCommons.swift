@@ -65,32 +65,20 @@ public class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
     }
 
     public func saveToKeychain() throws {
-        let cachedValueBeforeUpdates = cachedValue
-
-        let currentStatus: Result<Void, Error> = Result { () -> Void in
-            if synced {
-                return
-            } else {
-                try executeFetchQuery()
-            }
+        guard cachedValue != nil else {
+            try deleteKeychain()
+            synced = true
+            return
         }
 
-        switch (currentStatus, cachedValueBeforeUpdates) {
-        case (.success, .some(let value)):
-            cachedValue = value
-            try executeUpdateQuery()
-            synced = true
-        case (.success, nil):
-            try deleteKeychain()
-        case (.failure(KeychainError.noData), .some(let value)):
-            cachedValue = value
+        do {
             try executeInsertQuery()
             synced = true
-        case (.failure(KeychainError.noData), nil):
-            break
-        case (.failure(let error), _):
-            throw error
+        } catch (KeychainError.osSecureDuplicitItem){
+            try executeUpdateQuery()
+            synced = true
         }
+
     }
 
     public func loadFromKeychain() throws {
@@ -101,7 +89,7 @@ public class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
         switch currentStatus {
         case .success:
             synced = true
-        case .failure(KeychainError.noData):
+        case .failure(KeychainError.osSecureNoSuchItem):
             synced = true
             cachedValue = nil
         case .failure(let error):

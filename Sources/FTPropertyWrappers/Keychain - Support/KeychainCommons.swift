@@ -1,10 +1,35 @@
 import Foundation
 
 public enum KeychainError: Error {
-    case noData, unexpectedFormat, generalEncodingFailure, generalDecodingFailure
-    case unhandledError(status: OSStatus)
+    case unexpectedFormat, generalEncodingFailure, generalDecodingFailure
+    case accessControllErrorUnknown
     case accessControllError(status: Error)
-    case unknownAccessControllError
+    case osSecure(status: OSStatus)
+    case osSecureDuplicitItem
+    case osSecureNoSuchItem
+    case osSecureDiskFull
+    case osSucureInvalidParameter
+    case osSecureBadRequest
+    case osSecureUserCancelledAuthentication
+
+    init(fromOSStatus status: OSStatus) {
+        switch status {
+        case errSecDuplicateItem:
+            self = .osSecureDuplicitItem
+        case errSecItemNotFound:
+            self = .osSecureNoSuchItem
+        case errSecDiskFull:
+            self = .osSecureDiskFull
+        case errSecParam:
+            self = .osSucureInvalidParameter
+        case errSecBadReq:
+            self = .osSecureBadRequest
+        case errSecUserCanceled:
+            self = .osSecureUserCancelledAuthentication
+        default:
+            self = .osSecure(status: status)
+        }
+    }
 }
 
 public enum AccesibleOption: CaseIterable {
@@ -176,7 +201,7 @@ public class KeychainItem {
     func executeInsertQuery() throws {
         let status = SecItemAdd(insertQuery as CFDictionary, nil)
         guard status == errSecSuccess else {
-            throw KeychainError.unhandledError(status: status)
+            throw KeychainError(fromOSStatus: status)
         }
         commonReadOnlyAttributes = KeychainReadOnlyCommonAttributes(creationDate: Date(), modificationDate: Date())
     }
@@ -185,11 +210,8 @@ public class KeychainItem {
         var item: CFTypeRef?
         let status = SecItemCopyMatching(fetchQuery as CFDictionary, &item)
 
-        guard status != errSecItemNotFound else {
-            throw KeychainError.noData
-        }
         guard status == errSecSuccess else {
-            throw KeychainError.unhandledError(status: status)
+            throw KeychainError(fromOSStatus: status)
         }
         guard let response = item as? [String : Any] else {
             throw KeychainError.unexpectedFormat
@@ -201,12 +223,8 @@ public class KeychainItem {
     func executeUpdateQuery() throws {
         let status = SecItemUpdate(updateFetchQuery as CFDictionary, updateAttributesQuery as CFDictionary)
 
-        guard status != errSecItemNotFound else {
-            throw KeychainError.noData
-        }
-
         guard status == errSecSuccess else {
-            throw KeychainError.unhandledError(status: status)
+            throw KeychainError(fromOSStatus: status)
         }
         commonReadOnlyAttributes.modificationDate = Date()
     }
@@ -214,7 +232,7 @@ public class KeychainItem {
     func executeDeleteQuery() throws {
         let status = SecItemDelete(deleteQuery as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
-            throw KeychainError.unhandledError(status: status)
+            throw KeychainError(fromOSStatus: status)
         }
     }
 

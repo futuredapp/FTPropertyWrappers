@@ -12,7 +12,7 @@ public struct GenericPasswordAttributes {
         }
 
         guard access != nil else {
-            throw KeychainError.unknownAccessControllError
+            throw KeychainError.accessControllErrorUnknown
         }
 
         accessControl = access
