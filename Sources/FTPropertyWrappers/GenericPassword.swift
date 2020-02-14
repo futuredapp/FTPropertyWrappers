@@ -2,16 +2,35 @@ import Foundation
 
 // MARK: - Generic password item
 public struct GenericPasswordAttributes {
-    var accessControl: SecAccessControlCreateFlags?
+
+    mutating func modifyAccess(using accessible: AccesibleOption, flags: SecAccessControlCreateFlags) throws {
+        var error: Unmanaged<CFError>?
+
+        let access = SecAccessControlCreateWithFlags(nil, accessible.rawValue, flags, &error);
+        if let error = error?.takeRetainedValue() as Error? {
+            throw KeychainError.accessControllError(status: error)
+        }
+
+        guard access != nil else {
+            throw KeychainError.unknownAccessControllError
+        }
+
+        accessControl = access
+    }
+
+    public private(set) var accessControl: SecAccessControl?
     // notice: kSecAttrService is reserved as ID
     // notice: kSecAttrGeneric counterpart is not implemented
 
     func insertParameters(into query: inout [String : Any]) {
-        // TODO!
+        if let accessControl = self.accessControl {
+            query[kSecAttrAccessible as String] = nil
+            query[kSecAttrAccessControl as String] = accessControl
+        }
     }
 
-    func readParameters(from response: [String : Any]) {
-        // TODO!
+    mutating func readParameters(from response: [String : Any]) {
+        self.accessControl = response[kSecAttrAccessControl as String] as! SecAccessControl?
     }
 
 }
@@ -46,7 +65,7 @@ public class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
         genericPasswordClassAttributes.readParameters(from: searchResult)
     }
 
-    public init(serviceIdentifier: String, refreshPolicy: KeychainRefreshPolicy = .onAccess, defaultValue: T? = nil) {
+    public init(serviceIdentifier: String, refreshPolicy: KeychainDataRefreshPolicy = .onAccess, defaultValue: T? = nil) {
         self.serviceIdentifier = serviceIdentifier
         super.init(refreshPolicy: refreshPolicy, defaultValue: defaultValue)
     }

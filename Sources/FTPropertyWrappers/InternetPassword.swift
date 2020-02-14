@@ -10,11 +10,19 @@ public struct InternetPasswordAttributes {
     // notice: kSecAttrServer is reserved as ID
 
     func insertParameters(into query: inout [String : Any]) {
-        // TODO!
+        query[kSecAttrSecurityDomain as String] = domain
+        query[kSecAttrProtocol as String] = aProtocol
+        query[kSecAttrAuthenticationType as String] = authenticationType
+        query[kSecAttrPort as String] = port
+        query[kSecAttrPath as String] = path
     }
 
-    func readParameters(from response: [String : Any]) {
-        // TODO!
+    mutating func readParameters(from response: [String : Any]) {
+        domain = response[kSecAttrSecurityDomain as String] as? String
+        aProtocol = response[kSecAttrProtocol as String] as? String
+        authenticationType = response[kSecAttrAuthenticationType as String] as? String
+        port = response[kSecAttrPort as String] as? UInt16
+        path = response[kSecAttrPath as String] as? String
     }
 }
 
@@ -48,7 +56,7 @@ public class InternetPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
         internetPasswordClassAttributes.readParameters(from: searchResult)
     }
 
-    public init(serverIdentifier: String, refreshPolicy: KeychainRefreshPolicy = .onAccess, defaultValue: T? = nil) {
+    public init(serverIdentifier: String, refreshPolicy: KeychainDataRefreshPolicy = .onAccess, defaultValue: T? = nil) {
         self.serverIdentifier = serverIdentifier
         super.init(refreshPolicy: refreshPolicy, defaultValue: defaultValue)
     }

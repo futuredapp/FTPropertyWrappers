@@ -3,6 +3,8 @@ import Foundation
 public enum KeychainError: Error {
     case noData, unexpectedFormat, generalEncodingFailure, generalDecodingFailure
     case unhandledError(status: OSStatus)
+    case accessControllError(status: Error)
+    case unknownAccessControllError
 }
 
 public enum AccesibleOption: CaseIterable {
@@ -60,7 +62,9 @@ public struct KeychainCommonAttributes {
     public var synchronizable: Bool?
 
     func insertParameters(into query: inout [String : Any]) {
-        query[kSecAttrAccessible as String] = accesible?.rawValue
+        if query[kSecAttrAccessControl as String] == nil {
+            query[kSecAttrAccessible as String] = accesible?.rawValue
+        }
         query[kSecAttrDescription as String] = description
         query[kSecAttrComment as String] = comment
         query[kSecAttrCreator as String] = creator
@@ -72,17 +76,27 @@ public struct KeychainCommonAttributes {
         query[kSecAttrSynchronizable as String] = synchronizable
     }
 
-    func readParameters(from response: [String : Any]) {
-        // TODO!
+    mutating func readParameters(from response: [String : Any]) {
+        accesible = response[kSecAttrAccessible as String].flatMap { $0 as? String as CFString? }.flatMap(AccesibleOption.init(rawValue:))
+        description = response[kSecAttrDescription as String] as? String
+        comment = response[kSecAttrComment as String] as? String
+        creator = response[kSecAttrCreator as String] as? UInt64
+        type = response[kSecAttrType as String] as? UInt64
+        label = response[kSecAttrLabel as String] as? String
+        isInvisible = response[kSecAttrIsInvisible as String] as? Bool
+        isNegative = response[kSecAttrIsNegative as String]  as? Bool
+        account = response[kSecAttrAccount as String] as? String
+        synchronizable = response[kSecAttrSynchronizable as String] as? Bool
     }
 }
 
 public struct KeychainReadOnlyCommonAttributes {
-    public private(set) var creationDate: Date?
-    public private(set) var modificationDate: Date?
+    public internal(set) var creationDate: Date?
+    public internal(set) var modificationDate: Date?
 
-    func readParameters(from response: [String : Any]) {
-        // TODO!
+    mutating func readParameters(from response: [String : Any]) {
+        creationDate = response[kSecAttrCreationDate as String] as? Date
+        modificationDate = response[kSecAttrModificationDate as String] as? Date
     }
 }
 
@@ -210,7 +224,7 @@ public class KeychainItem {
         guard status == errSecSuccess else {
             throw KeychainError.unhandledError(status: status)
         }
-        // TODO: set common read only attributes
+        commonReadOnlyAttributes = KeychainReadOnlyCommonAttributes(creationDate: Date(), modificationDate: Date())
     }
 
     func executeFetchQuery() throws {
@@ -240,6 +254,7 @@ public class KeychainItem {
         guard status == errSecSuccess else {
             throw KeychainError.unhandledError(status: status)
         }
+        commonReadOnlyAttributes.modificationDate = Date()
     }
 
     func executeDeleteQuery() throws {

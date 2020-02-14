@@ -1,6 +1,6 @@
 import Foundation
 
-public enum KeychainRefreshPolicy {
+public enum KeychainDataRefreshPolicy {
     case manual, onAccess
 }
 
@@ -12,7 +12,7 @@ public class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
 
     private var cachedValue: T?
 
-    public let refreshPolicy: KeychainRefreshPolicy
+    public let refreshPolicy: KeychainDataRefreshPolicy
 
     public private(set) var synced = false
 
@@ -71,7 +71,7 @@ public class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
         }
     }
 
-    public init(refreshPolicy: KeychainRefreshPolicy, defaultValue: T? = nil) {
+    public init(refreshPolicy: KeychainDataRefreshPolicy, defaultValue: T? = nil) {
         self.refreshPolicy = refreshPolicy
         self.defaultValue = defaultValue
     }
