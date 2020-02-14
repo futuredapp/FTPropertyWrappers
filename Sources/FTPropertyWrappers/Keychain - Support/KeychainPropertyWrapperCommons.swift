@@ -6,8 +6,6 @@ public enum KeychainDataRefreshPolicy {
 
 public class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
 
-    private var coding = KeychainCoding()
-
     private var defaultValue: T?
 
     private var cachedValue: T?
@@ -52,22 +50,12 @@ public class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
 
     override var itemData: Data {
         get {
-            return cachedValue.flatMap { value -> Data? in
-                do {
-                    return try coding.encode(value)
-                } catch {
-                    print("Error encoding \(value) into keychain.")
-                    return nil
-                }
-            } ?? Data()
+            guard let cached = cachedValue as? Data else { fatalError("Not a Data") }
+            return cached
         }
         set {
-            do {
-                cachedValue = try coding.decode(from: newValue)
-            } catch {
-                print("Error decoding \(newValue) from keychain.")
-                cachedValue = nil
-            }
+            guard let newVal = newValue as? T else { fatalError("Not a Data") }
+            cachedValue = newVal
         }
     }
 
@@ -80,7 +68,11 @@ public class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
         let cachedValueBeforeUpdates = cachedValue
 
         let currentStatus: Result<Void, Error> = Result { () -> Void in
-            try executeFetchQuery()
+            if synced {
+                return
+            } else {
+                try executeFetchQuery()
+            }
         }
 
         switch (currentStatus, cachedValueBeforeUpdates) {
@@ -90,7 +82,7 @@ public class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
             synced = true
         case (.success, nil):
             try deleteKeychain()
-            case (.failure(KeychainError.noData), .some(let value)):
+        case (.failure(KeychainError.noData), .some(let value)):
             cachedValue = value
             try executeInsertQuery()
             synced = true

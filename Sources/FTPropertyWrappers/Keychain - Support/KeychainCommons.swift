@@ -37,18 +37,6 @@ public enum AccesibleOption: CaseIterable {
     }
 }
 
-public struct KeychainQueryConfiguration {
-    var matchCaseInsensitive: Bool
-    var matchDiacriticInsensitive: Bool
-    var matchWidthInsensitive: Bool
-
-    func insertParameters(into query: inout [String : Any]) {
-        query[kSecMatchCaseInsensitive as String] = matchCaseInsensitive
-        query[kSecMatchDiacriticInsensitive as String] = matchDiacriticInsensitive
-        query[kSecMatchWidthInsensitive as String] = matchWidthInsensitive
-    }
-}
-
 public struct KeychainCommonAttributes {
     public var accesible: AccesibleOption?
     public var description: String?
@@ -105,9 +93,6 @@ public class KeychainItem {
     // MARK: Properties
     public private(set) var commonReadOnlyAttributes = KeychainReadOnlyCommonAttributes()
 
-    public var matchAttributes = KeychainQueryConfiguration(matchCaseInsensitive: false,
-                                                       matchDiacriticInsensitive: false,
-                                                           matchWidthInsensitive: true)
     public var commonAttributes = KeychainCommonAttributes()
 
     // MARK: Override support
@@ -123,14 +108,6 @@ public class KeychainItem {
         var attributes = [String: Any]()
         commonAttributes.insertParameters(into: &attributes)
         return attributes
-    }
-
-    var searchMatchOptions: [String: Any] {
-        var query = [String: Any]()
-
-        matchAttributes.insertParameters(into: &query)
-
-        return query
     }
 
     func configure(from searchResult: [String: Any]) {
@@ -162,11 +139,6 @@ public class KeychainItem {
     var fetchQuery: [String: Any] {
         var query: [String: Any] = itemClassIdentity
 
-        query.merge(searchMatchOptions) { lhs, rhs in
-            print("FTPropertyWrappers KeychainItem fetchQuery: notice: collision found at instance \(self) between \(lhs) and \(rhs)")
-            return lhs
-        }
-
         if query[kSecMatchLimit as String] != nil {
             print("FTPropertyWrappers KeychainItem fetchQuery: warning: changing of kSecMatchLimit is not allowed!")
         }
@@ -186,16 +158,7 @@ public class KeychainItem {
     }
 
 
-    var updateFetchQuery: [String: Any] {
-        var query: [String: Any] = itemClassIdentity
-
-        query.merge(searchMatchOptions) { lhs, rhs in
-            print("FTPropertyWrappers KeychainItem updateQuery: notice: collision found at instance \(self) between \(lhs) and \(rhs)")
-            return lhs
-        }
-
-        return query
-    }
+    var updateFetchQuery: [String: Any] { itemClassIdentity }
 
     var updateAttributesQuery: [String: Any] {
         var query = itemAttributes
@@ -208,16 +171,7 @@ public class KeychainItem {
         return query
     }
 
-    var deleteQuery: [String: Any] {
-        var query: [String: Any] = itemClassIdentity
-
-        query.merge(searchMatchOptions) { lhs, rhs in
-            print("FTPropertyWrappers KeychainItem deleteQuery: notice: collision found at instance \(self) between \(lhs) and \(rhs)")
-            return lhs
-        }
-
-        return query
-    }
+    var deleteQuery: [String: Any] { itemClassIdentity }
 
     func executeInsertQuery() throws {
         let status = SecItemAdd(insertQuery as CFDictionary, nil)

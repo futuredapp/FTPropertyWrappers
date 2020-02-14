@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Generic password item
 public struct GenericPasswordAttributes {
 
-    mutating func modifyAccess(using accessible: AccesibleOption, flags: SecAccessControlCreateFlags) throws {
+    public mutating func modifyAccess(using accessible: AccesibleOption, flags: SecAccessControlCreateFlags) throws {
         var error: Unmanaged<CFError>?
 
         let access = SecAccessControlCreateWithFlags(nil, accessible.rawValue, flags, &error);
@@ -20,7 +20,6 @@ public struct GenericPasswordAttributes {
 
     public private(set) var accessControl: SecAccessControl?
     // notice: kSecAttrService is reserved as ID
-    // notice: kSecAttrGeneric counterpart is not implemented
 
     func insertParameters(into query: inout [String : Any]) {
         if let accessControl = self.accessControl {
