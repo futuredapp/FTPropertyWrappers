@@ -11,6 +11,7 @@ public enum KeychainError: Error {
     case osSucureInvalidParameter
     case osSecureBadRequest
     case osSecureUserCancelledAuthentication
+    case osSecureMissingEtitlementForThisFeature
 
     init(fromOSStatus status: OSStatus) {
         switch status {
@@ -26,6 +27,8 @@ public enum KeychainError: Error {
             self = .osSecureBadRequest
         case errSecUserCanceled:
             self = .osSecureUserCancelledAuthentication
+        case errSecMissingEntitlement:
+            self = .osSecureMissingEtitlementForThisFeature
         default:
             self = .osSecure(status: status)
         }
