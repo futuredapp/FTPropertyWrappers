@@ -28,18 +28,27 @@ public final class QueryElement<T>: ConfiguringElement {
     let key: String
     let unsets: String?
     let unsetBy: String?
+    let readOnly: Bool
     
     init(key: CFString, unsets: CFString? = nil, unsetBy: CFString? = nil){
         self.key = key as String
         self.unsets = unsets as String?
         self.unsetBy = unsetBy as String?
+        self.readOnly = false
+    }
+    
+    init(readOnlyKey: CFString) {
+        self.key = readOnlyKey
+        self.readOnly = true
     }
     
     func insertParameters(into query: inout [String : Any]) {
-        if unsetBy.flatMap({ query[$0] }) == nil {
-            unsets.flatMap { query[$0] = nil }
-            query[key] = wrappedValue
+        guard !readOnly, unsetBy.flatMap({ query[$0] }) == nil else {
+            return
         }
+
+        unsets.flatMap { query[$0] = nil }
+        query[key] = wrappedValue
     }
 
     func readParameters(from response: [String : Any]) {

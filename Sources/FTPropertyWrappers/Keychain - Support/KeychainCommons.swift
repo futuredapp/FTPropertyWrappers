@@ -20,8 +20,8 @@ public class KeychainItem {
         set { _raw_accesible = newValue?.rawValue }
     }
     
-    @QueryElement(key: kSecAttrCreationDate) public internal(set) var creationDate: Date?
-    @QueryElement(key: kSecAttrModificationDate) public internal(set) var modificationDate: Date?
+    @QueryElement(readOnlyKey: kSecAttrCreationDate) public internal(set) var creationDate: Date?
+    @QueryElement(readOnlyKey: kSecAttrModificationDate) public internal(set) var modificationDate: Date?
 
     // MARK: Override requirements
 
