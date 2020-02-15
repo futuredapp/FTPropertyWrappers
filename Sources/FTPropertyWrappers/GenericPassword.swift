@@ -1,9 +1,26 @@
 import Foundation
 
-// MARK: - Generic password item
-public struct GenericPasswordAttributes {
+@propertyWrapper
+public final class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
 
-    public mutating func modifyAccess(using accessible: AccesibleOption, flags: SecAccessControlCreateFlags) throws {
+    @QueryElement(key: kSecAttrAccessControl,
+                  unsets: kSecAttrAccessible) public internal(set) var accessControl: SecAccessControl?
+
+    public let serviceIdentifier: String
+
+    override var itemClassIdentity: [String : Any] {
+        return [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: serviceIdentifier
+        ]
+    }
+
+    override public var wrappedValue: T? {
+        get { return super.wrappedValue }
+        set { super.wrappedValue = newValue }
+    }
+
+    public func modifyAccess(using accessible: AccesibleOption, flags: SecAccessControlCreateFlags) throws {
         var error: Unmanaged<CFError>?
 
         let access = SecAccessControlCreateWithFlags(nil, accessible.rawValue, flags, &error);
@@ -18,55 +35,15 @@ public struct GenericPasswordAttributes {
         accessControl = access
     }
 
-    public private(set) var accessControl: SecAccessControl?
-    // notice: kSecAttrService is reserved as ID
-
-    func insertParameters(into query: inout [String : Any]) {
-        if let accessControl = self.accessControl {
-            query[kSecAttrAccessible as String] = nil
-            query[kSecAttrAccessControl as String] = accessControl
-        }
-    }
-
-    mutating func readParameters(from response: [String : Any]) {
-        self.accessControl = response[kSecAttrAccessControl as String] as! SecAccessControl?
-    }
-
-}
-
-@propertyWrapper
-public final class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
-
-    public var genericPasswordClassAttributes = GenericPasswordAttributes()
-
-    public let serviceIdentifier: String
-
-    override var itemClassIdentity: [String : Any] {
-        return [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: serviceIdentifier
-        ]
-    }
-
-    /*
-    override var itemAttributes: [String : Any] {
-        var attributes = super.itemAttributes
-        genericPasswordClassAttributes.insertParameters(into: &attributes)
-        return attributes
-    }
-*/
-    override public var wrappedValue: T? {
-        get { return super.wrappedValue }
-        set { super.wrappedValue = newValue }
-    }
-/*
-    override func configure(from searchResult: [String : Any]) {
-        super.configure(from: searchResult)
-        genericPasswordClassAttributes.readParameters(from: searchResult)
-    }
-*/
     public init(serviceIdentifier: String, refreshPolicy: KeychainDataRefreshPolicy = .onAccess, defaultValue: T? = nil) {
         self.serviceIdentifier = serviceIdentifier
         super.init(refreshPolicy: refreshPolicy, defaultValue: defaultValue)
+    }
+    
+    public convenience init(serviceIdentifier: String, refreshPolicy: KeychainDataRefreshPolicy = .onAccess, defaultValue: T? = nil, protection: (access: AccesibleOption, flags: SecAccessControlCreateFlags)? = nil) throws {
+        self.init(serviceIdentifier: serviceIdentifier, refreshPolicy: refreshPolicy, defaultValue: defaultValue)
+        if let protection = protection {
+            try self.modifyAccess(using: protection.access, flags: protection.flags)
+        }
     }
 }

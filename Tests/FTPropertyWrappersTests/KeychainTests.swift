@@ -36,7 +36,7 @@ final class KeychainTests: XCTestCase {
             print(error)
         }
 
-        print(String(data: tester.mirror!, encoding: .utf8)!, tester.wrapperM.commonReadOnlyAttributes)
+        print(String(data: tester.mirror!, encoding: .utf8)!)
         print(tester.wrapperM.comment)
     }
 
