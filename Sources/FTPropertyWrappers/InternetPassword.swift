@@ -27,7 +27,7 @@ public struct InternetPasswordAttributes {
 }
 
 @propertyWrapper
-public class InternetPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
+public final class InternetPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
 
     public var internetPasswordClassAttributes = InternetPasswordAttributes()
 

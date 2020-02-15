@@ -1,9 +1,5 @@
 import Foundation
 
-public enum KeychainDataRefreshPolicy {
-    case manual, onAccess
-}
-
 public class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
 
     private var defaultValue: T?

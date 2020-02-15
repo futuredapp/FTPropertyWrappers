@@ -21,7 +21,7 @@ final class KeychainTests: XCTestCase {
         var tester = KeychainTester()
 
         tester.myElement = nil
-        tester.wrapperE.commonAttributes.comment = "Ahoj Miki !!!"
+        tester.wrapperE.comment = "Ahoj Miki !!!"
 
         do {
             try tester.wrapperE.loadFromKeychain()
@@ -37,7 +37,7 @@ final class KeychainTests: XCTestCase {
         }
 
         print(String(data: tester.mirror!, encoding: .utf8)!, tester.wrapperM.commonReadOnlyAttributes)
-        print(tester.wrapperM.commonAttributes.comment)
+        print(tester.wrapperM.comment)
     }
 
     override func setUp() {

@@ -35,7 +35,7 @@ public struct GenericPasswordAttributes {
 }
 
 @propertyWrapper
-public class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
+public final class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
 
     public var genericPasswordClassAttributes = GenericPasswordAttributes()
 
@@ -48,22 +48,23 @@ public class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
         ]
     }
 
+    /*
     override var itemAttributes: [String : Any] {
         var attributes = super.itemAttributes
         genericPasswordClassAttributes.insertParameters(into: &attributes)
         return attributes
     }
-
+*/
     override public var wrappedValue: T? {
         get { return super.wrappedValue }
         set { super.wrappedValue = newValue }
     }
-
+/*
     override func configure(from searchResult: [String : Any]) {
         super.configure(from: searchResult)
         genericPasswordClassAttributes.readParameters(from: searchResult)
     }
-
+*/
     public init(serviceIdentifier: String, refreshPolicy: KeychainDataRefreshPolicy = .onAccess, defaultValue: T? = nil) {
         self.serviceIdentifier = serviceIdentifier
         super.init(refreshPolicy: refreshPolicy, defaultValue: defaultValue)

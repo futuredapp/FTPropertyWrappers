@@ -1,129 +1,29 @@
 import Foundation
 
-public enum KeychainError: Error {
-    case unexpectedFormat, generalEncodingFailure, generalDecodingFailure
-    case accessControllErrorUnknown
-    case accessControllError(status: Error)
-    case osSecure(status: OSStatus)
-    case osSecureDuplicitItem
-    case osSecureNoSuchItem
-    case osSecureDiskFull
-    case osSucureInvalidParameter
-    case osSecureBadRequest
-    case osSecureUserCancelledAuthentication
-    case osSecureMissingEtitlementForThisFeature
-
-    init(fromOSStatus status: OSStatus) {
-        switch status {
-        case errSecDuplicateItem:
-            self = .osSecureDuplicitItem
-        case errSecItemNotFound:
-            self = .osSecureNoSuchItem
-        case errSecDiskFull:
-            self = .osSecureDiskFull
-        case errSecParam:
-            self = .osSucureInvalidParameter
-        case errSecBadReq:
-            self = .osSecureBadRequest
-        case errSecUserCanceled:
-            self = .osSecureUserCancelledAuthentication
-        case errSecMissingEntitlement:
-            self = .osSecureMissingEtitlementForThisFeature
-        default:
-            self = .osSecure(status: status)
-        }
-    }
-}
-
-public enum AccesibleOption: CaseIterable {
-    case whenPasswordSetThisDeviceOnly
-    case whenUnlockedThisDeviceOnly
-    case whenUnlocked
-    case afterFirstUnlockThisDeviceOnly
-    case afterFirstUnlock
-
-    public var rawValue: CFString {
-        switch self {
-        case .whenPasswordSetThisDeviceOnly:
-            return kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
-        case .whenUnlockedThisDeviceOnly:
-            return kSecAttrAccessibleWhenUnlockedThisDeviceOnly
-        case .whenUnlocked:
-            return kSecAttrAccessibleWhenUnlocked
-        case .afterFirstUnlockThisDeviceOnly:
-            return kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-        case .afterFirstUnlock:
-            return kSecAttrAccessibleAfterFirstUnlock
-        }
-    }
-
-    public init?(rawValue: CFString) {
-        guard let value = AccesibleOption.allCases.first(where: { rawValue == $0.rawValue }) else {
-            return nil
-        }
-        self = value
-    }
-}
-
-public struct KeychainCommonAttributes {
-    public var accesible: AccesibleOption?
-    public var description: String?
-    public var comment: String?
-    public var creator: UInt64?
-    public var type: UInt64?
-    public var label: String?
-    public var isInvisible: Bool?
-    public var isNegative: Bool?
-    public var account: String?
-    public var synchronizable: Bool?
-
-    func insertParameters(into query: inout [String : Any]) {
-        if query[kSecAttrAccessControl as String] == nil {
-            query[kSecAttrAccessible as String] = accesible?.rawValue
-        }
-        query[kSecAttrDescription as String] = description
-        query[kSecAttrComment as String] = comment
-        query[kSecAttrCreator as String] = creator
-        query[kSecAttrType as String] = type
-        query[kSecAttrLabel as String] = label
-        query[kSecAttrIsInvisible as String] = isInvisible
-        query[kSecAttrIsNegative as String] = isNegative
-        query[kSecAttrAccount as String] = account
-        query[kSecAttrSynchronizable as String] = synchronizable
-    }
-
-    mutating func readParameters(from response: [String : Any]) {
-        accesible = response[kSecAttrAccessible as String].flatMap { $0 as? String as CFString? }.flatMap(AccesibleOption.init(rawValue:))
-        description = response[kSecAttrDescription as String] as? String
-        comment = response[kSecAttrComment as String] as? String
-        creator = response[kSecAttrCreator as String] as? UInt64
-        type = response[kSecAttrType as String] as? UInt64
-        label = response[kSecAttrLabel as String] as? String
-        isInvisible = response[kSecAttrIsInvisible as String] as? Bool
-        isNegative = response[kSecAttrIsNegative as String]  as? Bool
-        account = response[kSecAttrAccount as String] as? String
-        synchronizable = response[kSecAttrSynchronizable as String] as? Bool
-    }
-}
-
-public struct KeychainReadOnlyCommonAttributes {
-    public internal(set) var creationDate: Date?
-    public internal(set) var modificationDate: Date?
-
-    mutating func readParameters(from response: [String : Any]) {
-        creationDate = response[kSecAttrCreationDate as String] as? Date
-        modificationDate = response[kSecAttrModificationDate as String] as? Date
-    }
-}
-
 public class KeychainItem {
 
     // MARK: Properties
-    public private(set) var commonReadOnlyAttributes = KeychainReadOnlyCommonAttributes()
+    @QueryElement(key: kSecAttrDescription) public var description: String?
+    @QueryElement(key: kSecAttrComment) public var comment: String?
+    @QueryElement(key: kSecAttrCreator) public var creator: String?
+    @QueryElement(key: kSecAttrType) public var type: UInt64?
+    @QueryElement(key: kSecAttrLabel) public var label: String?
+    @QueryElement(key: kSecAttrIsInvisible) public var isInvisible: Bool?
+    @QueryElement(key: kSecAttrIsNegative) public var isNegative: Bool?
+    @QueryElement(key: kSecAttrAccount) public var account: String?
+    @QueryElement(key: kSecAttrSynchronizable) public var synchronizable: Bool?
+    
+    @QueryElement(key: kSecAttrAccessible,
+                  unsetBy: kSecAttrAccessControl) private var _raw_accesible: CFString?
+    public var accesible: AccesibleOption? {
+        get { _raw_accesible.flatMap(AccesibleOption.init(rawValue:)) }
+        set { _raw_accesible = newValue?.rawValue }
+    }
+    
+    @QueryElement(key: kSecAttrCreationDate) public internal(set) var creationDate: Date?
+    @QueryElement(key: kSecAttrModificationDate) public internal(set) var modificationDate: Date?
 
-    public var commonAttributes = KeychainCommonAttributes()
-
-    // MARK: Override support
+    // MARK: Override requirements
 
     var itemClassIdentity: [String: Any] { fatalError("FTPropertyWrappers KeychainItem: error: empty class identity!") }
 
@@ -131,16 +31,21 @@ public class KeychainItem {
         get { fatalError("FTPropertyWrappers KeychainItem: error: empty data!") }
         set { fatalError("FTPropertyWrappers KeychainItem: error: empty data!") }
     }
-
+    
+    // MARK: Query execution support
+    
     var itemAttributes: [String: Any] {
         var attributes = [String: Any]()
-        commonAttributes.insertParameters(into: &attributes)
+        Mirror(reflecting: self).forEachChildInClassHiearchy { child in
+            (child.value as? ConfiguringElement)?.insertParameters(into: &attributes)
+        }
         return attributes
     }
 
     func configure(from searchResult: [String: Any]) {
-        commonAttributes.readParameters(from: searchResult)
-        commonReadOnlyAttributes.readParameters(from: searchResult)
+        Mirror(reflecting: self).forEachChildInClassHiearchy { child in
+            (child.value as? ConfiguringElement)?.readParameters(from: searchResult)
+        }
 
         if let data = searchResult[kSecValueData as String] as? Data {
             itemData = data
@@ -149,7 +54,6 @@ public class KeychainItem {
         }
     }
 
-    // MARK: Query execution support
     var insertQuery: [String: Any] {
         var query = itemClassIdentity.merging(itemAttributes) { lhs, rhs in
             print("FTPropertyWrappers KeychainItem insertQuery: notice: collision found at instance \(self) between \(lhs) and \(rhs)")
@@ -206,7 +110,8 @@ public class KeychainItem {
         guard status == errSecSuccess else {
             throw KeychainError(fromOSStatus: status)
         }
-        commonReadOnlyAttributes = KeychainReadOnlyCommonAttributes(creationDate: Date(), modificationDate: Date())
+        creationDate = Date()
+        modificationDate = Date()
     }
 
     func executeFetchQuery() throws {
@@ -229,7 +134,8 @@ public class KeychainItem {
         guard status == errSecSuccess else {
             throw KeychainError(fromOSStatus: status)
         }
-        commonReadOnlyAttributes.modificationDate = Date()
+        
+        modificationDate = Date()
     }
 
     func executeDeleteQuery() throws {
