@@ -1,17 +1,17 @@
 import Foundation
 
 @propertyWrapper
-public final class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
+open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
 
+    @QueryElement(key: kSecAttrService) public var service: String?
     @QueryElement(key: kSecAttrAccessControl,
                   constraints: [.override(kSecAttrAccessible)]) public internal(set) var accessControl: SecAccessControl?
-    @QueryElement(key: kSecAttrService) public var service: String?
 
-    override public var itemClass: CFString { kSecClassGenericPassword }
+    override open var itemClass: CFString { kSecClassGenericPassword }
 
-    override public var primaryKey: Set<String> { [kSecAttrService as String] }
+    override open var primaryKey: Set<String> { [kSecAttrService as String] }
 
-    override public var wrappedValue: T? {
+    override open var wrappedValue: T? {
         get { super.wrappedValue }
         set { super.wrappedValue = newValue }
     }
