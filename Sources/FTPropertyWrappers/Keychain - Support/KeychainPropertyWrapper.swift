@@ -44,6 +44,7 @@ open class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
         }
     }
 
+    // TODO: Implement encoding
     override open var itemData: Data {
         get {
             guard let cached = cachedValue as? Data else { fatalError("Not a Data") }
@@ -63,35 +64,26 @@ open class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
     open func saveToKeychain() throws {
         guard cachedValue != nil else {
             try deleteKeychain()
-            synced = true
             return
         }
 
         do {
             try executeInsertQuery()
-            synced = true
         } catch (KeychainError.osSecureDuplicitItem){
             try executeUpdateQuery()
-            synced = true
         }
+
+        synced = true
 
     }
 
     open func loadFromKeychain() throws {
-        let currentStatus: Result<Void, Error> = Result { () -> Void in
+        do {
             try executeFetchQuery()
-        }
-
-        switch currentStatus {
-        case .success:
-            synced = true
-        case .failure(KeychainError.osSecureNoSuchItem):
-            synced = true
+        } catch (KeychainError.osSecureNoSuchItem){
             cachedValue = nil
-        case .failure(let error):
-            throw error
         }
-
+        synced = true
     }
 
     open func deleteKeychain() throws {

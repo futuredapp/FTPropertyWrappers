@@ -19,14 +19,14 @@ open class KeychainItem {
         set { _raw_accesible = newValue?.rawValue }
     }
     
-    @QueryElement(readOnlyKey: kSecAttrCreationDate) public internal(set) var creationDate: Date?
-    @QueryElement(readOnlyKey: kSecAttrModificationDate) public internal(set) var modificationDate: Date?
+    @QueryElement(readOnlyKey: kSecAttrCreationDate) public private(set) var creationDate: Date?
+    @QueryElement(readOnlyKey: kSecAttrModificationDate) public private(set) var modificationDate: Date?
 
     // MARK: Override requirements
 
-    open var itemClassIdentity: [String: Any] {
-        get { fatalError("FTPropertyWrappers KeychainItem: error: empty class identity!") }
-    }
+    open var itemClass: CFString { fatalError("FTPropertyWrappers KeychainItem: error: empty class!") }
+
+    open var primaryKey: Set<String> { fatalError("FTPropertyWrappers KeychainItem: error: empty keys!") }
 
     open var itemData: Data {
         get { fatalError("FTPropertyWrappers KeychainItem: error: empty data!") }
@@ -34,18 +34,18 @@ open class KeychainItem {
     }
     
     // MARK: Query execution support
-    
-    private var itemAttributes: [String: Any] {
-        var attributes = [String: Any]()
+
+    private func composeQueryElements() -> [String: Any] {
+        var elements = [String: Any]()
 
         var willUnset: Set<String> = []
         var conditionalUnset: [(ifPresent: String, unset: String)] = []
 
         Mirror(reflecting: self).forEachChildInClassHiearchy { child in
-            guard let element = child.value as? ConfiguringElement else {
+            guard let element = child.value as? WrappedConfiguringElement else {
                 return
             }
-            element.insertParameters(into: &attributes)
+            elements[element.key] = element.wrappedAsAnonymous ?? elements[element.key]
             element.constraints.forEach { constraint in
                 switch constraint {
                 case .overridenBy(let attribute):
@@ -56,15 +56,18 @@ open class KeychainItem {
             }
         }
 
-        conditionalUnset.compactMap { attributes[$0.ifPresent] != nil ? $0.unset : nil }.forEach { willUnset.insert($0) }
-        willUnset.forEach { attributes.removeValue(forKey: $0) }
+        conditionalUnset.compactMap { elements[$0.ifPresent] != nil ? $0.unset : nil }.forEach { willUnset.insert($0) }
+        willUnset.forEach { elements.removeValue(forKey: $0) }
 
-        return attributes
+        return elements
     }
 
     private func configure(from searchResult: [String: Any]) {
         Mirror(reflecting: self).forEachChildInClassHiearchy { child in
-            (child.value as? ConfiguringElement)?.readParameters(from: searchResult)
+            guard var element = child.value as? WrappedConfiguringElement else {
+                return
+            }
+            element.wrappedAsAnonymous = searchResult[element.key]
         }
 
         if let data = searchResult[kSecValueData as String] as? Data {
@@ -75,55 +78,38 @@ open class KeychainItem {
     }
 
     private var insertQuery: [String: Any] {
-        var query = itemClassIdentity.merging(itemAttributes) { lhs, rhs in
-            print("FTPropertyWrappers KeychainItem insertQuery: notice: collision found at instance \(self) between \(lhs) and \(rhs)")
-            return lhs
-        }
-
-        if query[kSecValueData as String] != nil {
-            print("FTPropertyWrappers KeychainItem insertQuery: warning: changing of kSecValueData is not allowed!")
-        }
-        query[kSecValueData as String] = itemData
-
-        return query
+        composeQueryElements()
+            .merging([kSecClass as String : itemClass, kSecValueData as String : itemData]) { lhs, _ in lhs }
     }
 
     private var fetchQuery: [String: Any] {
-        var query: [String: Any] = itemClassIdentity
+        var query: [String: Any] = composeQueryElements().filter { primaryKey.contains($0.key) }
 
-        if query[kSecMatchLimit as String] != nil {
-            print("FTPropertyWrappers KeychainItem fetchQuery: warning: changing of kSecMatchLimit is not allowed!")
-        }
+        query[kSecClass as String] = itemClass
         query[kSecMatchLimit as String] = kSecMatchLimitOne
-
-        if query[kSecReturnAttributes as String] != nil {
-            print("FTPropertyWrappers KeychainItem fetchQuery: warning: changing of kSecReturnAttributes is not allowed!")
-        }
         query[kSecReturnAttributes as String] = true
-
-        if query[kSecReturnData as String] != nil {
-            print("FTPropertyWrappers KeychainItem fetchQuery: warning: changing of kSecReturnData is not allowed!")
-        }
         query[kSecReturnData as String] = true
 
         return query
     }
 
 
-    private var updateFetchQuery: [String: Any] { itemClassIdentity }
-
-    private var updateAttributesQuery: [String: Any] {
-        var query = itemAttributes
-
-        if query[kSecValueData as String] != nil {
-            print("FTPropertyWrappers KeychainItem insertQuery: warning: changing of kSecValueData is not allowed!")
-        }
-        query[kSecValueData as String] = itemData
-
-        return query
+    private var updateFetchQuery: [String: Any] {
+        composeQueryElements()
+            .filter { primaryKey.contains($0.key) }
+            .merging([kSecClass as String : itemClass]) { lhs, _ in lhs }
     }
 
-    private var deleteQuery: [String: Any] { itemClassIdentity }
+    private var updateAttributesQuery: [String: Any] {
+        composeQueryElements()
+            .merging([kSecValueData as String : itemData]) { lhs, _ in lhs }
+    }
+
+    private var deleteQuery: [String: Any] {
+        composeQueryElements()
+            .filter { primaryKey.contains($0.key) }
+            .merging([kSecClass as String : itemClass]) { lhs, _ in lhs }
+    }
 
     func executeInsertQuery() throws {
         let status = SecItemAdd(insertQuery as CFDictionary, nil)

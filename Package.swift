@@ -3,9 +3,6 @@ import PackageDescription
 
 let package = Package(
     name: "FTPropertyWrappers",
-    platforms: [
-        .macOS(.v10_11), .iOS(.v8)
-    ],
     products: [
         .library(
             name: "FTPropertyWrappers",

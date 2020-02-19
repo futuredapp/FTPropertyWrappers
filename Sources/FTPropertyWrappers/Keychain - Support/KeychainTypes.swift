@@ -16,29 +16,26 @@ extension Mirror {
     
 }
 
-protocol ConfiguringElement {
-    func insertParameters(into query: inout [String : Any])
-    func readParameters(from response: [String : Any])
-
-    var constraints: [Constraint] { get }
+protocol WrappedConfiguringElement {
+    var constraints: [KeychainQueryPresenceConstraint] { get }
     var key: String { get }
+    var wrappedAsAnonymous: Any? { get set }
 }
 
-public enum Constraint {
+public enum KeychainQueryPresenceConstraint {
     case override(CFString)
     case overridenBy(CFString)
 }
 
 @propertyWrapper
-public final class QueryElement<T>: ConfiguringElement {
+public final class QueryElement<T>: WrappedConfiguringElement {
     public var wrappedValue: T?
     
     let key: String
     let readOnly: Bool
-    let constraints: [Constraint]
+    let constraints: [KeychainQueryPresenceConstraint]
 
-    
-    init(key: CFString, constraints: [Constraint] = []){
+    init(key: CFString, constraints: [KeychainQueryPresenceConstraint] = []){
         self.key = key as String
         self.readOnly = false
         self.constraints = constraints
@@ -49,16 +46,10 @@ public final class QueryElement<T>: ConfiguringElement {
         self.readOnly = true
         self.constraints = []
     }
-    
-    func insertParameters(into query: inout [String : Any]) {
-        guard !readOnly else {
-            return
-        }
-        query[key] = wrappedValue
-    }
 
-    func readParameters(from response: [String : Any]) {
-        wrappedValue = response[key] as? T
+    var wrappedAsAnonymous: Any? {
+        get { wrappedValue }
+        set { wrappedValue = newValue.flatMap {$0 as? T} }
     }
 }
 
