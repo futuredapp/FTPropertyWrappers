@@ -2,14 +2,14 @@ import XCTest
 @testable import FTPropertyWrappers
 
 struct KeychainTester {
-    @GenericPassword(serviceIdentifier: "app.futured.test.element") var myElement: Data?
-    @GenericPassword(serviceIdentifier: "app.futured.test.element") var mirror: Data?
+    @GenericPassword(serviceIdentifier: "app.futured.test.element") var myElement: String?
+    @GenericPassword(serviceIdentifier: "app.futured.test.element") var mirror: String?
 
-    var wrapperE: GenericPassword<Data> {
+    var wrapperE: GenericPassword<String> {
         _myElement
     }
 
-    var wrapperM: GenericPassword<Data> {
+    var wrapperM: GenericPassword<String> {
         _mirror
     }
 }
@@ -28,7 +28,7 @@ final class KeychainTests: XCTestCase {
         } catch {
             print(error)
         }
-        tester.myElement = "Miki".data(using: .utf8)!
+        tester.myElement = "Miki"
 
         do {
             try tester.wrapperM.loadFromKeychain()
@@ -36,7 +36,7 @@ final class KeychainTests: XCTestCase {
             print(error)
         }
 
-        print(String(data: tester.mirror!, encoding: .utf8)!)
+        print(tester.mirror)
         print(tester.wrapperM.comment)
     }
 

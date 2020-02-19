@@ -2,6 +2,8 @@ import Foundation
 
 open class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
 
+    private var coder = KeychainCoding()
+
     private var defaultValue: T?
 
     private var cachedValue: T?
@@ -47,12 +49,14 @@ open class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
     // TODO: Implement encoding
     override open var itemData: Data {
         get {
-            guard let cached = cachedValue as? Data else { fatalError("Not a Data") }
-            return cached
+            //guard let cached = cachedValue as? Data else { fatalError("Not a Data") }
+            return try! coder.encode(cachedValue!)
         }
         set {
-            guard let newVal = newValue as? T else { fatalError("Not a Data") }
-            cachedValue = newVal
+            //guard let newVal = newValue as? T else { fatalError("Not a Data") }
+            var storage: T?
+            try! coder.decode(from: newValue, into: &storage)
+            cachedValue = storage!
         }
     }
 
