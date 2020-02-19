@@ -1,6 +1,6 @@
 import Foundation
 
-public class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
+open class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
 
     private var defaultValue: T?
 
@@ -10,7 +10,7 @@ public class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
 
     public private(set) var synced = false
 
-    public var wrappedValue: T? {
+    open var wrappedValue: T? {
         get {
             switch (refreshPolicy, synced) {
             case (.manual, _):
@@ -44,7 +44,7 @@ public class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
         }
     }
 
-    override var itemData: Data {
+    override open var itemData: Data {
         get {
             guard let cached = cachedValue as? Data else { fatalError("Not a Data") }
             return cached
@@ -60,7 +60,7 @@ public class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
         self.defaultValue = defaultValue
     }
 
-    public func saveToKeychain() throws {
+    open func saveToKeychain() throws {
         guard cachedValue != nil else {
             try deleteKeychain()
             synced = true
@@ -77,7 +77,7 @@ public class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
 
     }
 
-    public func loadFromKeychain() throws {
+    open func loadFromKeychain() throws {
         let currentStatus: Result<Void, Error> = Result { () -> Void in
             try executeFetchQuery()
         }
@@ -94,7 +94,7 @@ public class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
 
     }
 
-    public func deleteKeychain() throws {
+    open func deleteKeychain() throws {
         try executeDeleteQuery()
         cachedValue = nil
         synced = true

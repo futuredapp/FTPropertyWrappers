@@ -19,6 +19,14 @@ extension Mirror {
 protocol ConfiguringElement {
     func insertParameters(into query: inout [String : Any])
     func readParameters(from response: [String : Any])
+
+    var constraints: [Constraint] { get }
+    var key: String { get }
+}
+
+public enum Constraint {
+    case override(CFString)
+    case overridenBy(CFString)
 }
 
 @propertyWrapper
@@ -26,28 +34,26 @@ public final class QueryElement<T>: ConfiguringElement {
     public var wrappedValue: T?
     
     let key: String
-    let unsets: String?
-    let unsetBy: String?
     let readOnly: Bool
+    let constraints: [Constraint]
+
     
-    init(key: CFString, unsets: CFString? = nil, unsetBy: CFString? = nil){
+    init(key: CFString, constraints: [Constraint] = []){
         self.key = key as String
-        self.unsets = unsets as String?
-        self.unsetBy = unsetBy as String?
         self.readOnly = false
+        self.constraints = constraints
     }
     
     init(readOnlyKey: CFString) {
-        self.key = readOnlyKey
+        self.key = readOnlyKey as String
         self.readOnly = true
+        self.constraints = []
     }
     
     func insertParameters(into query: inout [String : Any]) {
-        guard !readOnly, unsetBy.flatMap({ query[$0] }) == nil else {
+        guard !readOnly else {
             return
         }
-
-        unsets.flatMap { query[$0] = nil }
         query[key] = wrappedValue
     }
 

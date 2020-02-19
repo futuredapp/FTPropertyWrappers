@@ -11,7 +11,7 @@ public final class InternetPassword<T: Codable>: KeychainItemPropertyWrapper<T> 
     @QueryElement(key: kSecAttrPort) public var port: UInt16?
     @QueryElement(key: kSecAttrPath) public var path: String?
     
-    override var itemClassIdentity: [String : Any] {
+    override public var itemClassIdentity: [String : Any] {
         return [
             kSecClass as String: kSecClassInternetPassword,
             kSecAttrServer as String: serverIdentifier

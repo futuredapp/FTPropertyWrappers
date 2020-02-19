@@ -1,6 +1,6 @@
 import Foundation
 
-public class KeychainItem {
+open class KeychainItem {
 
     // MARK: Properties
     @QueryElement(key: kSecAttrDescription) public var description: String?
@@ -13,8 +13,7 @@ public class KeychainItem {
     @QueryElement(key: kSecAttrAccount) public var account: String?
     @QueryElement(key: kSecAttrSynchronizable) public var synchronizable: Bool?
     
-    @QueryElement(key: kSecAttrAccessible,
-                  unsetBy: kSecAttrAccessControl) private var _raw_accesible: CFString?
+    @QueryElement(key: kSecAttrAccessible) private var _raw_accesible: CFString?
     public var accesible: AccesibleOption? {
         get { _raw_accesible.flatMap(AccesibleOption.init(rawValue:)) }
         set { _raw_accesible = newValue?.rawValue }
@@ -25,24 +24,45 @@ public class KeychainItem {
 
     // MARK: Override requirements
 
-    var itemClassIdentity: [String: Any] { fatalError("FTPropertyWrappers KeychainItem: error: empty class identity!") }
+    open var itemClassIdentity: [String: Any] {
+        get { fatalError("FTPropertyWrappers KeychainItem: error: empty class identity!") }
+    }
 
-    var itemData: Data {
+    open var itemData: Data {
         get { fatalError("FTPropertyWrappers KeychainItem: error: empty data!") }
         set { fatalError("FTPropertyWrappers KeychainItem: error: empty data!") }
     }
     
     // MARK: Query execution support
     
-    var itemAttributes: [String: Any] {
+    private var itemAttributes: [String: Any] {
         var attributes = [String: Any]()
+
+        var willUnset: Set<String> = []
+        var conditionalUnset: [(ifPresent: String, unset: String)] = []
+
         Mirror(reflecting: self).forEachChildInClassHiearchy { child in
-            (child.value as? ConfiguringElement)?.insertParameters(into: &attributes)
+            guard let element = child.value as? ConfiguringElement else {
+                return
+            }
+            element.insertParameters(into: &attributes)
+            element.constraints.forEach { constraint in
+                switch constraint {
+                case .overridenBy(let attribute):
+                    conditionalUnset += [(element.key, attribute as String)]
+                case .override(let attribute):
+                    willUnset.insert(attribute as String)
+                }
+            }
         }
+
+        conditionalUnset.compactMap { attributes[$0.ifPresent] != nil ? $0.unset : nil }.forEach { willUnset.insert($0) }
+        willUnset.forEach { attributes.removeValue(forKey: $0) }
+
         return attributes
     }
 
-    func configure(from searchResult: [String: Any]) {
+    private func configure(from searchResult: [String: Any]) {
         Mirror(reflecting: self).forEachChildInClassHiearchy { child in
             (child.value as? ConfiguringElement)?.readParameters(from: searchResult)
         }
@@ -54,7 +74,7 @@ public class KeychainItem {
         }
     }
 
-    var insertQuery: [String: Any] {
+    private var insertQuery: [String: Any] {
         var query = itemClassIdentity.merging(itemAttributes) { lhs, rhs in
             print("FTPropertyWrappers KeychainItem insertQuery: notice: collision found at instance \(self) between \(lhs) and \(rhs)")
             return lhs
@@ -68,7 +88,7 @@ public class KeychainItem {
         return query
     }
 
-    var fetchQuery: [String: Any] {
+    private var fetchQuery: [String: Any] {
         var query: [String: Any] = itemClassIdentity
 
         if query[kSecMatchLimit as String] != nil {
@@ -90,9 +110,9 @@ public class KeychainItem {
     }
 
 
-    var updateFetchQuery: [String: Any] { itemClassIdentity }
+    private var updateFetchQuery: [String: Any] { itemClassIdentity }
 
-    var updateAttributesQuery: [String: Any] {
+    private var updateAttributesQuery: [String: Any] {
         var query = itemAttributes
 
         if query[kSecValueData as String] != nil {
@@ -103,7 +123,7 @@ public class KeychainItem {
         return query
     }
 
-    var deleteQuery: [String: Any] { itemClassIdentity }
+    private var deleteQuery: [String: Any] { itemClassIdentity }
 
     func executeInsertQuery() throws {
         let status = SecItemAdd(insertQuery as CFDictionary, nil)

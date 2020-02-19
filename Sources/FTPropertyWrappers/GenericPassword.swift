@@ -4,11 +4,11 @@ import Foundation
 public final class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
 
     @QueryElement(key: kSecAttrAccessControl,
-                  unsets: kSecAttrAccessible) public internal(set) var accessControl: SecAccessControl?
+                  constraints: [.override(kSecAttrAccessible)]) public internal(set) var accessControl: SecAccessControl?
 
     public let serviceIdentifier: String
 
-    override var itemClassIdentity: [String : Any] {
+    override public var itemClassIdentity: [String : Any] {
         return [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: serviceIdentifier
