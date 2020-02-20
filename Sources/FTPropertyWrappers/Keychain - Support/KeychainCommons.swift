@@ -1,36 +1,36 @@
 import Foundation
 
-open class KeychainItem {
+open class SingleValueKeychainItem {
 
     // MARK: Properties
-    @QueryElement(key: kSecAttrDescription) public var description: String?
-    @QueryElement(key: kSecAttrComment) public var comment: String?
-    @QueryElement(key: kSecAttrCreator) public var creator: String?
-    @QueryElement(key: kSecAttrType) public var type: UInt64?
-    @QueryElement(key: kSecAttrLabel) public var label: String?
-    @QueryElement(key: kSecAttrIsInvisible) public var isInvisible: Bool?
-    @QueryElement(key: kSecAttrIsNegative) public var isNegative: Bool?
-    @QueryElement(key: kSecAttrAccount) public var account: String?
-    @QueryElement(key: kSecAttrSynchronizable) public var synchronizable: Bool?
+    @QueryElement(key: kSecAttrDescription) open var description: String?
+    @QueryElement(key: kSecAttrComment) open var comment: String?
+    @QueryElement(key: kSecAttrCreator) open var creator: String?
+    @QueryElement(key: kSecAttrType) open var type: UInt64?
+    @QueryElement(key: kSecAttrLabel) open var label: String?
+    @QueryElement(key: kSecAttrIsInvisible) open var isInvisible: Bool?
+    @QueryElement(key: kSecAttrIsNegative) open var isNegative: Bool?
+    @QueryElement(key: kSecAttrAccount) open var account: String?
+    @QueryElement(key: kSecAttrSynchronizable) open var synchronizable: Bool?
     
     @QueryElement(key: kSecAttrAccessible) private var _raw_accesible: CFString?
-    public var accesible: AccesibleOption? {
+    open var accesible: AccesibleOption? {
         get { _raw_accesible.flatMap(AccesibleOption.init(rawValue:)) }
         set { _raw_accesible = newValue?.rawValue }
     }
     
-    @QueryElement(readOnlyKey: kSecAttrCreationDate) public private(set) var creationDate: Date?
-    @QueryElement(readOnlyKey: kSecAttrModificationDate) public private(set) var modificationDate: Date?
+    @QueryElement(readOnlyKey: kSecAttrCreationDate) open private(set) var creationDate: Date?
+    @QueryElement(readOnlyKey: kSecAttrModificationDate) open private(set) var modificationDate: Date?
 
     // MARK: Override requirements
 
-    open var itemClass: CFString { fatalError("FTPropertyWrappers KeychainItem: error: empty class!") }
+    open var itemClass: CFString { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty class!") }
 
-    open var primaryKey: Set<String> { fatalError("FTPropertyWrappers KeychainItem: error: empty keys!") }
+    open var primaryKey: Set<String> { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty keys!") }
 
     open var itemData: Data {
-        get { fatalError("FTPropertyWrappers KeychainItem: error: empty data!") }
-        set { fatalError("FTPropertyWrappers KeychainItem: error: empty data!") }
+        get { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty data!") }
+        set { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty data!") }
     }
     
     // MARK: Query execution support

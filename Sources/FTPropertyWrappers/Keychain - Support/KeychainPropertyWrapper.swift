@@ -1,6 +1,6 @@
 import Foundation
 
-open class KeychainItemPropertyWrapper<T: Codable>: KeychainItem {
+open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
 
     private var coder = KeychainCoding()
 

@@ -3,12 +3,12 @@ import Foundation
 @propertyWrapper
 open class InternetPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
     
-    @QueryElement(key: kSecAttrServer) public var server: String?
-    @QueryElement(key: kSecAttrSecurityDomain) public var domain: String?
-    @QueryElement(key: kSecAttrProtocol) public var aProtocol: String?
-    @QueryElement(key: kSecAttrAuthenticationType) public var authenticationType: String?
-    @QueryElement(key: kSecAttrPort) public var port: UInt16?
-    @QueryElement(key: kSecAttrPath) public var path: String?
+    @QueryElement(key: kSecAttrServer) open var server: String?
+    @QueryElement(key: kSecAttrSecurityDomain) open var domain: String?
+    @QueryElement(key: kSecAttrProtocol) open var aProtocol: String?
+    @QueryElement(key: kSecAttrAuthenticationType) open var authenticationType: String?
+    @QueryElement(key: kSecAttrPort) open var port: UInt16?
+    @QueryElement(key: kSecAttrPath) open var path: String?
 
     override open var itemClass: CFString { kSecClassInternetPassword }
 
