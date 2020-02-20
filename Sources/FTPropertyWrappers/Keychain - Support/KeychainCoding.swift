@@ -51,44 +51,44 @@ struct KeychainCoding {
         }
     }
 
-    func decode<T: Decodable>(from data: Data, into storage: inout T?) throws {
-        switch storage {
-        case is Int:
-            storage = (try decode(from: data) as Int) as? T
-        case is Int8:
-            storage = (try decode(from: data) as Int8) as? T
-        case is Int16:
-            storage = (try decode(from: data) as Int16) as? T
-        case is Int32:
-            storage = (try decode(from: data) as Int32) as? T
-        case is Int64:
-            storage = (try decode(from: data) as Int64) as? T
-        case is UInt:
-            storage = (try decode(from: data) as UInt) as? T
-        case is UInt8:
-            storage = (try decode(from: data) as UInt8) as? T
-        case is UInt16:
-            storage = (try decode(from: data) as UInt16) as? T
-        case is UInt32:
-            storage = (try decode(from: data) as UInt32) as? T
-        case is UInt64:
-            storage = (try decode(from: data) as UInt64) as? T
-        case is Float:
+    func decode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
+        switch type {
+        case is Int.Type:
+            return (try decode(from: data) as Int) as! T
+        case is Int8.Type:
+            return (try decode(from: data) as Int8) as! T
+        case is Int16.Type:
+            return (try decode(from: data) as Int16) as! T
+        case is Int32.Type:
+            return (try decode(from: data) as Int32) as! T
+        case is Int64.Type:
+            return (try decode(from: data) as Int64) as! T
+        case is UInt.Type:
+            return (try decode(from: data) as UInt) as! T
+        case is UInt8.Type:
+            return (try decode(from: data) as UInt8) as! T
+        case is UInt16.Type:
+            return (try decode(from: data) as UInt16) as! T
+        case is UInt32.Type:
+            return (try decode(from: data) as UInt32) as! T
+        case is UInt64.Type:
+            return (try decode(from: data) as UInt64) as! T
+        case is Float.Type:
             fatalError("Encoding root type Float not supported!")
-        case is Float80:
+        case is Float80.Type:
             fatalError("Encoding root type Float80 not supported!")
-        case is Double:
+        case is Double.Type:
             fatalError("Encoding root type Double not supported!")
-        case is Bool:
-            storage = (try decode(from: data) as Bool) as? T
-        case is String:
-            storage = (try decode(from: data) as String) as? T
-        case is URL:
-            storage = (try decode(from: data) as URL) as? T
-        case is Data:
-            storage = (try decode(from: data) as Data) as? T
+        case is Bool.Type:
+            return (try decode(from: data) as Bool) as! T
+        case is String.Type:
+            return (try decode(from: data) as String) as! T
+        case is URL.Type:
+            return (try decode(from: data) as URL) as! T
+        case is Data.Type:
+            return (try decode(from: data) as Data) as! T
         default:
-            storage = try decoder.decode(T.self, from: data)
+            return try decoder.decode(T.self, from: data)
         }
 
     }
@@ -168,13 +168,13 @@ struct KeychainCoding {
     private func decode(from data: Data) throws -> Int {
         switch data.count {
         case MemoryLayout<Int8>.size:
-            return Int(try decode(from: data) as Int8)
+            return Int(clamping: try decode(from: data) as Int8)
         case MemoryLayout<Int16>.size:
-            return Int(try decode(from: data) as Int16)
+            return Int(clamping: try decode(from: data) as Int16)
         case MemoryLayout<Int32>.size:
-            return Int(try decode(from: data) as Int32)
+            return Int(clamping: try decode(from: data) as Int32)
         case MemoryLayout<Int64>.size:
-            return Int(try decode(from: data) as Int64)
+            return Int(clamping: try decode(from: data) as Int64)
         default:
             throw KeychainError.generalDecodingFailure
         }
@@ -183,15 +183,14 @@ struct KeychainCoding {
     private func decode(from data: Data) throws -> Int8 {
         switch data.count {
         case MemoryLayout<Int8>.size:
-            return data.reduce(into: 0) { result, current in
-                result = (result << 8) | Int8(current)
-            }
+            let storage = data.withUnsafeBytes { $0.load(as: Int8.self) }
+            return storage
         case MemoryLayout<Int16>.size:
-            return Int8(try decode(from: data) as Int16)
+            return Int8(clamping: try decode(from: data) as Int16)
         case MemoryLayout<Int32>.size:
-            return Int8(try decode(from: data) as Int32)
+            return Int8(clamping: try decode(from: data) as Int32)
         case MemoryLayout<Int64>.size:
-            return Int8(try decode(from: data) as Int64)
+            return Int8(clamping: try decode(from: data) as Int64)
         default:
             throw KeychainError.generalDecodingFailure
         }
@@ -200,15 +199,14 @@ struct KeychainCoding {
     private func decode(from data: Data) throws -> Int16 {
         switch data.count {
         case MemoryLayout<Int8>.size:
-            return Int16(try decode(from: data) as Int8)
+            return Int16(clamping: try decode(from: data) as Int8)
         case MemoryLayout<Int16>.size:
-            return data.reduce(into: 0) { result, current in
-                result = (result << 8) | Int16(current)
-            }
+            let storage = data.withUnsafeBytes { $0.load(as: Int16.self) }
+            return storage
         case MemoryLayout<Int32>.size:
-            return Int16(try decode(from: data) as Int32)
+            return Int16(clamping: try decode(from: data) as Int32)
         case MemoryLayout<Int64>.size:
-            return Int16(try decode(from: data) as Int64)
+            return Int16(clamping: try decode(from: data) as Int64)
         default:
             throw KeychainError.generalDecodingFailure
         }
@@ -217,15 +215,14 @@ struct KeychainCoding {
     private func decode(from data: Data) throws -> Int32 {
         switch data.count {
         case MemoryLayout<Int8>.size:
-            return Int32(try decode(from: data) as Int8)
+            return Int32(clamping: try decode(from: data) as Int8)
         case MemoryLayout<Int16>.size:
-            return Int32(try decode(from: data) as Int16)
+            return Int32(clamping: try decode(from: data) as Int16)
         case MemoryLayout<Int32>.size:
-            return data.reduce(into: 0) { result, current in
-                result = (result << 8) | Int32(current)
-            }
+            let storage = data.withUnsafeBytes { $0.load(as: Int32.self) }
+            return storage
         case MemoryLayout<Int64>.size:
-            return Int32(try decode(from: data) as Int64)
+            return Int32(clamping: try decode(from: data) as Int64)
         default:
             throw KeychainError.generalDecodingFailure
         }
@@ -234,15 +231,14 @@ struct KeychainCoding {
     private func decode(from data: Data) throws -> Int64 {
         switch data.count {
         case MemoryLayout<Int8>.size:
-            return Int64(try decode(from: data) as Int8)
+            return Int64(clamping: try decode(from: data) as Int8)
         case MemoryLayout<Int16>.size:
-            return Int64(try decode(from: data) as Int16)
+            return Int64(clamping: try decode(from: data) as Int16)
         case MemoryLayout<Int32>.size:
-            return Int64(try decode(from: data) as Int32)
+            return Int64(clamping: try decode(from: data) as Int32)
         case MemoryLayout<Int64>.size:
-            return data.reduce(into: 0) { result, current in
-                result = (result << 8) | Int64(current)
-            }
+            let storage = data.withUnsafeBytes { $0.load(as: Int64.self) }
+            return storage
         default:
             throw KeychainError.generalDecodingFailure
         }
@@ -266,9 +262,8 @@ struct KeychainCoding {
     private func decode(from data: Data) throws -> UInt8 {
         switch data.count {
         case MemoryLayout<UInt8>.size:
-            return data.reduce(into: 0) { result, current in
-                result = (result << 8) | UInt8(current)
-            }
+            let storage = data.withUnsafeBytes { $0.load(as: UInt8.self) }
+            return storage
         case MemoryLayout<UInt16>.size:
             return UInt8(try decode(from: data) as UInt16)
         case MemoryLayout<UInt32>.size:
@@ -285,9 +280,8 @@ struct KeychainCoding {
         case MemoryLayout<UInt8>.size:
             return UInt16(try decode(from: data) as UInt8)
         case MemoryLayout<UInt16>.size:
-            return data.reduce(into: 0) { result, current in
-                result = (result << 8) | UInt16(current)
-            }
+            let storage = data.withUnsafeBytes { $0.load(as: UInt16.self) }
+            return storage
         case MemoryLayout<UInt32>.size:
             return UInt16(try decode(from: data) as UInt32)
         case MemoryLayout<UInt64>.size:
@@ -304,9 +298,8 @@ struct KeychainCoding {
         case MemoryLayout<UInt16>.size:
             return UInt32(try decode(from: data) as UInt16)
         case MemoryLayout<UInt32>.size:
-            return data.reduce(into: 0) { result, current in
-                result = (result << 8) | UInt32(current)
-            }
+            let storage = data.withUnsafeBytes { $0.load(as: UInt32.self) }
+            return storage
         case MemoryLayout<UInt64>.size:
             return UInt32(try decode(from: data) as UInt64)
         default:
@@ -323,9 +316,8 @@ struct KeychainCoding {
         case MemoryLayout<UInt32>.size:
             return UInt64(try decode(from: data) as UInt32)
         case MemoryLayout<UInt64>.size:
-            return data.reduce(into: 0) { result, current in
-                result = (result << 8) | UInt64(current)
-            }
+            let storage = data.withUnsafeBytes { $0.load(as: UInt64.self) }
+            return storage
         default:
             throw KeychainError.generalDecodingFailure
         }

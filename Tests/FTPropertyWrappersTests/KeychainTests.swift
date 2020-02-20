@@ -14,10 +14,10 @@ struct KeychainTester {
     }
 }
 
+
 final class KeychainTests: XCTestCase {
 
-    @available(OSX 10.15, *)
-    func testKeychainPlayground() {
+    func testGenericExample() {
         var tester = KeychainTester()
 
         tester.myElement = nil
@@ -48,10 +48,8 @@ final class KeychainTests: XCTestCase {
     override func tearDown() {
     }
 
-
-    @available(OSX 10.15, *)
     static var allTests = [
-        ("testKeychainPlayground", testKeychainPlayground)
+        ("testGenericExample", testGenericExample)
     ]
 }
 
