@@ -1,43 +1,75 @@
 import XCTest
 @testable import FTPropertyWrappers
 
-struct KeychainTester {
-    @GenericPassword(serviceIdentifier: "app.futured.test.element") var myElement: String?
-    @GenericPassword(serviceIdentifier: "app.futured.test.element") var mirror: String?
-
-    var wrapperE: GenericPassword<String> {
-        _myElement
-    }
-
-    var wrapperM: GenericPassword<String> {
-        _mirror
-    }
-}
-
-
 final class KeychainTests: XCTestCase {
 
-    func testGenericExample() {
-        var tester = KeychainTester()
+    /*
+     *  Notice: Accesible and AccessControl are not being tested in unit tests.
+     *  Those features are implemented in example apps.
+     */
 
-        tester.myElement = nil
-        tester.wrapperE.comment = "Ahoj Miki !!!"
+    func testAttribute_kSecAttrDescription() {
 
-        do {
-            try tester.wrapperE.loadFromKeychain()
-        } catch {
-            print(error)
-        }
-        tester.myElement = "Miki"
+    }
 
-        do {
-            try tester.wrapperM.loadFromKeychain()
-        } catch {
-            print(error)
-        }
+    func testAttribute_kSecAttrComment() {
 
-        print(tester.mirror)
-        print(tester.wrapperM.comment)
+    }
+
+    func testAttribute_kSecAttrCreator() {
+
+    }
+
+    func testAttribute_kSecAttrType() {
+
+    }
+
+    func testAttribute_kSecAttrLabel() {
+
+    }
+
+    func testAttribute_kSecAttrIsInvisible() {
+
+    }
+
+    func testAttribute_kSecAttrCreationDate() {
+
+    }
+
+    func testAttribute_kSecAttrModificationDate() {
+
+    }
+
+    func testAttribute_kSecAttrSecurityDomain() {
+
+    }
+
+    func testAttribute_kSecAttrProtocol() {
+
+    }
+
+    func testAttribute_kSecAttrAuthenticationType() {
+
+    }
+
+    func testAttribute_kSecAttrPort() {
+
+    }
+
+    func testAttribute_kSecAttrPath() {
+
+    }
+
+    func testSubclassingInternetPasswordAndModifyPrimaryKey() {
+
+    }
+
+    func testGenericStorage() {
+
+    }
+
+    func testInternetStorage() {
+
     }
 
     override func setUp() {
@@ -49,7 +81,22 @@ final class KeychainTests: XCTestCase {
     }
 
     static var allTests = [
-        ("testGenericExample", testGenericExample)
+        ("testAttribute_kSecAttrDescription", testAttribute_kSecAttrDescription),
+        ("testAttribute_kSecAttrComment", testGenericExample),
+        ("testAttribute_kSecAttrCreator", testAttribute_kSecAttrCreator),
+        ("testAttribute_kSecAttrType", testAttribute_kSecAttrType),
+        ("testAttribute_kSecAttrLabel", testAttribute_kSecAttrLabel),
+        ("testAttribute_kSecAttrIsInvisible", testAttribute_kSecAttrIsInvisible),
+        ("testAttribute_kSecAttrCreationDate", testAttribute_kSecAttrCreationDate),
+        ("testAttribute_kSecAttrModificationDate", testAttribute_kSecAttrModificationDate),
+        ("testAttribute_kSecAttrSecurityDomain", testAttribute_kSecAttrSecurityDomain),
+        ("testAttribute_kSecAttrProtocol", testAttribute_kSecAttrProtocol),
+        ("testAttribute_kSecAttrAuthenticationType", testAttribute_kSecAttrAuthenticationType),
+        ("testAttribute_kSecAttrPort", testAttribute_kSecAttrPort),
+        ("testAttribute_kSecAttrPath", testAttribute_kSecAttrPath),
+        ("testSubclassingInternetPasswordAndModifyPrimaryKey", testSubclassingInternetPasswordAndModifyPrimaryKey),
+        ("testGenericStorage", testGenericStorage),
+        ("testInternetStorage", testInternetStorage),
     ]
 }
 
