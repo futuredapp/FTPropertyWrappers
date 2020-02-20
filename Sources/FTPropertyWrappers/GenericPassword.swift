@@ -3,6 +3,7 @@ import Foundation
 @propertyWrapper
 open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
 
+    @QueryElement(key: kSecAttrAccount) open var account: String?
     @QueryElement(key: kSecAttrService) open var service: String?
     @QueryElement(key: kSecAttrAccessControl,
                   constraints: [.override(kSecAttrAccessible)]) open private(set) var accessControl: SecAccessControl?

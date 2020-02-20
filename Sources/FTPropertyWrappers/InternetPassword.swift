@@ -2,7 +2,8 @@ import Foundation
 
 @propertyWrapper
 open class InternetPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
-    
+
+    @QueryElement(key: kSecAttrAccount) open var account: String?
     @QueryElement(key: kSecAttrServer) open var server: String?
     @QueryElement(key: kSecAttrSecurityDomain) open var domain: String?
     @QueryElement(key: kSecAttrProtocol) open var aProtocol: String?

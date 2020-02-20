@@ -5,13 +5,10 @@ open class SingleValueKeychainItem {
     // MARK: Properties
     @QueryElement(key: kSecAttrDescription) open var description: String?
     @QueryElement(key: kSecAttrComment) open var comment: String?
-    @QueryElement(key: kSecAttrCreator) open var creator: String?
+    @QueryElement(key: kSecAttrCreator) open var creator: UInt64?
     @QueryElement(key: kSecAttrType) open var type: UInt64?
     @QueryElement(key: kSecAttrLabel) open var label: String?
     @QueryElement(key: kSecAttrIsInvisible) open var isInvisible: Bool?
-    @QueryElement(key: kSecAttrIsNegative) open var isNegative: Bool?
-    @QueryElement(key: kSecAttrAccount) open var account: String?
-    @QueryElement(key: kSecAttrSynchronizable) open var synchronizable: Bool?
     
     @QueryElement(key: kSecAttrAccessible) private var _raw_accesible: CFString?
     open var accesible: AccesibleOption? {
