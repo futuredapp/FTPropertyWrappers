@@ -11,7 +11,7 @@ open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
 
     public let refreshPolicy: KeychainDataRefreshPolicy
 
-    public private(set) var wrappedValueHasUnsavedChanges = false
+    public private(set) var wrappedValueUnchanged = false
 
     open var wrappedValue: T? {
         get {
@@ -31,15 +31,15 @@ open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
             switch refreshPolicy {
             case .manual:
                 cachedValue = newValue
-                wrappedValueHasUnsavedChanges = false
+                wrappedValueUnchanged = false
             case .onAccess:
                 cachedValue = newValue
                 do {
                     try saveToKeychain()
-                    wrappedValueHasUnsavedChanges = true
+                    wrappedValueUnchanged = true
                 } catch {
                     print("Error saving \(self) into keychain: \(error)")
-                    wrappedValueHasUnsavedChanges = false
+                    wrappedValueUnchanged = false
                 }
             }
         }
@@ -82,22 +82,24 @@ open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
             try executeUpdateQuery()
         }
 
-        wrappedValueHasUnsavedChanges = true
+        wrappedValueUnchanged = true
 
     }
 
     open func loadFromKeychain() throws {
+        resetQueryElementsExcludedKeys()
         do {
             try executeFetchQuery()
         } catch KeychainError.osSecureNoSuchItem {
             cachedValue = nil
         }
-        wrappedValueHasUnsavedChanges = true
+        wrappedValueUnchanged = true
     }
 
     open func deleteKeychain() throws {
         try executeDeleteQuery()
         cachedValue = nil
-        wrappedValueHasUnsavedChanges = true
+        resetQueryElementsExcludedKeys()
+        wrappedValueUnchanged = true
     }
 }

@@ -42,15 +42,19 @@ open class SingleValueKeychainItem {
             guard let element = child.value as? WrappedConfiguringElement, !element.readOnly else {
                 return
             }
-            elements[element.key] = element.wrappedAsAnonymous ?? elements[element.key]
-            element.constraints.forEach { constraint in
-                switch constraint {
-                case .overridenBy(let attribute):
-                    conditionalUnset += [(element.key, attribute as String)]
-                case .override(let attribute):
-                    willUnset.insert(attribute as String)
+            let value = element.wrappedAsAnonymous
+            if value != nil {
+                element.constraints.forEach { constraint in
+                    switch constraint {
+                    case .overridenBy(let attribute):
+                        conditionalUnset += [(element.key, attribute as String)]
+                    case .override(let attribute):
+                        willUnset.insert(attribute as String)
+                    }
                 }
             }
+
+            elements[element.key] = value ?? elements[element.key]
         }
 
         conditionalUnset.compactMap { elements[$0.ifPresent] != nil ? $0.unset : nil }.forEach { willUnset.insert($0) }
@@ -71,6 +75,15 @@ open class SingleValueKeychainItem {
             itemData = data
         } else {
             print("FTPropertyWrappers KeychainItem insertQuery: warning: update request without data")
+        }
+    }
+
+    func resetQueryElementsExcludedKeys() {
+        Mirror(reflecting: self).forEachChildInClassHiearchy { child in
+            guard var element = child.value as? WrappedConfiguringElement, !primaryKey.contains(element.key) else {
+                return
+            }
+            element.wrappedAsAnonymous = nil
         }
     }
 
@@ -123,6 +136,7 @@ open class SingleValueKeychainItem {
         guard status == errSecSuccess else {
             throw KeychainError(fromOSStatus: status)
         }
+        
         guard let response = item as? [String: Any] else {
             throw KeychainError.unexpectedFormat
         }
@@ -131,9 +145,9 @@ open class SingleValueKeychainItem {
     }
 
     func executeUpdateQuery() throws {
-        let fetchQuery = updateFetchQuery
-        let attributeQuery = updateAttributesQuery.filter { key, value in fetchQuery[key] == nil }
-        let status = SecItemUpdate(fetchQuery as CFDictionary, attributeQuery as CFDictionary)
+        let fetchQuery = updateFetchQuery as CFDictionary
+        let attributeQuery = updateAttributesQuery.filter { key, value in fetchQuery[key] == nil } as CFDictionary
+        let status = SecItemUpdate(fetchQuery, attributeQuery)
 
         guard status == errSecSuccess else {
             throw KeychainError(fromOSStatus: status)

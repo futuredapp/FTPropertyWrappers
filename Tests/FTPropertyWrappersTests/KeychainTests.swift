@@ -16,6 +16,7 @@ final class KeychainTests: XCTestCase {
         var storeB = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .manual)
 
         try storeA.deleteKeychain()
+        try storeA.loadFromKeychain()
         XCTAssertNil(storeA[keyPath: keyPath])
 
         storeA[keyPath: keyPath] = firstExample
@@ -27,6 +28,8 @@ final class KeychainTests: XCTestCase {
         try storeB.loadFromKeychain()
         XCTAssertEqual(storeA[keyPath: keyPath], firstExample)
         XCTAssertEqual(storeB[keyPath: keyPath], firstExample)
+        XCTAssertNotNil(storeA.wrappedValue)
+        XCTAssertNotNil(storeB.wrappedValue)
 
         storeB[keyPath: keyPath] = secondExample
         storeB.wrappedValue = "B".data(using: .ascii)!
@@ -38,18 +41,26 @@ final class KeychainTests: XCTestCase {
         try storeA.loadFromKeychain()
         XCTAssertEqual(storeA[keyPath: keyPath], secondExample)
         XCTAssertEqual(storeB[keyPath: keyPath], secondExample)
+        XCTAssertNotNil(storeA.wrappedValue)
+        XCTAssertNotNil(storeB.wrappedValue)
 
         storeA[keyPath: keyPath] = nil
         try storeB.loadFromKeychain()
         XCTAssertNil(storeA[keyPath: keyPath])
         XCTAssertEqual(storeB[keyPath: keyPath], secondExample)
+        XCTAssertNotNil(storeA.wrappedValue)
+        XCTAssertNotNil(storeB.wrappedValue)
 
+        storeA[keyPath: keyPath] = nil
         try storeA.saveToKeychain()
+        try storeA.loadFromKeychain()
         try storeB.loadFromKeychain()
-        XCTAssertNil(storeA[keyPath: keyPath])
-        XCTAssertNil(storeB[keyPath: keyPath])
+        XCTAssertEqual(storeB[keyPath: keyPath], secondExample)
+        XCTAssertEqual(storeB[keyPath: keyPath], secondExample)
+        XCTAssertNotNil(storeA.wrappedValue)
+        XCTAssertNotNil(storeB.wrappedValue)
 
-        storeA.wrappedValue = nil
+        try storeA.deleteKeychain()
         try storeB.loadFromKeychain()
         XCTAssertNil(storeA[keyPath: keyPath])
         XCTAssertNil(storeA.wrappedValue)
@@ -62,6 +73,7 @@ final class KeychainTests: XCTestCase {
         var storeB = InternetPassword<Data>(serverIdentifier: path + ".i", refreshPolicy: .manual)
 
         try storeA.deleteKeychain()
+        try storeA.loadFromKeychain()
         XCTAssertNil(storeA[keyPath: keyPath])
 
         storeA[keyPath: keyPath] = firstExample
@@ -73,6 +85,8 @@ final class KeychainTests: XCTestCase {
         try storeB.loadFromKeychain()
         XCTAssertEqual(storeA[keyPath: keyPath], firstExample)
         XCTAssertEqual(storeB[keyPath: keyPath], firstExample)
+        XCTAssertNotNil(storeA.wrappedValue)
+        XCTAssertNotNil(storeB.wrappedValue)
 
         storeB[keyPath: keyPath] = secondExample
         storeB.wrappedValue = "B".data(using: .ascii)!
@@ -84,18 +98,27 @@ final class KeychainTests: XCTestCase {
         try storeA.loadFromKeychain()
         XCTAssertEqual(storeA[keyPath: keyPath], secondExample)
         XCTAssertEqual(storeB[keyPath: keyPath], secondExample)
+        XCTAssertNotNil(storeA.wrappedValue)
+        XCTAssertNotNil(storeB.wrappedValue)
 
         storeA[keyPath: keyPath] = nil
         try storeB.loadFromKeychain()
         XCTAssertNil(storeA[keyPath: keyPath])
         XCTAssertEqual(storeB[keyPath: keyPath], secondExample)
+        XCTAssertNotNil(storeA.wrappedValue)
+        XCTAssertNotNil(storeB.wrappedValue)
 
+        storeA[keyPath: keyPath] = nil
+        storeB[keyPath: keyPath] = nil
         try storeA.saveToKeychain()
+        try storeA.loadFromKeychain()
         try storeB.loadFromKeychain()
-        XCTAssertNil(storeA[keyPath: keyPath])
-        XCTAssertNil(storeB[keyPath: keyPath])
+        XCTAssertEqual(storeB[keyPath: keyPath], secondExample)
+        XCTAssertEqual(storeB[keyPath: keyPath], secondExample)
+        XCTAssertNotNil(storeA.wrappedValue)
+        XCTAssertNotNil(storeB.wrappedValue)
 
-        storeA.wrappedValue = nil
+        try storeA.deleteKeychain()
         try storeB.loadFromKeychain()
         XCTAssertNil(storeA[keyPath: keyPath])
         XCTAssertNil(storeA.wrappedValue)
@@ -105,12 +128,12 @@ final class KeychainTests: XCTestCase {
 
     func testAttribute_kSecAttrDescription() {
         XCTAssertNoThrow(try testLoadingSequence(keyPath: \GenericPassword.description, firstExample: "Hello", secondExample: "World"))
-        //XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.description, firstExample: "Hello", secondExample: "World"))
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.description, firstExample: "Hello", secondExample: "World"))
     }
 
     func testAttribute_kSecAttrComment() {
         XCTAssertNoThrow(try testLoadingSequence(keyPath: \GenericPassword.comment, firstExample: "Hello", secondExample: "World"))
-        //XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.comment, firstExample: "Hello", secondExample: "World"))
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.comment, firstExample: "Hello", secondExample: "World"))
     }
 
     func testAttribute_kSecAttrCreator() {
@@ -162,15 +185,14 @@ final class KeychainTests: XCTestCase {
     }
 
     func testGenericStorage() {
-        var storeA = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .onAccess)
-        var storeB = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .manual)
+        let storeA = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .onAccess)
+        let storeB = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .manual)
 
         try! storeA.deleteKeychain()
 
         storeA.wrappedValue = "🌞".data(using: .utf8)!
         XCTAssertNoThrow(try storeB.loadFromKeychain())
         XCTAssertEqual(storeA.wrappedValue, storeB.wrappedValue)
-
 
         storeA.wrappedValue = "🌚".data(using: .utf8)!
         XCTAssertNoThrow(try storeB.loadFromKeychain())
@@ -180,17 +202,32 @@ final class KeychainTests: XCTestCase {
         XCTAssertNoThrow(try storeB.saveToKeychain())
         XCTAssertEqual(storeA.wrappedValue, storeB.wrappedValue)
 
-
         XCTAssertNoThrow(try storeA.deleteKeychain())
     }
 
     func testInternetStorage() {
+        let storeA = InternetPassword<Data>(serverIdentifier: path + ".i", refreshPolicy: .onAccess)
+        let storeB = InternetPassword<Data>(serverIdentifier: path + ".i", refreshPolicy: .manual)
 
+        try! storeA.deleteKeychain()
+
+        storeA.wrappedValue = "🌞".data(using: .utf8)!
+        XCTAssertNoThrow(try storeB.loadFromKeychain())
+        XCTAssertEqual(storeA.wrappedValue, storeB.wrappedValue)
+
+        storeA.wrappedValue = "🌚".data(using: .utf8)!
+        XCTAssertNoThrow(try storeB.loadFromKeychain())
+        XCTAssertEqual(storeA.wrappedValue, storeB.wrappedValue)
+
+        storeB.wrappedValue = "🌜".data(using: .utf8)!
+        XCTAssertNoThrow(try storeB.saveToKeychain())
+        XCTAssertEqual(storeA.wrappedValue, storeB.wrappedValue)
+
+        XCTAssertNoThrow(try storeA.deleteKeychain())
     }
 
     override func setUp() {
         super.setUp()
-
     }
 
     override func tearDown() {
