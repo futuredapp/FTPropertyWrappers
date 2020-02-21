@@ -2,7 +2,8 @@ import Foundation
 
 open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
 
-    private var coder = KeychainCoding()
+    private var encoder = KeychainEncoder()
+    private var decoder = KeychainDecoder()
 
     private var defaultValue: T?
 
@@ -48,10 +49,21 @@ open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
 
     override open var itemData: Data {
         get {
-            return try! coder.encode(cachedValue!)
+            do {
+                return try encoder.encode(cachedValue!)
+            } catch {
+                print("FTPropertyWrappers KeychainItemPropertyWrapper encoding: error: \(error)")
+                return Data()
+            }
         }
         set {
-            cachedValue = try! coder.decode(T.self, from: newValue)
+            do {
+                cachedValue = try decoder.decode(T.self, from: newValue)
+            } catch {
+                print("FTPropertyWrappers KeychainItemPropertyWrapper decoding: error: \(error)")
+                cachedValue = nil
+            }
+
         }
     }
 

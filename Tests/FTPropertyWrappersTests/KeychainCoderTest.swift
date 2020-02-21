@@ -10,14 +10,11 @@ final class KeychainCoderTest: XCTestCase {
             self.wrapped = wrapped
         }
         func testCoding() throws {
-            let coder = KeychainCoding()
-            let data = try coder.encode(wrapped)
-            XCTAssertEqual(try coder.decode(T.self, from: data), wrapped)
+            let encoder = KeychainEncoder()
+            let decoder = KeychainDecoder()
+            let data = try encoder.encode(wrapped)
+            XCTAssertEqual(try decoder.decode(T.self, from: data), wrapped)
         }
-    }
-
-    private func assertCoding<T: Codable & Equatable>(input: T) throws {
-        try WrapperClass(wrapped: input).testCoding()
     }
 
     private func assertNoThrow(_ block: () throws -> ()) {
@@ -26,58 +23,58 @@ final class KeychainCoderTest: XCTestCase {
 
     func testIntegers() {
         assertNoThrow {
-            try assertCoding(input: Int(0))
-            try assertCoding(input: Int.max)
-            try assertCoding(input: Int.min)
+            try WrapperClass(wrapped: Int(0)).testCoding()
+            try WrapperClass(wrapped: Int.max).testCoding()
+            try WrapperClass(wrapped: Int.min).testCoding()
 
-            try assertCoding(input: Int8(0))
-            try assertCoding(input: Int8.max)
-            try assertCoding(input: Int8.min)
+            try WrapperClass(wrapped: Int8(0)).testCoding()
+            try WrapperClass(wrapped: Int8.max).testCoding()
+            try WrapperClass(wrapped: Int8.min).testCoding()
 
-            try assertCoding(input: Int(0))
-            try assertCoding(input: Int16.max)
-            try assertCoding(input: Int16.min)
+            try WrapperClass(wrapped: Int(0)).testCoding()
+            try WrapperClass(wrapped: Int16.max).testCoding()
+            try WrapperClass(wrapped: Int16.min).testCoding()
 
-            try assertCoding(input: Int32(0))
-            try assertCoding(input: Int32.max)
-            try assertCoding(input: Int32.min)
+            try WrapperClass(wrapped: Int32(0)).testCoding()
+            try WrapperClass(wrapped: Int32.max).testCoding()
+            try WrapperClass(wrapped: Int32.min).testCoding()
 
-            try assertCoding(input: Int64(0))
-            try assertCoding(input: Int64.max)
-            try assertCoding(input: Int64.min)
+            try WrapperClass(wrapped: Int64(0)).testCoding()
+            try WrapperClass(wrapped: Int64.max).testCoding()
+            try WrapperClass(wrapped: Int64.min).testCoding()
         }
     }
 
     func testUnsigned() {
         assertNoThrow {
-            try assertCoding(input: UInt.max)
-            try assertCoding(input: UInt.min)
+            try WrapperClass(wrapped: UInt.max).testCoding()
+            try WrapperClass(wrapped: UInt.min).testCoding()
 
-            try assertCoding(input: UInt8.max)
-            try assertCoding(input: UInt8.min)
+            try WrapperClass(wrapped: UInt8.max).testCoding()
+            try WrapperClass(wrapped: UInt8.min).testCoding()
 
-            try assertCoding(input: UInt16.max)
-            try assertCoding(input: UInt16.min)
+            try WrapperClass(wrapped: UInt16.max).testCoding()
+            try WrapperClass(wrapped: UInt16.min).testCoding()
 
-            try assertCoding(input: UInt32.max)
-            try assertCoding(input: UInt32.min)
+            try WrapperClass(wrapped: UInt32.max).testCoding()
+            try WrapperClass(wrapped: UInt32.min).testCoding()
 
-            try assertCoding(input: UInt64.max)
-            try assertCoding(input: UInt64.min)
+            try WrapperClass(wrapped: UInt64.max).testCoding()
+            try WrapperClass(wrapped: UInt64.min).testCoding()
         }
     }
 
     func testBool() {
         assertNoThrow {
-            try assertCoding(input: true)
-            try assertCoding(input: false)
+            try WrapperClass(wrapped: true).testCoding()
+            try WrapperClass(wrapped: false).testCoding()
         }
     }
 
     func testString() {
         assertNoThrow {
-            try assertCoding(input: "Hello world")
-            try assertCoding(input: "👋 🌎")
+            try WrapperClass(wrapped: "Hello world").testCoding()
+            try WrapperClass(wrapped: "👋 🌎").testCoding()
         }
     }
 
@@ -86,15 +83,15 @@ final class KeychainCoderTest: XCTestCase {
             let url1 = URL(string: "https://google.com/")!
             let url2 = URL(string: "../../hello/world/file.txt")!
             let url3 = URL(string: "/hello/world/file.txt")!
-            try assertCoding(input: url1)
-            try assertCoding(input: url2)
-            try assertCoding(input: url3)
+            try WrapperClass(wrapped: url1).testCoding()
+            try WrapperClass(wrapped: url2).testCoding()
+            try WrapperClass(wrapped: url3).testCoding()
         }
     }
 
     func testData() {
         assertNoThrow {
-            try assertCoding(input: "Hello World!".data(using: .utf8)!)
+            try WrapperClass(wrapped: "Hello World!".data(using: .utf8)!).testCoding()
         }
     }
 
@@ -106,14 +103,14 @@ final class KeychainCoderTest: XCTestCase {
 
     func testCodable() {
         assertNoThrow {
-            try assertCoding(input: MyCodable(abc: 15, cde: "Hello world!", def: nil))
+            try WrapperClass(wrapped: MyCodable(abc: 15, cde: "Hello world!", def: nil)).testCoding()
         }
     }
 
     func testCollections() {
         assertNoThrow {
-            try assertCoding(input: ["Hello", "My", "World", "!"])
-            try assertCoding(input: Set(["Hello", "My", "World", "!"]))
+            try WrapperClass(wrapped: ["Hello", "My", "World", "!"]).testCoding()
+            try WrapperClass(wrapped: Set(["Hello", "My", "World", "!"])).testCoding()
         }
     }
 
