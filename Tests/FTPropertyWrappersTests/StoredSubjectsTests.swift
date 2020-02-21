@@ -39,6 +39,6 @@ final class StoredSubjectTests: XCTestCase {
 
     static var allTests = [
         ("testStoredSubjectObserving", testStoredSubjectObserving),
-        ("testStoredSubjectDisposing", testStoredSubjectDisposing),
+        ("testStoredSubjectDisposing", testStoredSubjectDisposing)
     ]
 }

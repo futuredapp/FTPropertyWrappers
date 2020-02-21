@@ -1,4 +1,3 @@
-
 public typealias Subscription<Value> = (_ oldValue: Value, _ newValue: Value) -> Void
 
 public final class DisposeBag {

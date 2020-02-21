@@ -1,87 +1,102 @@
 import XCTest
 @testable import FTPropertyWrappers
 
-struct KeychainStorageTestStruct {
-    @KeychainStore(key: "tester.number") var number: Int?
-    @KeychainStore(key: "tester.number") var collection: [Int]?
-}
-
+// TODO: Implement tests
 final class KeychainTests: XCTestCase {
-    func testKeychainBuiltin() {
-        let tester = KeychainStorageTestStruct()
-        XCTAssertNil(tester.number)
-        tester.number = 15
-        XCTAssertEqual(tester.number, 15)
 
-        let tester2 = KeychainStorageTestStruct()
-        XCTAssertEqual(tester2.number, 15)
-        tester2.number = 30
-        XCTAssertEqual(tester.number, 30)
-        XCTAssertEqual(tester2.number, 30)
+    /*
+     *  Notice: Accesible and AccessControl are not being tested in unit tests.
+     *  Those features are implemented in example apps.
+     */
+
+    func testAttribute_kSecAttrDescription() {
 
     }
 
-    func testKeychainCollection() {
-        let tester = KeychainStorageTestStruct()
-        XCTAssertNil(tester.collection)
-        tester.collection = [10, 20, 30]
-        XCTAssertEqual(tester.collection, [10, 20, 30])
-
-        let tester2 = KeychainStorageTestStruct()
-        XCTAssertEqual(tester.collection, [10, 20, 30])
-        tester2.collection?[1] = 50
-        XCTAssertEqual(tester.collection, [10, 50, 30])
-        XCTAssertEqual(tester2.collection, [10, 50, 30])
+    func testAttribute_kSecAttrComment() {
 
     }
 
-    func testKeychainDeletions() {
-        let tester = KeychainStorageTestStruct()
-        XCTAssertNil(tester.collection)
-        XCTAssertNil(tester.number)
+    func testAttribute_kSecAttrCreator() {
 
-        tester.number = 15
-        XCTAssertEqual(tester.number, 15)
+    }
 
-        tester.collection = [10, 20, 30]
-        XCTAssertEqual(tester.collection, [10, 20, 30])
+    func testAttribute_kSecAttrType() {
 
-        XCTAssertNoThrow(try CodableKeychainAdapter.defaultDomain.deleteAll()) 
-        XCTAssertNil(tester.collection)
-        XCTAssertNil(tester.number)
+    }
 
-        tester.number = 15
-        XCTAssertEqual(tester.number, 15)
+    func testAttribute_kSecAttrLabel() {
 
-        tester.collection = [10, 20, 30]
-        XCTAssertEqual(tester.collection, [10, 20, 30])
+    }
 
+    func testAttribute_kSecAttrIsInvisible() {
 
-        tester.number = nil
-        XCTAssertNil(tester.number)
+    }
 
-        tester.collection = nil
-        XCTAssertNil(tester.collection)
+    func testAttribute_kSecAttrCreationDate() {
+
+    }
+
+    func testAttribute_kSecAttrModificationDate() {
+
+    }
+
+    func testAttribute_kSecAttrSecurityDomain() {
+
+    }
+
+    func testAttribute_kSecAttrProtocol() {
+
+    }
+
+    func testAttribute_kSecAttrAuthenticationType() {
+
+    }
+
+    func testAttribute_kSecAttrPort() {
+
+    }
+
+    func testAttribute_kSecAttrPath() {
+
+    }
+
+    func testSubclassingInternetPasswordAndModifyPrimaryKey() {
+
+    }
+
+    func testGenericStorage() {
+
+    }
+
+    func testInternetStorage() {
 
     }
 
     override func setUp() {
         super.setUp()
-        let tidy = KeychainStorageTestStruct()
-        tidy.number = nil
-        tidy.number = nil
+
     }
 
     override func tearDown() {
-        let tidy = KeychainStorageTestStruct()
-        tidy.number = nil
-        tidy.number = nil
     }
 
-
     static var allTests = [
-        ("testKeychainBuiltin", testKeychainBuiltin),
-        ("testKeychainCollection", testKeychainCollection),
-        ("testKeychainDeletions", testKeychainDeletions)
+        ("testAttribute_kSecAttrDescription", testAttribute_kSecAttrDescription),
+        ("testAttribute_kSecAttrComment", testAttribute_kSecAttrComment),
+        ("testAttribute_kSecAttrCreator", testAttribute_kSecAttrCreator),
+        ("testAttribute_kSecAttrType", testAttribute_kSecAttrType),
+        ("testAttribute_kSecAttrLabel", testAttribute_kSecAttrLabel),
+        ("testAttribute_kSecAttrIsInvisible", testAttribute_kSecAttrIsInvisible),
+        ("testAttribute_kSecAttrCreationDate", testAttribute_kSecAttrCreationDate),
+        ("testAttribute_kSecAttrModificationDate", testAttribute_kSecAttrModificationDate),
+        ("testAttribute_kSecAttrSecurityDomain", testAttribute_kSecAttrSecurityDomain),
+        ("testAttribute_kSecAttrProtocol", testAttribute_kSecAttrProtocol),
+        ("testAttribute_kSecAttrAuthenticationType", testAttribute_kSecAttrAuthenticationType),
+        ("testAttribute_kSecAttrPort", testAttribute_kSecAttrPort),
+        ("testAttribute_kSecAttrPath", testAttribute_kSecAttrPath),
+        ("testSubclassingInternetPasswordAndModifyPrimaryKey", testSubclassingInternetPasswordAndModifyPrimaryKey),
+        ("testGenericStorage", testGenericStorage),
+        ("testInternetStorage", testInternetStorage)
     ]
 }
