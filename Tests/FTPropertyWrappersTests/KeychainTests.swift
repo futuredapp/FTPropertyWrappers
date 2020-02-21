@@ -9,12 +9,108 @@ final class KeychainTests: XCTestCase {
      *  Those features are implemented in example apps.
      */
 
-    func testAttribute_kSecAttrDescription() {
+    private let path = "app.futured.ftpropertywrappers.test.keychain"
 
+    private func testLoadingSequence<T: Equatable>(keyPath: WritableKeyPath<GenericPassword<Data>, T?>, firstExample: T, secondExample: T) throws {
+        var storeA = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .onAccess)
+        var storeB = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .manual)
+
+        try storeA.deleteKeychain()
+        XCTAssertNil(storeA[keyPath: keyPath])
+
+        storeA[keyPath: keyPath] = firstExample
+        try storeB.loadFromKeychain()
+        XCTAssertEqual(storeA[keyPath: keyPath], firstExample)
+        XCTAssertNil(storeB[keyPath: keyPath])
+
+        storeA.wrappedValue = "A".data(using: .ascii)!
+        try storeB.loadFromKeychain()
+        XCTAssertEqual(storeA[keyPath: keyPath], firstExample)
+        XCTAssertEqual(storeB[keyPath: keyPath], firstExample)
+
+        storeB[keyPath: keyPath] = secondExample
+        storeB.wrappedValue = "B".data(using: .ascii)!
+        try storeA.loadFromKeychain()
+        XCTAssertEqual(storeA[keyPath: keyPath], firstExample)
+        XCTAssertEqual(storeB[keyPath: keyPath], secondExample)
+
+        try storeB.saveToKeychain()
+        try storeA.loadFromKeychain()
+        XCTAssertEqual(storeA[keyPath: keyPath], secondExample)
+        XCTAssertEqual(storeB[keyPath: keyPath], secondExample)
+
+        storeA[keyPath: keyPath] = nil
+        try storeB.loadFromKeychain()
+        XCTAssertNil(storeA[keyPath: keyPath])
+        XCTAssertEqual(storeB[keyPath: keyPath], secondExample)
+
+        try storeA.saveToKeychain()
+        try storeB.loadFromKeychain()
+        XCTAssertNil(storeA[keyPath: keyPath])
+        XCTAssertNil(storeB[keyPath: keyPath])
+
+        storeA.wrappedValue = nil
+        try storeB.loadFromKeychain()
+        XCTAssertNil(storeA[keyPath: keyPath])
+        XCTAssertNil(storeA.wrappedValue)
+        XCTAssertNil(storeB[keyPath: keyPath])
+        XCTAssertNil(storeB.wrappedValue)
+    }
+
+    private func testLoadingSequence<T: Equatable>(keyPath: WritableKeyPath<InternetPassword<Data>, T?>, firstExample: T, secondExample: T) throws {
+        var storeA = InternetPassword<Data>(serverIdentifier: path + ".i", refreshPolicy: .onAccess)
+        var storeB = InternetPassword<Data>(serverIdentifier: path + ".i", refreshPolicy: .manual)
+
+        try storeA.deleteKeychain()
+        XCTAssertNil(storeA[keyPath: keyPath])
+
+        storeA[keyPath: keyPath] = firstExample
+        try storeB.loadFromKeychain()
+        XCTAssertEqual(storeA[keyPath: keyPath], firstExample)
+        XCTAssertNil(storeB[keyPath: keyPath])
+
+        storeA.wrappedValue = "A".data(using: .ascii)!
+        try storeB.loadFromKeychain()
+        XCTAssertEqual(storeA[keyPath: keyPath], firstExample)
+        XCTAssertEqual(storeB[keyPath: keyPath], firstExample)
+
+        storeB[keyPath: keyPath] = secondExample
+        storeB.wrappedValue = "B".data(using: .ascii)!
+        try storeA.loadFromKeychain()
+        XCTAssertEqual(storeA[keyPath: keyPath], firstExample)
+        XCTAssertEqual(storeB[keyPath: keyPath], secondExample)
+
+        try storeB.saveToKeychain()
+        try storeA.loadFromKeychain()
+        XCTAssertEqual(storeA[keyPath: keyPath], secondExample)
+        XCTAssertEqual(storeB[keyPath: keyPath], secondExample)
+
+        storeA[keyPath: keyPath] = nil
+        try storeB.loadFromKeychain()
+        XCTAssertNil(storeA[keyPath: keyPath])
+        XCTAssertEqual(storeB[keyPath: keyPath], secondExample)
+
+        try storeA.saveToKeychain()
+        try storeB.loadFromKeychain()
+        XCTAssertNil(storeA[keyPath: keyPath])
+        XCTAssertNil(storeB[keyPath: keyPath])
+
+        storeA.wrappedValue = nil
+        try storeB.loadFromKeychain()
+        XCTAssertNil(storeA[keyPath: keyPath])
+        XCTAssertNil(storeA.wrappedValue)
+        XCTAssertNil(storeB[keyPath: keyPath])
+        XCTAssertNil(storeB.wrappedValue)
+    }
+
+    func testAttribute_kSecAttrDescription() {
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \GenericPassword.description, firstExample: "Hello", secondExample: "World"))
+        //XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.description, firstExample: "Hello", secondExample: "World"))
     }
 
     func testAttribute_kSecAttrComment() {
-
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \GenericPassword.comment, firstExample: "Hello", secondExample: "World"))
+        //XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.comment, firstExample: "Hello", secondExample: "World"))
     }
 
     func testAttribute_kSecAttrCreator() {
@@ -66,7 +162,26 @@ final class KeychainTests: XCTestCase {
     }
 
     func testGenericStorage() {
+        var storeA = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .onAccess)
+        var storeB = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .manual)
 
+        try! storeA.deleteKeychain()
+
+        storeA.wrappedValue = "🌞".data(using: .utf8)!
+        XCTAssertNoThrow(try storeB.loadFromKeychain())
+        XCTAssertEqual(storeA.wrappedValue, storeB.wrappedValue)
+
+
+        storeA.wrappedValue = "🌚".data(using: .utf8)!
+        XCTAssertNoThrow(try storeB.loadFromKeychain())
+        XCTAssertEqual(storeA.wrappedValue, storeB.wrappedValue)
+
+        storeB.wrappedValue = "🌜".data(using: .utf8)!
+        XCTAssertNoThrow(try storeB.saveToKeychain())
+        XCTAssertEqual(storeA.wrappedValue, storeB.wrappedValue)
+
+
+        XCTAssertNoThrow(try storeA.deleteKeychain())
     }
 
     func testInternetStorage() {

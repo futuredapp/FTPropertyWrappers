@@ -39,7 +39,7 @@ open class SingleValueKeychainItem {
         var conditionalUnset: [(ifPresent: String, unset: String)] = []
 
         Mirror(reflecting: self).forEachChildInClassHiearchy { child in
-            guard let element = child.value as? WrappedConfiguringElement else {
+            guard let element = child.value as? WrappedConfiguringElement, !element.readOnly else {
                 return
             }
             elements[element.key] = element.wrappedAsAnonymous ?? elements[element.key]
@@ -131,7 +131,9 @@ open class SingleValueKeychainItem {
     }
 
     func executeUpdateQuery() throws {
-        let status = SecItemUpdate(updateFetchQuery as CFDictionary, updateAttributesQuery as CFDictionary)
+        let fetchQuery = updateFetchQuery
+        let attributeQuery = updateAttributesQuery.filter { key, value in fetchQuery[key] == nil }
+        let status = SecItemUpdate(fetchQuery as CFDictionary, attributeQuery as CFDictionary)
 
         guard status == errSecSuccess else {
             throw KeychainError(fromOSStatus: status)

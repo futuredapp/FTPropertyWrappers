@@ -12,6 +12,7 @@ extension Mirror {
 protocol WrappedConfiguringElement {
     var constraints: [KeychainQueryPresenceConstraint] { get }
     var key: String { get }
+    var readOnly: Bool { get }
     var wrappedAsAnonymous: Any? { get set }
 }
 
@@ -22,11 +23,16 @@ public enum KeychainQueryPresenceConstraint {
 
 @propertyWrapper
 public final class QueryElement<T>: WrappedConfiguringElement {
+
     public var wrappedValue: T?
 
     let key: String
     let readOnly: Bool
     let constraints: [KeychainQueryPresenceConstraint]
+    var wrappedAsAnonymous: Any? {
+        get { wrappedValue }
+        set { wrappedValue = newValue.flatMap {$0 as? T} }
+    }
 
     init(key: CFString, constraints: [KeychainQueryPresenceConstraint] = []) {
         self.key = key as String
@@ -40,10 +46,6 @@ public final class QueryElement<T>: WrappedConfiguringElement {
         self.constraints = []
     }
 
-    var wrappedAsAnonymous: Any? {
-        get { wrappedValue }
-        set { wrappedValue = newValue.flatMap {$0 as? T} }
-    }
 }
 
 public enum KeychainDataRefreshPolicy {
@@ -62,6 +64,7 @@ public enum KeychainError: Error {
     case osSecureBadRequest
     case osSecureUserCancelledAuthentication
     case osSecureMissingEtitlementForThisFeature
+    case osSecureInvalidValue
 
     init(fromOSStatus status: OSStatus) {
         switch status {
@@ -79,6 +82,8 @@ public enum KeychainError: Error {
             self = .osSecureUserCancelledAuthentication
         case errSecMissingEntitlement:
             self = .osSecureMissingEtitlementForThisFeature
+        case errSecInvalidValue:
+            self = .osSecureInvalidValue
         default:
             self = .osSecure(status: status)
         }
