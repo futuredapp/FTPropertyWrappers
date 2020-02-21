@@ -1,6 +1,7 @@
 import XCTest
 @testable import FTPropertyWrappers
 
+// TODO: Implement tests
 final class KeychainTests: XCTestCase {
 
     /*
@@ -69,7 +70,7 @@ final class KeychainTests: XCTestCase {
     }
 
     func testInternetStorage() {
-
+        
     }
 
     override func setUp() {
@@ -82,7 +83,7 @@ final class KeychainTests: XCTestCase {
 
     static var allTests = [
         ("testAttribute_kSecAttrDescription", testAttribute_kSecAttrDescription),
-        ("testAttribute_kSecAttrComment", testGenericExample),
+        ("testAttribute_kSecAttrComment", testAttribute_kSecAttrComment),
         ("testAttribute_kSecAttrCreator", testAttribute_kSecAttrCreator),
         ("testAttribute_kSecAttrType", testAttribute_kSecAttrType),
         ("testAttribute_kSecAttrLabel", testAttribute_kSecAttrLabel),

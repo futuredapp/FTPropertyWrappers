@@ -20,8 +20,12 @@ final class KeychainCoderTest: XCTestCase {
         try WrapperClass(wrapped: input).testCoding()
     }
 
+    private func assertNoThrow(_ block: () throws -> ()) {
+        XCTAssertNoThrow(try block())
+    }
+
     func testIntegers() {
-        do {
+        assertNoThrow {
             try assertCoding(input: Int(0))
             try assertCoding(input: Int.max)
             try assertCoding(input: Int.min)
@@ -41,13 +45,11 @@ final class KeychainCoderTest: XCTestCase {
             try assertCoding(input: Int64(0))
             try assertCoding(input: Int64.max)
             try assertCoding(input: Int64.min)
-        } catch {
-            XCTFail(error.localizedDescription)
         }
     }
 
     func testUnsigned() {
-        do {
+        assertNoThrow {
             try assertCoding(input: UInt.max)
             try assertCoding(input: UInt.min)
 
@@ -62,47 +64,37 @@ final class KeychainCoderTest: XCTestCase {
 
             try assertCoding(input: UInt64.max)
             try assertCoding(input: UInt64.min)
-        } catch {
-            XCTFail(error.localizedDescription)
         }
     }
 
     func testBool() {
-        do {
+        assertNoThrow {
             try assertCoding(input: true)
             try assertCoding(input: false)
-        } catch {
-            XCTFail(error.localizedDescription)
         }
     }
 
     func testString() {
-        do {
+        assertNoThrow {
             try assertCoding(input: "Hello world")
             try assertCoding(input: "👋 🌎")
-        } catch {
-            XCTFail(error.localizedDescription)
         }
     }
 
     func testURL() {
-        do {
+        assertNoThrow {
             let url1 = URL(string: "https://google.com/")!
             let url2 = URL(string: "../../hello/world/file.txt")!
             let url3 = URL(string: "/hello/world/file.txt")!
             try assertCoding(input: url1)
             try assertCoding(input: url2)
             try assertCoding(input: url3)
-        } catch {
-            XCTFail(error.localizedDescription)
         }
     }
 
     func testData() {
-        do {
+        assertNoThrow {
             try assertCoding(input: "Hello World!".data(using: .utf8)!)
-        } catch {
-            XCTFail(error.localizedDescription)
         }
     }
 
@@ -113,19 +105,15 @@ final class KeychainCoderTest: XCTestCase {
     }
 
     func testCodable() {
-        do {
+        assertNoThrow {
             try assertCoding(input: MyCodable(abc: 15, cde: "Hello world!", def: nil))
-        } catch {
-            XCTFail(error.localizedDescription)
         }
     }
 
     func testCollections() {
-        do {
+        assertNoThrow {
             try assertCoding(input: ["Hello", "My", "World", "!"])
             try assertCoding(input: Set(["Hello", "My", "World", "!"]))
-        } catch {
-            XCTFail(error.localizedDescription)
         }
     }
 

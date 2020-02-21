@@ -323,18 +323,6 @@ struct KeychainCoding {
         }
     }
 
-    private func decode(from data: Data) throws -> Float {
-        fatalError("Encoding root type Float not supported!")
-    }
-
-    private func decode(from data: Data) throws -> Float80 {
-        fatalError("Encoding root type Float80 not supported!")
-    }
-
-    private func decode(from data: Data) throws -> Double {
-        fatalError("Encoding root type Double not supported!")
-    }
-
     private func decode(from data: Data) throws -> Bool {
         let value: Int = try decode(from: data)
         switch value {
