@@ -70,7 +70,7 @@ final class KeychainTests: XCTestCase {
     }
 
     func testInternetStorage() {
-        
+
     }
 
     override func setUp() {
@@ -97,7 +97,6 @@ final class KeychainTests: XCTestCase {
         ("testAttribute_kSecAttrPath", testAttribute_kSecAttrPath),
         ("testSubclassingInternetPasswordAndModifyPrimaryKey", testSubclassingInternetPasswordAndModifyPrimaryKey),
         ("testGenericStorage", testGenericStorage),
-        ("testInternetStorage", testInternetStorage),
+        ("testInternetStorage", testInternetStorage)
     ]
 }
-

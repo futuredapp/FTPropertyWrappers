@@ -223,7 +223,7 @@ struct KeychainDecoder {
 
     private func decode(_ type: String.Type, from data: Data) throws -> String {
         guard let string = String(data: data, encoding: .utf8)
-                        ?? String(data:data, encoding: .ascii) else {
+                        ?? String(data: data, encoding: .ascii) else {
             throw KeychainError.generalDecodingFailure
         }
 
@@ -242,4 +242,3 @@ struct KeychainDecoder {
         return data
     }
 }
-

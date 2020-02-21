@@ -3,7 +3,7 @@ import XCTest
 
 final class KeychainCoderTest: XCTestCase {
 
-    private struct WrapperClass<T: Codable & Equatable>{
+    private struct WrapperClass<T: Codable & Equatable> {
         let wrapped: T
         func testCoding() throws {
             let encoder = KeychainEncoder()
@@ -13,7 +13,7 @@ final class KeychainCoderTest: XCTestCase {
         }
     }
 
-    private func assertNoThrow(_ block: () throws -> ()) {
+    private func assertNoThrow(_ block: () throws -> Void) {
         XCTAssertNoThrow(try block())
     }
 
@@ -117,7 +117,6 @@ final class KeychainCoderTest: XCTestCase {
     override func tearDown() {
     }
 
-
     static var allTests = [
         ("testIntegers", testIntegers),
         ("testUnsigned", testUnsigned),
@@ -126,7 +125,6 @@ final class KeychainCoderTest: XCTestCase {
         ("testURL", testURL),
         ("testData", testData),
         ("testCodable", testCodable),
-        ("testCollections", testCollections),
+        ("testCollections", testCollections)
     ]
 }
-

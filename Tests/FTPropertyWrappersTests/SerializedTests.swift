@@ -15,6 +15,6 @@ final class SerializedTests: XCTestCase {
     }
 
     static var allTests = [
-        ("testSerialized", testSerialized),
+        ("testSerialized", testSerialized)
     ]
 }

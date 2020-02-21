@@ -6,7 +6,7 @@ let package = Package(
     products: [
         .library(
             name: "FTPropertyWrappers",
-            targets: ["FTPropertyWrappers"]),
+            targets: ["FTPropertyWrappers"])
     ],
     dependencies: [],
     targets: [
@@ -15,6 +15,6 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "FTPropertyWrappersTests",
-            dependencies: ["FTPropertyWrappers"]),
+            dependencies: ["FTPropertyWrappers"])
     ]
 )

@@ -1,12 +1,12 @@
 import Foundation
 
 extension Mirror {
-    
-    func forEachChildInClassHiearchy(do block: (Child)->Void ) {
+
+    func forEachChildInClassHiearchy(do block: (Child) -> Void ) {
         children.forEach(block)
         superclassMirror?.forEachChildInClassHiearchy(do: block)
     }
-    
+
 }
 
 protocol WrappedConfiguringElement {
@@ -23,17 +23,17 @@ public enum KeychainQueryPresenceConstraint {
 @propertyWrapper
 public final class QueryElement<T>: WrappedConfiguringElement {
     public var wrappedValue: T?
-    
+
     let key: String
     let readOnly: Bool
     let constraints: [KeychainQueryPresenceConstraint]
 
-    init(key: CFString, constraints: [KeychainQueryPresenceConstraint] = []){
+    init(key: CFString, constraints: [KeychainQueryPresenceConstraint] = []) {
         self.key = key as String
         self.readOnly = false
         self.constraints = constraints
     }
-    
+
     init(readOnlyKey: CFString) {
         self.key = readOnlyKey as String
         self.readOnly = true

@@ -9,13 +9,13 @@ open class SingleValueKeychainItem {
     @QueryElement(key: kSecAttrType) open var type: UInt64?
     @QueryElement(key: kSecAttrLabel) open var label: String?
     @QueryElement(key: kSecAttrIsInvisible) open var isInvisible: Bool?
-    
+
     @QueryElement(key: kSecAttrAccessible) private var _raw_accesible: CFString?
     open var accesible: AccesibleOption? {
         get { _raw_accesible.flatMap(AccesibleOption.init(rawValue:)) }
         set { _raw_accesible = newValue?.rawValue }
     }
-    
+
     @QueryElement(readOnlyKey: kSecAttrCreationDate) open private(set) var creationDate: Date?
     @QueryElement(readOnlyKey: kSecAttrModificationDate) open private(set) var modificationDate: Date?
 
@@ -29,7 +29,7 @@ open class SingleValueKeychainItem {
         get { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty data!") }
         set { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty data!") }
     }
-    
+
     // MARK: Query execution support
 
     private func composeQueryElements() -> [String: Any] {
@@ -76,7 +76,7 @@ open class SingleValueKeychainItem {
 
     private var insertQuery: [String: Any] {
         composeQueryElements()
-            .merging([kSecClass as String : itemClass, kSecValueData as String : itemData]) { lhs, _ in lhs }
+            .merging([kSecClass as String: itemClass, kSecValueData as String: itemData]) { lhs, _ in lhs }
     }
 
     private var fetchQuery: [String: Any] {
@@ -90,22 +90,21 @@ open class SingleValueKeychainItem {
         return query
     }
 
-
     private var updateFetchQuery: [String: Any] {
         composeQueryElements()
             .filter { primaryKey.contains($0.key) }
-            .merging([kSecClass as String : itemClass]) { lhs, _ in lhs }
+            .merging([kSecClass as String: itemClass]) { lhs, _ in lhs }
     }
 
     private var updateAttributesQuery: [String: Any] {
         composeQueryElements()
-            .merging([kSecValueData as String : itemData]) { lhs, _ in lhs }
+            .merging([kSecValueData as String: itemData]) { lhs, _ in lhs }
     }
 
     private var deleteQuery: [String: Any] {
         composeQueryElements()
             .filter { primaryKey.contains($0.key) }
-            .merging([kSecClass as String : itemClass]) { lhs, _ in lhs }
+            .merging([kSecClass as String: itemClass]) { lhs, _ in lhs }
     }
 
     func executeInsertQuery() throws {
@@ -124,7 +123,7 @@ open class SingleValueKeychainItem {
         guard status == errSecSuccess else {
             throw KeychainError(fromOSStatus: status)
         }
-        guard let response = item as? [String : Any] else {
+        guard let response = item as? [String: Any] else {
             throw KeychainError.unexpectedFormat
         }
 
@@ -137,7 +136,7 @@ open class SingleValueKeychainItem {
         guard status == errSecSuccess else {
             throw KeychainError(fromOSStatus: status)
         }
-        
+
         modificationDate = Date()
     }
 

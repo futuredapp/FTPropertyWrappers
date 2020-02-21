@@ -80,7 +80,7 @@ open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
 
         do {
             try executeInsertQuery()
-        } catch (KeychainError.osSecureDuplicitItem){
+        } catch KeychainError.osSecureDuplicitItem {
             try executeUpdateQuery()
         }
 
@@ -91,7 +91,7 @@ open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
     open func loadFromKeychain() throws {
         do {
             try executeFetchQuery()
-        } catch (KeychainError.osSecureNoSuchItem){
+        } catch KeychainError.osSecureNoSuchItem {
             cachedValue = nil
         }
         synced = true

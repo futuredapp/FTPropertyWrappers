@@ -157,6 +157,6 @@ final class UserDefaultsTests: XCTestCase {
         ("testUserDefaults", testUserDefaults),
         ("testUserDefaultsCollection", testUserDefaultsCollection),
         ("testCodableUserDefault", testCodableUserDefault),
-        ("testPromitiveValues", testPromitiveValues),
+        ("testPromitiveValues", testPromitiveValues)
     ]
 }

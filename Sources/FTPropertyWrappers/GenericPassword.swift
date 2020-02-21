@@ -21,7 +21,7 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
         super.init(refreshPolicy: refreshPolicy, defaultValue: defaultValue)
         self.service = serviceIdentifier
     }
-    
+
     public convenience init(serviceIdentifier: String, refreshPolicy: KeychainDataRefreshPolicy = .onAccess, defaultValue: T? = nil, protection: (access: AccesibleOption, flags: SecAccessControlCreateFlags)? = nil) throws {
         self.init(serviceIdentifier: serviceIdentifier, refreshPolicy: refreshPolicy, defaultValue: defaultValue)
         if let protection = protection {
@@ -32,7 +32,7 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
     public func modifyAccess(using accessible: AccesibleOption, flags: SecAccessControlCreateFlags) throws {
         var error: Unmanaged<CFError>?
 
-        let access = SecAccessControlCreateWithFlags(nil, accessible.rawValue, flags, &error);
+        let access = SecAccessControlCreateWithFlags(nil, accessible.rawValue, flags, &error)
         if let error = error?.takeRetainedValue() as Error? {
             throw KeychainError.accessControllError(status: error)
         }
