@@ -3,12 +3,8 @@ import XCTest
 
 final class KeychainCoderTest: XCTestCase {
 
-    private class WrapperClass<T: Codable & Equatable>{
-
+    private struct WrapperClass<T: Codable & Equatable>{
         let wrapped: T
-        init(wrapped: T) {
-            self.wrapped = wrapped
-        }
         func testCoding() throws {
             let encoder = KeychainEncoder()
             let decoder = KeychainDecoder()
