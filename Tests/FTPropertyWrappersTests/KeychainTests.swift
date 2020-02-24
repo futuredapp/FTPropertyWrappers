@@ -1,7 +1,6 @@
 import XCTest
 @testable import FTPropertyWrappers
 
-// TODO: Implement tests
 final class KeychainTests: XCTestCase {
 
     /*
@@ -126,6 +125,62 @@ final class KeychainTests: XCTestCase {
         XCTAssertNil(storeB.wrappedValue)
     }
 
+    private func testReadOnlyLoadingSequence<T: Equatable>(keyPath: KeyPath<GenericPassword<Data>, T?>) throws {
+        let storeA = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .onAccess)
+        let storeB = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .manual)
+
+        try storeA.deleteKeychain()
+        try storeA.loadFromKeychain()
+        XCTAssertNil(storeA[keyPath: keyPath])
+
+        storeA.wrappedValue = "A".data(using: .ascii)!
+        try storeA.loadFromKeychain()
+        try storeB.loadFromKeychain()
+        XCTAssertEqual(storeA[keyPath: keyPath], storeB[keyPath: keyPath])
+        XCTAssertNotNil(storeA.wrappedValue)
+        XCTAssertNotNil(storeB.wrappedValue)
+
+        storeA.wrappedValue = "B".data(using: .ascii)!
+        try storeB.loadFromKeychain()
+        XCTAssertEqual(storeA[keyPath: keyPath], storeB[keyPath: keyPath])
+        XCTAssertNotNil(storeA.wrappedValue)
+        XCTAssertNotNil(storeB.wrappedValue)
+
+        try storeB.deleteKeychain()
+        try storeA.loadFromKeychain()
+        XCTAssertEqual(storeA[keyPath: keyPath], storeB[keyPath: keyPath])
+        XCTAssertNil(storeA.wrappedValue)
+        XCTAssertNil(storeB.wrappedValue)
+    }
+
+    private func testReadOnlyLoadingSequence<T: Equatable>(keyPath: KeyPath<InternetPassword<Data>, T?>) throws {
+        let storeA = InternetPassword<Data>(serverIdentifier: path + ".i", refreshPolicy: .onAccess)
+        let storeB = InternetPassword<Data>(serverIdentifier: path + ".i", refreshPolicy: .manual)
+
+        try storeA.deleteKeychain()
+        try storeA.loadFromKeychain()
+        XCTAssertNil(storeA[keyPath: keyPath])
+
+        storeA.wrappedValue = "A".data(using: .ascii)!
+        try storeA.loadFromKeychain()
+        try storeB.loadFromKeychain()
+        XCTAssertEqual(storeA[keyPath: keyPath], storeB[keyPath: keyPath])
+        XCTAssertNotNil(storeA.wrappedValue)
+        XCTAssertNotNil(storeB.wrappedValue)
+
+        storeA.wrappedValue = "B".data(using: .ascii)!
+        try storeB.loadFromKeychain()
+        XCTAssertEqual(storeA[keyPath: keyPath], storeB[keyPath: keyPath])
+        XCTAssertNotNil(storeA.wrappedValue)
+        XCTAssertNotNil(storeB.wrappedValue)
+
+        try storeB.deleteKeychain()
+        try storeA.loadFromKeychain()
+        XCTAssertEqual(storeA[keyPath: keyPath], storeB[keyPath: keyPath])
+        XCTAssertNil(storeA.wrappedValue)
+        XCTAssertNil(storeB.wrappedValue)
+    }
+
     func testAttribute_kSecAttrDescription() {
         XCTAssertNoThrow(try testLoadingSequence(keyPath: \GenericPassword.description, firstExample: "Hello", secondExample: "World"))
         XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.description, firstExample: "Hello", secondExample: "World"))
@@ -137,51 +192,61 @@ final class KeychainTests: XCTestCase {
     }
 
     func testAttribute_kSecAttrCreator() {
-
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \GenericPassword.creator, firstExample: 150 as CFNumber, secondExample: 0 as CFNumber))
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.creator, firstExample: 150 as CFNumber, secondExample: 0 as CFNumber))
     }
 
     func testAttribute_kSecAttrType() {
-
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \GenericPassword.type, firstExample: 150 as CFNumber, secondExample: 0 as CFNumber))
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.type, firstExample: 150 as CFNumber, secondExample: 0 as CFNumber))
     }
 
     func testAttribute_kSecAttrLabel() {
-
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \GenericPassword.label, firstExample: "Hello", secondExample: "World"))
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.label, firstExample: "Hello", secondExample: "World"))
     }
 
     func testAttribute_kSecAttrIsInvisible() {
-
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \GenericPassword.isInvisible, firstExample: true, secondExample: false))
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.isInvisible, firstExample: true, secondExample: false))
     }
 
     func testAttribute_kSecAttrCreationDate() {
-
+        XCTAssertNoThrow(try testReadOnlyLoadingSequence(keyPath: \GenericPassword.creationDate))
+        XCTAssertNoThrow(try testReadOnlyLoadingSequence(keyPath: \InternetPassword.creationDate))
     }
 
     func testAttribute_kSecAttrModificationDate() {
-
+        XCTAssertNoThrow(try testReadOnlyLoadingSequence(keyPath: \GenericPassword.modificationDate))
+        XCTAssertNoThrow(try testReadOnlyLoadingSequence(keyPath: \InternetPassword.modificationDate))
     }
 
     func testAttribute_kSecAttrSecurityDomain() {
-
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.domain, firstExample: "any.my.domain" , secondExample: "other.my.domain"))
     }
 
     func testAttribute_kSecAttrProtocol() {
-
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.aProtocol,
+                                                 firstExample: kSecAttrProtocolAFP as String,
+                                                 secondExample: kSecAttrProtocolSSH as String))
     }
 
     func testAttribute_kSecAttrAuthenticationType() {
-
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.authenticationType,
+                                                 firstExample: kSecAttrAuthenticationTypeNTLM,
+                                                 secondExample: kSecAttrAuthenticationTypeHTMLForm))
     }
 
     func testAttribute_kSecAttrPort() {
-
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.port,
+                                                 firstExample: 80,
+                                                 secondExample: UInt16.max))
     }
 
     func testAttribute_kSecAttrPath() {
-
-    }
-
-    func testSubclassingInternetPasswordAndModifyPrimaryKey() {
-
+        XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.path,
+                                                 firstExample: "app.futured.path",
+                                                 secondExample: "app.futured.another.path"))
     }
 
     func testGenericStorage() {
@@ -247,7 +312,6 @@ final class KeychainTests: XCTestCase {
         ("testAttribute_kSecAttrAuthenticationType", testAttribute_kSecAttrAuthenticationType),
         ("testAttribute_kSecAttrPort", testAttribute_kSecAttrPort),
         ("testAttribute_kSecAttrPath", testAttribute_kSecAttrPath),
-        ("testSubclassingInternetPasswordAndModifyPrimaryKey", testSubclassingInternetPasswordAndModifyPrimaryKey),
         ("testGenericStorage", testGenericStorage),
         ("testInternetStorage", testInternetStorage)
     ]

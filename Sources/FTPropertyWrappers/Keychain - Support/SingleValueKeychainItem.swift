@@ -5,8 +5,8 @@ open class SingleValueKeychainItem {
     // MARK: Properties
     @QueryElement(key: kSecAttrDescription) open var description: String?
     @QueryElement(key: kSecAttrComment) open var comment: String?
-    @QueryElement(key: kSecAttrCreator) open var creator: UInt64?
-    @QueryElement(key: kSecAttrType) open var type: UInt64?
+    @QueryElement(key: kSecAttrCreator) open var creator: CFNumber?
+    @QueryElement(key: kSecAttrType) open var type: CFNumber?
     @QueryElement(key: kSecAttrLabel) open var label: String?
     @QueryElement(key: kSecAttrIsInvisible) open var isInvisible: Bool?
 
@@ -125,8 +125,6 @@ open class SingleValueKeychainItem {
         guard status == errSecSuccess else {
             throw KeychainError(fromOSStatus: status)
         }
-        creationDate = Date()
-        modificationDate = Date()
     }
 
     func executeFetchQuery() throws {
@@ -145,15 +143,13 @@ open class SingleValueKeychainItem {
     }
 
     func executeUpdateQuery() throws {
-        let fetchQuery = updateFetchQuery as CFDictionary
-        let attributeQuery = updateAttributesQuery.filter { key, value in fetchQuery[key] == nil } as CFDictionary
-        let status = SecItemUpdate(fetchQuery, attributeQuery)
+        let fetchQuery = updateFetchQuery
+        let attributeQuery = updateAttributesQuery.filter { key, value in fetchQuery[key] == nil }
+        let status = SecItemUpdate(fetchQuery as CFDictionary, attributeQuery as CFDictionary)
 
         guard status == errSecSuccess else {
             throw KeychainError(fromOSStatus: status)
         }
-
-        modificationDate = Date()
     }
 
     func executeDeleteQuery() throws {

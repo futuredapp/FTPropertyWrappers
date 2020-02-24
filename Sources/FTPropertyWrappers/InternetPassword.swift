@@ -7,7 +7,7 @@ open class InternetPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
     @QueryElement(key: kSecAttrServer) open var server: String?
     @QueryElement(key: kSecAttrSecurityDomain) open var domain: String?
     @QueryElement(key: kSecAttrProtocol) open var aProtocol: String?
-    @QueryElement(key: kSecAttrAuthenticationType) open var authenticationType: String?
+    @QueryElement(key: kSecAttrAuthenticationType) open var authenticationType: CFString?
     @QueryElement(key: kSecAttrPort) open var port: UInt16?
     @QueryElement(key: kSecAttrPath) open var path: String?
 
