@@ -11,8 +11,8 @@ final class KeychainTests: XCTestCase {
     private let path = "app.futured.ftpropertywrappers.test.keychain"
 
     private func testLoadingSequence<T: Equatable>(keyPath: WritableKeyPath<GenericPassword<Data>, T?>, firstExample: T, secondExample: T) throws {
-        var storeA = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .onAccess)
-        var storeB = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .manual)
+        var storeA = GenericPassword<Data>(service: path + ".g", refreshPolicy: .onAccess)
+        var storeB = GenericPassword<Data>(service: path + ".g", refreshPolicy: .manual)
 
         try storeA.deleteKeychain()
         try storeA.loadFromKeychain()
@@ -68,8 +68,8 @@ final class KeychainTests: XCTestCase {
     }
 
     private func testLoadingSequence<T: Equatable>(keyPath: WritableKeyPath<InternetPassword<Data>, T?>, firstExample: T, secondExample: T) throws {
-        var storeA = InternetPassword<Data>(serverIdentifier: path + ".i", refreshPolicy: .onAccess)
-        var storeB = InternetPassword<Data>(serverIdentifier: path + ".i", refreshPolicy: .manual)
+        var storeA = InternetPassword<Data>(server: path + ".i", refreshPolicy: .onAccess)
+        var storeB = InternetPassword<Data>(server: path + ".i", refreshPolicy: .manual)
 
         try storeA.deleteKeychain()
         try storeA.loadFromKeychain()
@@ -126,8 +126,8 @@ final class KeychainTests: XCTestCase {
     }
 
     private func testReadOnlyLoadingSequence<T: Equatable>(keyPath: KeyPath<GenericPassword<Data>, T?>) throws {
-        let storeA = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .onAccess)
-        let storeB = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .manual)
+        let storeA = GenericPassword<Data>(service: path + ".g", refreshPolicy: .onAccess)
+        let storeB = GenericPassword<Data>(service: path + ".g", refreshPolicy: .manual)
 
         try storeA.deleteKeychain()
         try storeA.loadFromKeychain()
@@ -154,21 +154,21 @@ final class KeychainTests: XCTestCase {
     }
 
     private func testReadOnlyLoadingSequence<T: Equatable>(keyPath: KeyPath<InternetPassword<Data>, T?>) throws {
-        let storeA = InternetPassword<Data>(serverIdentifier: path + ".i", refreshPolicy: .onAccess)
-        let storeB = InternetPassword<Data>(serverIdentifier: path + ".i", refreshPolicy: .manual)
+        let storeA = InternetPassword<Data>(server: path + ".i", refreshPolicy: .onAccess)
+        let storeB = InternetPassword<Data>(server: path + ".i", refreshPolicy: .manual)
 
         try storeA.deleteKeychain()
         try storeA.loadFromKeychain()
         XCTAssertNil(storeA[keyPath: keyPath])
 
-        storeA.wrappedValue = "A".data(using: .ascii)!
+        storeA.wrappedValue = "api.app".data(using: .ascii)!
         try storeA.loadFromKeychain()
         try storeB.loadFromKeychain()
         XCTAssertEqual(storeA[keyPath: keyPath], storeB[keyPath: keyPath])
         XCTAssertNotNil(storeA.wrappedValue)
         XCTAssertNotNil(storeB.wrappedValue)
 
-        storeA.wrappedValue = "B".data(using: .ascii)!
+        storeA.wrappedValue = "api.app".data(using: .ascii)!
         try storeB.loadFromKeychain()
         XCTAssertEqual(storeA[keyPath: keyPath], storeB[keyPath: keyPath])
         XCTAssertNotNil(storeA.wrappedValue)
@@ -221,37 +221,9 @@ final class KeychainTests: XCTestCase {
         XCTAssertNoThrow(try testReadOnlyLoadingSequence(keyPath: \InternetPassword.modificationDate))
     }
 
-    func testAttribute_kSecAttrSecurityDomain() {
-        XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.domain, firstExample: "any.my.domain" , secondExample: "other.my.domain"))
-    }
-
-    func testAttribute_kSecAttrProtocol() {
-        XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.aProtocol,
-                                                 firstExample: kSecAttrProtocolAFP as String,
-                                                 secondExample: kSecAttrProtocolSSH as String))
-    }
-
-    func testAttribute_kSecAttrAuthenticationType() {
-        XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.authenticationType,
-                                                 firstExample: kSecAttrAuthenticationTypeNTLM,
-                                                 secondExample: kSecAttrAuthenticationTypeHTMLForm))
-    }
-
-    func testAttribute_kSecAttrPort() {
-        XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.port,
-                                                 firstExample: 80,
-                                                 secondExample: UInt16.max))
-    }
-
-    func testAttribute_kSecAttrPath() {
-        XCTAssertNoThrow(try testLoadingSequence(keyPath: \InternetPassword.path,
-                                                 firstExample: "app.futured.path",
-                                                 secondExample: "app.futured.another.path"))
-    }
-
     func testGenericStorage() {
-        let storeA = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .onAccess)
-        let storeB = GenericPassword<Data>(serviceIdentifier: path + ".g", refreshPolicy: .manual)
+        let storeA = GenericPassword<Data>(service: path + ".g", refreshPolicy: .onAccess)
+        let storeB = GenericPassword<Data>(service: path + ".g", refreshPolicy: .manual)
 
         try! storeA.deleteKeychain()
 
@@ -271,8 +243,8 @@ final class KeychainTests: XCTestCase {
     }
 
     func testInternetStorage() {
-        let storeA = InternetPassword<Data>(serverIdentifier: path + ".i", refreshPolicy: .onAccess)
-        let storeB = InternetPassword<Data>(serverIdentifier: path + ".i", refreshPolicy: .manual)
+        let storeA = InternetPassword<Data>(server: path + ".i", refreshPolicy: .onAccess)
+        let storeB = InternetPassword<Data>(server: path + ".i", refreshPolicy: .manual)
 
         try! storeA.deleteKeychain()
 
@@ -291,6 +263,72 @@ final class KeychainTests: XCTestCase {
         XCTAssertNoThrow(try storeA.deleteKeychain())
     }
 
+    func testAccountExclusivityGenericStorage() {
+        let accounts = ["alpha@account.my",
+                        "beta@account.my",
+                        "ceta@account.my",
+                        "delta@account.my",
+                        "eta@account.my",
+                        "theta@account.my"]
+        let accA = accounts.randomElement()!
+        let accB = accounts.filter { $0 != accA }.randomElement()!
+
+        let storeA_A = GenericPassword<Data>(service: path + ".g", account: accA, refreshPolicy: .manual)
+        let storeA_B = GenericPassword<Data>(service: path + ".g", account: accB, refreshPolicy: .manual)
+        let storeB = GenericPassword<Data>(service: path + ".g", refreshPolicy: .manual)
+
+        XCTAssertNoThrow(try accounts.forEach {
+            try GenericPassword<Data>(service: path + ".g", account: $0, refreshPolicy: .manual).deleteKeychain()
+        })
+
+        storeA_A.wrappedValue = "🌞".data(using: .utf8)!
+        storeA_B.wrappedValue = "🌚".data(using: .utf8)!
+        XCTAssertNoThrow(try storeA_A.saveToKeychain())
+        XCTAssertNoThrow(try storeA_B.saveToKeychain())
+
+        XCTAssertNoThrow(try storeB.loadFromKeychain())
+        XCTAssertEqual(storeA_A.wrappedValue, storeB.wrappedValue)
+        XCTAssertNotEqual(storeA_B.wrappedValue, storeB.wrappedValue)
+
+        XCTAssertNoThrow(try accounts.forEach {
+            try GenericPassword<Data>(service: path + ".g", account: $0, refreshPolicy: .manual).deleteKeychain()
+        })
+
+    }
+
+    func testAccountExclusivityInternetStorage() {
+        let accounts = ["alpha@account.my",
+                        "beta@account.my",
+                        "ceta@account.my",
+                        "delta@account.my",
+                        "eta@account.my",
+                        "theta@account.my"]
+        let accA = accounts.randomElement()!
+        let accB = accounts.filter { $0 != accA }.randomElement()!
+
+        let storeA_A = InternetPassword<Data>(server: path + ".i", account: accA, refreshPolicy: .manual)
+        let storeA_B = InternetPassword<Data>(server: path + ".i", account: accB, refreshPolicy: .manual)
+        let storeB = InternetPassword<Data>(server: path + ".i", refreshPolicy: .manual)
+
+        XCTAssertNoThrow(try accounts.forEach {
+            try InternetPassword<Data>(server: path + ".i", account: $0, refreshPolicy: .manual).deleteKeychain()
+        })
+
+        storeA_A.wrappedValue = "🌞".data(using: .utf8)!
+        storeA_B.wrappedValue = "🌚".data(using: .utf8)!
+        XCTAssertNoThrow(try storeA_A.saveToKeychain())
+        XCTAssertNoThrow(try storeA_B.saveToKeychain())
+
+        XCTAssertNoThrow(try storeB.loadFromKeychain())
+        XCTAssertEqual(storeA_A.wrappedValue, storeB.wrappedValue)
+        XCTAssertNotEqual(storeA_B.wrappedValue, storeB.wrappedValue)
+
+        XCTAssertNoThrow(try accounts.forEach {
+            try InternetPassword<Data>(server: path + ".i", account: $0, refreshPolicy: .manual).deleteKeychain()
+        })
+
+    }
+
     override func setUp() {
         super.setUp()
     }
@@ -307,12 +345,9 @@ final class KeychainTests: XCTestCase {
         ("testAttribute_kSecAttrIsInvisible", testAttribute_kSecAttrIsInvisible),
         ("testAttribute_kSecAttrCreationDate", testAttribute_kSecAttrCreationDate),
         ("testAttribute_kSecAttrModificationDate", testAttribute_kSecAttrModificationDate),
-        ("testAttribute_kSecAttrSecurityDomain", testAttribute_kSecAttrSecurityDomain),
-        ("testAttribute_kSecAttrProtocol", testAttribute_kSecAttrProtocol),
-        ("testAttribute_kSecAttrAuthenticationType", testAttribute_kSecAttrAuthenticationType),
-        ("testAttribute_kSecAttrPort", testAttribute_kSecAttrPort),
-        ("testAttribute_kSecAttrPath", testAttribute_kSecAttrPath),
         ("testGenericStorage", testGenericStorage),
-        ("testInternetStorage", testInternetStorage)
+        ("testInternetStorage", testInternetStorage),
+        ("testAccountExclusivityGenericStorage", testAccountExclusivityGenericStorage),
+        ("testAccountExclusivityInternetStorage", testAccountExclusivityInternetStorage)
     ]
 }

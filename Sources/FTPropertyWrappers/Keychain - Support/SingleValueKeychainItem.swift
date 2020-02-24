@@ -23,7 +23,7 @@ open class SingleValueKeychainItem {
 
     open var itemClass: CFString { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty class!") }
 
-    open var primaryKey: Set<String> { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty keys!") }
+    open var primaryKey: Set<CFString> { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty keys!") }
 
     open var itemData: Data {
         get { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty data!") }
@@ -80,7 +80,7 @@ open class SingleValueKeychainItem {
 
     func resetQueryElementsExcludedKeys() {
         Mirror(reflecting: self).forEachChildInClassHiearchy { child in
-            guard var element = child.value as? WrappedConfiguringElement, !primaryKey.contains(element.key) else {
+            guard var element = child.value as? WrappedConfiguringElement, !primaryKey.contains(element.key as CFString) else {
                 return
             }
             element.wrappedAsAnonymous = nil
@@ -93,7 +93,7 @@ open class SingleValueKeychainItem {
     }
 
     private var fetchQuery: [String: Any] {
-        var query: [String: Any] = composeQueryElements().filter { primaryKey.contains($0.key) }
+        var query: [String: Any] = composeQueryElements().filter { primaryKey.contains($0.key as CFString) }
 
         query[kSecClass as String] = itemClass
         query[kSecMatchLimit as String] = kSecMatchLimitOne
@@ -105,7 +105,7 @@ open class SingleValueKeychainItem {
 
     private var updateFetchQuery: [String: Any] {
         composeQueryElements()
-            .filter { primaryKey.contains($0.key) }
+            .filter { primaryKey.contains($0.key as CFString) }
             .merging([kSecClass as String: itemClass]) { lhs, _ in lhs }
     }
 
@@ -116,7 +116,7 @@ open class SingleValueKeychainItem {
 
     private var deleteQuery: [String: Any] {
         composeQueryElements()
-            .filter { primaryKey.contains($0.key) }
+            .filter { primaryKey.contains($0.key as CFString) }
             .merging([kSecClass as String: itemClass]) { lhs, _ in lhs }
     }
 
