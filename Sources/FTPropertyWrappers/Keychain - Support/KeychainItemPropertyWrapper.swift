@@ -11,16 +11,14 @@ open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
 
     public let refreshPolicy: KeychainDataRefreshPolicy
 
-    public private(set) var synced = false
+    public private(set) var wrappedValueUnchanged = false
 
     open var wrappedValue: T? {
         get {
-            switch (refreshPolicy, synced) {
-            case (.manual, _):
+            switch refreshPolicy {
+            case .manual:
                 return cachedValue ?? defaultValue
-            case (.onAccess, true):
-                return cachedValue ?? defaultValue
-            case (.onAccess, false):
+            case .onAccess:
                 do {
                     try loadFromKeychain()
                 } catch {
@@ -33,15 +31,15 @@ open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
             switch refreshPolicy {
             case .manual:
                 cachedValue = newValue
-                synced = false
+                wrappedValueUnchanged = false
             case .onAccess:
                 cachedValue = newValue
                 do {
                     try saveToKeychain()
-                    synced = true
+                    wrappedValueUnchanged = true
                 } catch {
                     print("Error saving \(self) into keychain: \(error)")
-                    synced = false
+                    wrappedValueUnchanged = false
                 }
             }
         }
@@ -84,22 +82,24 @@ open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
             try executeUpdateQuery()
         }
 
-        synced = true
+        wrappedValueUnchanged = true
 
     }
 
     open func loadFromKeychain() throws {
+        resetQueryElementsExcludedKeys()
         do {
             try executeFetchQuery()
         } catch KeychainError.osSecureNoSuchItem {
             cachedValue = nil
         }
-        synced = true
+        wrappedValueUnchanged = true
     }
 
     open func deleteKeychain() throws {
         try executeDeleteQuery()
         cachedValue = nil
-        synced = true
+        resetQueryElementsExcludedKeys()
+        wrappedValueUnchanged = true
     }
 }

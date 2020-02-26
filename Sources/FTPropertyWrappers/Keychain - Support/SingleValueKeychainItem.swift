@@ -5,8 +5,8 @@ open class SingleValueKeychainItem {
     // MARK: Properties
     @QueryElement(key: kSecAttrDescription) open var description: String?
     @QueryElement(key: kSecAttrComment) open var comment: String?
-    @QueryElement(key: kSecAttrCreator) open var creator: UInt64?
-    @QueryElement(key: kSecAttrType) open var type: UInt64?
+    @QueryElement(key: kSecAttrCreator) open var creator: CFNumber?
+    @QueryElement(key: kSecAttrType) open var type: CFNumber?
     @QueryElement(key: kSecAttrLabel) open var label: String?
     @QueryElement(key: kSecAttrIsInvisible) open var isInvisible: Bool?
 
@@ -23,7 +23,7 @@ open class SingleValueKeychainItem {
 
     open var itemClass: CFString { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty class!") }
 
-    open var primaryKey: Set<String> { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty keys!") }
+    open var primaryKey: Set<CFString> { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty keys!") }
 
     open var itemData: Data {
         get { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty data!") }
@@ -39,18 +39,22 @@ open class SingleValueKeychainItem {
         var conditionalUnset: [(ifPresent: String, unset: String)] = []
 
         Mirror(reflecting: self).forEachChildInClassHiearchy { child in
-            guard let element = child.value as? WrappedConfiguringElement else {
+            guard let element = child.value as? WrappedConfiguringElement, !element.readOnly else {
                 return
             }
-            elements[element.key] = element.wrappedAsAnonymous ?? elements[element.key]
-            element.constraints.forEach { constraint in
-                switch constraint {
-                case .overridenBy(let attribute):
-                    conditionalUnset += [(element.key, attribute as String)]
-                case .override(let attribute):
-                    willUnset.insert(attribute as String)
+            let value = element.wrappedAsAnonymous
+            if value != nil {
+                element.constraints.forEach { constraint in
+                    switch constraint {
+                    case .overridenBy(let attribute):
+                        conditionalUnset += [(element.key, attribute as String)]
+                    case .override(let attribute):
+                        willUnset.insert(attribute as String)
+                    }
                 }
             }
+
+            elements[element.key] = value ?? elements[element.key]
         }
 
         conditionalUnset.compactMap { elements[$0.ifPresent] != nil ? $0.unset : nil }.forEach { willUnset.insert($0) }
@@ -74,13 +78,22 @@ open class SingleValueKeychainItem {
         }
     }
 
+    func resetQueryElementsExcludedKeys() {
+        Mirror(reflecting: self).forEachChildInClassHiearchy { child in
+            guard var element = child.value as? WrappedConfiguringElement, !primaryKey.contains(element.key as CFString) else {
+                return
+            }
+            element.wrappedAsAnonymous = nil
+        }
+    }
+
     private var insertQuery: [String: Any] {
         composeQueryElements()
             .merging([kSecClass as String: itemClass, kSecValueData as String: itemData]) { lhs, _ in lhs }
     }
 
     private var fetchQuery: [String: Any] {
-        var query: [String: Any] = composeQueryElements().filter { primaryKey.contains($0.key) }
+        var query: [String: Any] = composeQueryElements().filter { primaryKey.contains($0.key as CFString) }
 
         query[kSecClass as String] = itemClass
         query[kSecMatchLimit as String] = kSecMatchLimitOne
@@ -92,7 +105,7 @@ open class SingleValueKeychainItem {
 
     private var updateFetchQuery: [String: Any] {
         composeQueryElements()
-            .filter { primaryKey.contains($0.key) }
+            .filter { primaryKey.contains($0.key as CFString) }
             .merging([kSecClass as String: itemClass]) { lhs, _ in lhs }
     }
 
@@ -103,7 +116,7 @@ open class SingleValueKeychainItem {
 
     private var deleteQuery: [String: Any] {
         composeQueryElements()
-            .filter { primaryKey.contains($0.key) }
+            .filter { primaryKey.contains($0.key as CFString) }
             .merging([kSecClass as String: itemClass]) { lhs, _ in lhs }
     }
 
@@ -112,8 +125,6 @@ open class SingleValueKeychainItem {
         guard status == errSecSuccess else {
             throw KeychainError(fromOSStatus: status)
         }
-        creationDate = Date()
-        modificationDate = Date()
     }
 
     func executeFetchQuery() throws {
@@ -123,6 +134,7 @@ open class SingleValueKeychainItem {
         guard status == errSecSuccess else {
             throw KeychainError(fromOSStatus: status)
         }
+        
         guard let response = item as? [String: Any] else {
             throw KeychainError.unexpectedFormat
         }
@@ -131,13 +143,13 @@ open class SingleValueKeychainItem {
     }
 
     func executeUpdateQuery() throws {
-        let status = SecItemUpdate(updateFetchQuery as CFDictionary, updateAttributesQuery as CFDictionary)
+        let fetchQuery = updateFetchQuery
+        let attributeQuery = updateAttributesQuery.filter { key, value in fetchQuery[key] == nil }
+        let status = SecItemUpdate(fetchQuery as CFDictionary, attributeQuery as CFDictionary)
 
         guard status == errSecSuccess else {
             throw KeychainError(fromOSStatus: status)
         }
-
-        modificationDate = Date()
     }
 
     func executeDeleteQuery() throws {

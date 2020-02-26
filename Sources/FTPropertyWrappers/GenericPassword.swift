@@ -3,27 +3,41 @@ import Foundation
 @propertyWrapper
 open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
 
-    @QueryElement(key: kSecAttrAccount) open var account: String?
-    @QueryElement(key: kSecAttrService) open var service: String?
+    @QueryElement(key: kSecAttrAccount) open private(set) var account: String?
+    @QueryElement(key: kSecAttrService) open private(set) var service: String?
     @QueryElement(key: kSecAttrAccessControl,
                   constraints: [.override(kSecAttrAccessible)]) open private(set) var accessControl: SecAccessControl?
 
     override open var itemClass: CFString { kSecClassGenericPassword }
 
-    override open var primaryKey: Set<String> { [kSecAttrService as String] }
+    override open var primaryKey: Set<CFString> {
+        [ kSecAttrAccount, kSecAttrService ]
+    }
 
     override open var wrappedValue: T? {
         get { super.wrappedValue }
         set { super.wrappedValue = newValue }
     }
 
-    public init(serviceIdentifier: String, refreshPolicy: KeychainDataRefreshPolicy = .onAccess, defaultValue: T? = nil) {
+    public init(
+        service: String,
+        account: String? = nil,
+        refreshPolicy: KeychainDataRefreshPolicy = .onAccess,
+        defaultValue: T? = nil
+    ) {
         super.init(refreshPolicy: refreshPolicy, defaultValue: defaultValue)
-        self.service = serviceIdentifier
+        self.service = service
+        self.account = account
     }
 
-    public convenience init(serviceIdentifier: String, refreshPolicy: KeychainDataRefreshPolicy = .onAccess, defaultValue: T? = nil, protection: (access: AccesibleOption, flags: SecAccessControlCreateFlags)? = nil) throws {
-        self.init(serviceIdentifier: serviceIdentifier, refreshPolicy: refreshPolicy, defaultValue: defaultValue)
+    public convenience init(
+        serviceIdentifier: String,
+        account: String? = nil,
+        refreshPolicy: KeychainDataRefreshPolicy = .onAccess,
+        defaultValue: T? = nil,
+        protection: (access: AccesibleOption, flags: SecAccessControlCreateFlags)? = nil
+    ) throws {
+        self.init(service: serviceIdentifier, account: account, refreshPolicy: refreshPolicy, defaultValue: defaultValue)
         if let protection = protection {
             try self.modifyAccess(using: protection.access, flags: protection.flags)
         }
