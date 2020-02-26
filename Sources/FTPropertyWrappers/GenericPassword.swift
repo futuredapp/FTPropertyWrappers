@@ -19,20 +19,24 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
         set { super.wrappedValue = newValue }
     }
 
-    public init(service: String,
-                account: String? = nil,
-                refreshPolicy: KeychainDataRefreshPolicy = .onAccess,
-                defaultValue: T? = nil) {
+    public init(
+        service: String,
+        account: String? = nil,
+        refreshPolicy: KeychainDataRefreshPolicy = .onAccess,
+        defaultValue: T? = nil
+    ) {
         super.init(refreshPolicy: refreshPolicy, defaultValue: defaultValue)
         self.service = service
         self.account = account
     }
 
-    public convenience init(serviceIdentifier: String,
-                            account: String? = nil,
-                            refreshPolicy: KeychainDataRefreshPolicy = .onAccess,
-                            defaultValue: T? = nil,
-                            protection: (access: AccesibleOption, flags: SecAccessControlCreateFlags)? = nil) throws {
+    public convenience init(
+        serviceIdentifier: String,
+        account: String? = nil,
+        refreshPolicy: KeychainDataRefreshPolicy = .onAccess,
+        defaultValue: T? = nil,
+        protection: (access: AccesibleOption, flags: SecAccessControlCreateFlags)? = nil
+    ) throws {
         self.init(service: serviceIdentifier, account: account, refreshPolicy: refreshPolicy, defaultValue: defaultValue)
         if let protection = protection {
             try self.modifyAccess(using: protection.access, flags: protection.flags)
