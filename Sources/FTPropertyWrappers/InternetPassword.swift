@@ -28,15 +28,17 @@ open class InternetPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
         set { super.wrappedValue = newValue }
     }
 
-    public init(server: String,
-                account: String? = nil,
-                domain: String? = nil,
-                aProtocol: CFString? = nil,
-                authenticationType: CFString? = nil,
-                port: UInt16? = nil,
-                path: String? = nil,
-                refreshPolicy: KeychainDataRefreshPolicy = .onAccess,
-                defaultValue: T? = nil) {
+    public init(
+        server: String,
+        account: String? = nil,
+        domain: String? = nil,
+        aProtocol: CFString? = nil,
+        authenticationType: CFString? = nil,
+        port: UInt16? = nil,
+        path: String? = nil,
+        refreshPolicy: KeychainDataRefreshPolicy = .onAccess,
+        defaultValue: T? = nil
+    ) {
         super.init(refreshPolicy: refreshPolicy, defaultValue: defaultValue)
         self.server = server
         self.account = account
