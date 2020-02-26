@@ -14,14 +14,14 @@ open class InternetPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
     override open var itemClass: CFString { kSecClassInternetPassword }
 
     override open var primaryKey: Set<CFString> { [
-                                                    kSecAttrAccount,
-                                                    kSecAttrServer,
-                                                    kSecAttrSecurityDomain,
-                                                    kSecAttrProtocol,
-                                                    kSecAttrAuthenticationType,
-                                                    kSecAttrPort,
-                                                    kSecAttrPath,
-                                                ] }
+        kSecAttrAccount,
+        kSecAttrServer,
+        kSecAttrSecurityDomain,
+        kSecAttrProtocol,
+        kSecAttrAuthenticationType,
+        kSecAttrPort,
+        kSecAttrPath,
+    ] }
 
     override open var wrappedValue: T? {
         get { super.wrappedValue }

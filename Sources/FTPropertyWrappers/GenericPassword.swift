@@ -10,10 +10,9 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
 
     override open var itemClass: CFString { kSecClassGenericPassword }
 
-    override open var primaryKey: Set<CFString> { [
-                                                    kSecAttrAccount,
-                                                    kSecAttrService,
-                                                ] }
+    override open var primaryKey: Set<CFString> {
+        [ kSecAttrAccount, kSecAttrService ]
+    }
 
     override open var wrappedValue: T? {
         get { super.wrappedValue }
