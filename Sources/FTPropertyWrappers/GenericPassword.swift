@@ -28,7 +28,7 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
     /// Creates instance of generic password. If one or more primary key attributes are  ommited, be sure that there is at most one item that could be identified with such set of primary key's values. If not, keychain will work with the one with oldest creation date, though some behaviour of this class may be undefined.
     /// - Parameters:
     ///   - service: Service attribute used as  part of primary key.
-    ///   - account: Account attribute used as oart of primary key.
+    ///   - account: Account attribute used as part of primary key.
     ///   - refreshPolicy: Refresh policy for superclass's purposes.
     ///   - defaultValue: Default value for superclass's purposes.
     public init(
@@ -45,7 +45,7 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
     /// Creates instance of generic password with specified access policy.. If one or more primary key attributes are  ommited, be sure that there is at most one item that could be identified with such set of primary key's values. If not, keychain will work with the one with oldest creation date, though some behaviour of this class may be undefined.
     /// - Parameters:
     ///   - service: Service attribute used as  part of primary key.
-    ///   - account: Account attribute used as oart of primary key.
+    ///   - account: Account attribute used as part of primary key.
     ///   - refreshPolicy: Refresh policy for superclass's purposes.
     ///   - defaultValue: Default value for superclass's purposes.
     ///   - protection: Default value for `accessControl` constructed with `modifyAccess(using:flags:)`. Setting access during  initialization is adviced.

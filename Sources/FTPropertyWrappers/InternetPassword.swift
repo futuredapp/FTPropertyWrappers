@@ -1,15 +1,30 @@
 import Foundation
 
+/// This class is property wrapper for `kSecClassInternetPassword` class. Simply put, this property wrapper should be used in case, that password is expected to be accessible from a browser. Refer to it's superclasses for more information on it's implementation.
 @propertyWrapper
 open class InternetPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
 
-    @QueryElement(key: kSecAttrServer) open var server: String?
-    @QueryElement(key: kSecAttrAccount) open var account: String?
-    @QueryElement(key: kSecAttrSecurityDomain) open var domain: String?
-    @QueryElement(key: kSecAttrProtocol) open var aProtocol: CFString?
-    @QueryElement(key: kSecAttrAuthenticationType) open var authenticationType: CFString?
-    @QueryElement(key: kSecAttrPort) open var port: UInt16?
-    @QueryElement(key: kSecAttrPath) open var path: String?
+    /// `QueryElement` user visible server. Server is part of keychain item's primary key. *Notice: once corresponding value stored in keychain, setting this property to `nil` will not have any effect. Delete the item from keychain in order to reset this attribute.*
+    @QueryElement(key: kSecAttrServer) open private(set) var server: String?
+
+    /// `QueryElement` user visible account. Account may be a part of keychain item's primary key. *Notice: once corresponding value stored in keychain, setting this property to `nil` will not have any effect. Delete the item from keychain in order to reset this attribute.*
+    @QueryElement(key: kSecAttrAccount) open private(set) var account: String?
+
+    /// `QueryElement` user visible domain. Domain may be a part of keychain item's primary key. *Notice: once corresponding value stored in keychain, setting this property to `nil` will not have any effect. Delete the item from keychain in order to reset this attribute.*
+    @QueryElement(key: kSecAttrSecurityDomain) open private(set) var domain: String?
+
+    /// `QueryElement` user visible protocol. Values of this attribute are listed in Keychain documentation. Protocol may be a part of keychain item's primary key. *Notice: once corresponding value stored in keychain, setting this property to `nil` will not have any effect. Delete the item from keychain in order to reset this attribute.*
+    @QueryElement(key: kSecAttrProtocol) open private(set) var aProtocol: CFString?
+
+    /// `QueryElement` user visible server-side authentication type. Values of this attribute are listed in Keychain documentation. Authentication type may be a part of keychain item's primary key. *Notice: once corresponding value stored in keychain, setting this property to `nil` will not have any effect. Delete the item from keychain in order to reset this attribute.*
+    @QueryElement(key: kSecAttrAuthenticationType) open private(set) var authenticationType: CFString?
+
+    /// `QueryElement` user visible port. Port may be a part of keychain item's primary key. *Notice: once corresponding value stored in keychain, setting this property to `nil` will not have any effect. Delete the item from keychain in order to reset this attribute.*
+    @QueryElement(key: kSecAttrPort) open private(set) var port: UInt16?
+
+    /// `QueryElement` user visible path. Path may be a part of keychain item's primary key. *Notice: once corresponding value stored in keychain, setting this property to `nil` will not have any effect. Delete the item from keychain in order to reset this attribute.*
+    @QueryElement(key: kSecAttrPath) open private(set) var path: String?
+
 
     override open var itemClass: CFString { kSecClassInternetPassword }
 
@@ -28,6 +43,17 @@ open class InternetPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
         set { super.wrappedValue = newValue }
     }
 
+    /// Creates instance of internet password. If one or more primary key attributes are  ommited, be sure that there is at most one item that could be identified with such set of primary key's values. If not, keychain will work with the one with oldest creation date, though some behaviour of this class may be undefined.
+    /// - Parameters:
+    ///   - server: Server attribute used as  part of primary key.
+    ///   - account: Account attribute used as  part of primary key.
+    ///   - domain: Domain attribute used as  part of primary key.
+    ///   - aProtocol: Protocol attribute used as  part of primary key.
+    ///   - authenticationType: Server-side authentication type attribute used as  part of primary key.
+    ///   - port: Port attribute used as  part of primary key.
+    ///   - path: Path attribute used as  part of primary key.
+    ///   - refreshPolicy: Refresh policy for superclass's purposes.
+    ///   - defaultValue: Default value for superclass's purposes.
     public init(
         server: String,
         account: String? = nil,
