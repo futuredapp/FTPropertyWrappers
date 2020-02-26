@@ -39,6 +39,8 @@ TODO:
 
 ### `InternetPassword<T>`
 
+## Contributors
+
 Current maintainer and main contributor is [Mikoláš Stuchlík](https://github.com/mikolasstuchlik), <mikolas.stuchlik@futured.app>.
 
 We want to thank other contributors, namely:
