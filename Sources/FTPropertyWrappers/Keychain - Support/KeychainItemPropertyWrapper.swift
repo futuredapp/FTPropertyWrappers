@@ -17,7 +17,7 @@ import Foundation
 /// on Int will result in fetch and update operation at the same time) or manual operation execution using
 /// `try saveToKeychain()`, `try loadFromKeychain()` and `try deleteKeychain()`
 ///  - Note:
-/// . If automatic synchronization is set and nil is passed to `wrappedValue`, items is deleted from keychain.
+/// . If  nil is passed to `wrappedValue` and save operation is executed, item is going to be deleted from store.
 open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
 
     /// Private encoder for keychain with specific calling convention for `Data`
