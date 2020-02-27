@@ -34,7 +34,11 @@ struct ContentView: View {
                 Button(action: {
                     do {
                         try self._data.loadFromKeychain()
-                        self.log += "Loaded: Age: \(self.data!.age), PL: \(self.data!.powerLevel)\n"
+                        if let data = self.data {
+                            self.log += "Loaded: Age: \(data.age), PL: \(data.powerLevel)\n"
+                        } else {
+                            self.log += "Loaded: <null>\n"
+                        }
                     } catch {
                         self.log += "\(error.localizedDescription)\n"
                     }
@@ -43,9 +47,14 @@ struct ContentView: View {
                 }
                 Button(action: {
                     do {
-                        self.data = Hidden(age: self.numberOfSaves, powerLevel: self.data?.powerLevel ?? Int.random(in: 0...9001))
+                        self.numberOfSaves += 1
+                        if self.data == nil {
+
+                            try self._data.modifyAccess(using: .whenUnlocked, flags: [.biometryAny, .or, .devicePasscode])
+                        }
+                        self.data = Hidden(age: self.numberOfSaves, powerLevel: self.data?.powerLevel ?? UInt64.random(in: 0...9001))
                         try self._data.saveToKeychain()
-                        self.log += "Saved: Age: \(self.data?.age), PL: \(self.data?.powerLevel)\n"
+                        self.log += "Saved: Age: \(self.data!.age), PL: \(self.data!.powerLevel)\n"
                     } catch {
                         self.log += "\(error.localizedDescription)\n"
                     }
