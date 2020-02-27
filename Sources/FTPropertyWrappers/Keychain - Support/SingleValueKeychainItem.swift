@@ -1,71 +1,117 @@
 import Foundation
 
-/// `SingleValueKeychainItem` is an "abstract" base class for keychain items that are differentiable using certain combination of it's attributes as a form of primary key. This class does not have any safety check when more than one item corresponds to the primary key.
+/// `SingleValueKeychainItem` is an "abstract" base class for keychain items that are differentiable using
+/// certain combination of it's attributes as a form of primary key. This class does not have any safety check when
+/// more than one item corresponds to the primary key.
 ///
 /// This class provides following services to it's subclasses.:
 ///
-*Query composition and execution.* Queries are composed from three main sources of data.
+/// * *Query composition and execution.* Queries are composed from three main sources of data.
 ///
-/// 1. `QueryElement` property wrappers. Data from wrapped values and it's metadata (like keys and constraints) are collected and composed into a query. When fetch query was executed, those properties are updated accordingly. Refer to `QueryElement` for more implementation details.
-/// 2. `itemClass` property. This propety's value is used as a value for key `kSecClass`.
-/// 3. `primaryKey` property contains list of kSecAttr**** identifiers which should be excluded from updates and are used to identify the keychain item in fetch, update and delte queries. *Query value and fetch resukts* are read and passed to `itemData` computed property.
+///     1. `QueryElement` property wrappers. Data from wrapped values and it's
+///     metadata (like keys and constraints) are collected and composed into a query.
+///      When fetch query was executed, those properties are updated accordingly.
+///      Refer to `QueryElement` for more implementation details.
+///     2. `itemClass` property. This propety's value is used as a value for key
+///     `kSecClass`.
+///     3. `primaryKey` property contains list of kSecAttr**** identifiers which
+///     should be excluded from updates and are used to identify the keychain item in
+///      fetch, update and delte queries. *Query value and fetch resukts* are read
+///      and passed to `itemData` computed property.
 ///
-/// *Overriding interface.* Subclasses are required to override propeties `itemClass`, `primaryKey` and `itemData`. Do not call base class implementations which would result in fatalError, since those properties have no implementation. Subclasses are not required to provide any additional `QueryElements`. This class should not be overriden directly outside of this module. Doing so would be futile, since all execution methods are marked as `internal`.
+/// * *Overriding interface.* Subclasses are required to override propeties `itemClass`, `primaryKey` and
+///  `itemData`. Do not call base class implementations which would result in fatalError, since those properties
+///  have no implementation. Subclasses are not required to provide any additional `QueryElements`. This class
+///   should not be overriden directly outside of this module. Doing so would be futile, since all execution methods
+///   are marked as `internal`.
 ///
-/// *Override runtime support.* Override runtime support is used to support query composition mentioned in previous points. This class uses reflection in order to collect data from `QueryElement` propeties, which is used as an form of annotation in context of this class. Therefore any `QueryElement` property added in subclasses is automatically used in queries and has the same treatment as those declared in the base class.
+/// * *Override runtime support.* Override runtime support is used to support query composition mentioned in
+/// previous points. This class uses reflection in order to collect data from `QueryElement` propeties, which is
+/// used as an form of annotation in context of this class. Therefore any `QueryElement` property added in
+/// subclasses is automatically used in queries and has the same treatment as those declared in the base class.
 open class SingleValueKeychainItem {
 
-    /// `QueryElement` user visible description. *Notice: once corresponding value stored in keychain, setting this property to `nil` will not have any effect. Delete the item from keychain in order to reset this attribute.*
+    /// `QueryElement` user visible description.
+    /// - Note:
+    /// Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
+    /// Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrDescription) open var description: String?
 
-    /// `QueryElement` user editable comment. *Notice: once corresponding value stored in keychain, setting this property to `nil` will not have any effect. Delete the item from keychain in order to reset this attribute.*
+    /// `QueryElement` user editable comment.
+    /// - Note:
+    /// Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
+    /// Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrComment) open var comment: String?
 
-    /// `QueryElement` creator identifier. *Notice: once corresponding value stored in keychain, setting this property to `nil` will not have any effect. Delete the item from keychain in order to reset this attribute.*
+    /// `QueryElement` creator identifier.
+    /// - Note:
+    /// Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
+    /// Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrCreator) open var creator: CFNumber?
 
-    /// `QueryElement` type identifier. *Notice: once corresponding value stored in keychain, setting this property to `nil` will not have any effect. Delete the item from keychain in order to reset this attribute.*
+    /// `QueryElement` type identifier.
+    /// - Note:
+    /// Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
+    /// Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrType) open var type: CFNumber?
 
-    /// `QueryElement` label. This property may have a default value. *Notice: once corresponding value stored in keychain, setting this property to `nil` will not have any effect. Delete the item from keychain in order to reset this attribute.*
+    /// `QueryElement` label. This property may have a default value.
+    /// - Note:
+    /// Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
+    /// Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrLabel) open var label: String?
 
-    /// `QueryElement` is invisible indicates, whether this item should be displayed in keychain app. *Notice: once corresponding value stored in keychain, setting this property to `nil` will not have any effect. Delete the item from keychain in order to reset this attribute.*
+    /// `QueryElement` is invisible indicates, whether this item should be displayed in keychain app.
+    /// - Note:
+    /// Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
+    /// Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrIsInvisible) open var isInvisible: Bool?
 
 
-    /// `QueryElement` accessible specifies conditions for accessing this item. *Notice: once corresponding value stored in keychain, setting this property to `nil` will not have any effect. Delete the item from keychain in order to reset this attribute.*
+    /// `QueryElement` accessible specifies conditions for accessing this item.
+    /// - Note:
+    /// Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
+    /// Delete the item from keychain in order to reset this attribute.
     open var accesible: AccesibleOption? {
         get { _raw_accesible.flatMap(AccesibleOption.init(rawValue:)) }
         set { _raw_accesible = newValue?.rawValue }
     }
     @QueryElement(key: kSecAttrAccessible) private var _raw_accesible: CFString?
 
-    /// Read only `QueryElement` creation date. *Notice: this read-only attribute is synthesized by the keychain itself. Perform load operation before accessing this property to ensure it is up to date. *
+    /// Read only `QueryElement` creation date.
+    /// - Note:
+    /// This read-only attribute is synthesized by the keychain itself. Perform load operation before accessing this
+    /// property to ensure it is up to date.
     @QueryElement(readOnlyKey: kSecAttrCreationDate) open private(set) var creationDate: Date?
 
-    /// Read only `QueryElement` last modification date. *Notice: this read-only attribute is synthesized by the keychain itself. Perform load operation before accessing this property to ensure it is up to date.*
+    /// Read only `QueryElement` last modification date.
+    /// - Note:
+    /// This read-only attribute is synthesized by the keychain itself. Perform load operation before accessing this
+    /// property to ensure it is up to date.
     @QueryElement(readOnlyKey: kSecAttrModificationDate) open private(set) var modificationDate: Date?
 
     /// This property must return value for `kSecClass` key.
-    ///
+    ///  - Warning:
     /// This property requires override. Do not call this class's implementation.
     open var itemClass: CFString { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty class!") }
 
-    /// This property must return set of kSecAttr**** keys which are excluded from value-queries and inserted into identification queries.
-    ///
+    /// This property must return set of kSecAttr**** keys which are excluded from value-queries and inserted
+    /// into identification queries.
+    /// - Warning:
     /// This property requires override. Do not call this class's implementation.
     open var primaryKey: Set<CFString> { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty keys!") }
 
-    /// Data fetched from keychain are delegated to this computed propety and data for `kSecValueData` key is extracted from this computed property.
-    ///
+    /// Data fetched from keychain are delegated to this computed propety and data for `kSecValueData` key
+    /// is extracted from this computed property.
+    /// - Warning:
     /// This property requires override. Do not call this class's implementation.
     open var itemData: Data {
         get { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty data!") }
         set { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty data!") }
     }
 
-    /// This method extracts data of each `QueryElement` property in the subclass hiearchy using reflection. Thiss method is responsible for correct resolving of contraints.
+    /// This method extracts data of each `QueryElement` property in the subclass hiearchy using reflection.
+    /// Thiss method is responsible for correct resolving of contraints.
     private func composeQueryElements() -> [String: Any] {
         // Working data
         var elements = [String: Any]()
@@ -124,13 +170,15 @@ open class SingleValueKeychainItem {
         }
     }
 
-    /// Insert query comprises of data extracted from `QueryElement` properties, data and `kSecClass` identifier.
+    /// Insert query comprises of data extracted from `QueryElement` properties, data and `kSecClass`
+    /// identifier.
     private var insertQuery: [String: Any] {
         composeQueryElements()
             .merging([kSecClass as String: itemClass, kSecValueData as String: itemData]) { lhs, _ in lhs }
     }
 
-    /// Fetch query comprises of data extracted from `QueryElement` properties which keys are listed in `primaryKey`, `kSecClass` identifier, `kSecMatchLimit` set to match one and copy data and attributes.
+    /// Fetch query comprises of data extracted from `QueryElement` properties which keys are listed in
+    /// `primaryKey`, `kSecClass` identifier, `kSecMatchLimit` set to match one and copy data and attributes.
     private var fetchQuery: [String: Any] {
         var query: [String: Any] = composeQueryElements().filter { primaryKey.contains($0.key as CFString) }
 
@@ -142,7 +190,8 @@ open class SingleValueKeychainItem {
         return query
     }
 
-    /// Identifying subquery for update  comprises of data extracted from `QueryElement` properties which keys are listed in `primaryKey` and `kSecClass` identifier.
+    /// Identifying subquery for update  comprises of data extracted from `QueryElement` properties which
+    /// keys are listed in `primaryKey` and `kSecClass` identifier.
     private var updateFetchQuery: [String: Any] {
         composeQueryElements()
             .filter { primaryKey.contains($0.key as CFString) }
@@ -155,7 +204,8 @@ open class SingleValueKeychainItem {
             .merging([kSecValueData as String: itemData]) { lhs, _ in lhs }
     }
 
-    /// Delete query comprises of data extracted from `QueryElement` properties which keys are listed in `primaryKey` and `kSecClass` identifier.
+    /// Delete query comprises of data extracted from `QueryElement` properties which keys are listed in
+    /// `primaryKey` and `kSecClass` identifier.
     private var deleteQuery: [String: Any] {
         composeQueryElements()
             .filter { primaryKey.contains($0.key as CFString) }

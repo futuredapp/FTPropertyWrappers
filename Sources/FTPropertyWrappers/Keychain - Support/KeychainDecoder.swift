@@ -1,14 +1,24 @@
 import Foundation
 
-/// Internal decoder for keychain property wrapper. This decoder uses generic type T to decide at runtime, which decoding method should be used. Please refer to each individual decoding method for implementation details.
+/// Internal decoder for keychain property wrapper. This decoder uses generic type T to decide at runtime, which
+/// decoding method should be used. Please refer to each individual decoding method for implementation details.
 struct KeychainDecoder {
 
     /// Property list decoder is used for decoding if type `T` has no explicit decoding method.
     private let decoder: PropertyListDecoder = PropertyListDecoder()
 
-    /// Decode type `T` from provided `Data`. This method uses different method for each `T` which could be considered as a "single value". Collection and other `Decodable` types are decoded using `PropertyListDecoder`. *Notice: In rare instances (like string) `PropertyListDecoder` and this decoder's decoding strategy produces the same result. This is not an intended feature, however. This method is not implemented for floating point types.*
+    /// Decode type `T` from provided `Data`. This method uses different method for each `T` which could be
+    /// considered as a "single value". Collection and other `Decodable` types are decoded using
+    /// `PropertyListDecoder`.
+    /// - Note:
+    /// In rare instances (like string) `PropertyListDecoder` and this decoder's decoding strategy produces
+    /// the same result. This is not an intended feature, however. This method is not implemented for floating point
+    /// - Note:
+    /// *Calling convention*: if this method is called with type `Data` as a generic type T, this method should
+    /// return the data argument as-is without any changes.
+    /// types.
     /// - Parameters:
-    ///   - type: Type used for inferring decodation strategy and return type. *Calling convention: if this method is called with type `Data` as a generic type T, this method should return the data argument as-is without any changes.*
+    ///   - type: Type used for inferring decodation strategy and return type.
     ///   - data: Binary data to decode.
     func decode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
         switch type {
