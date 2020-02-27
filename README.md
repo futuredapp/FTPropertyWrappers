@@ -30,6 +30,35 @@ The main aim of this package is to provide programmer with access to commonly us
 
 ### `UserDefaults<T>`
 
+User Defaults property wrapper uses two main approaches for storing data in User Defaults. Primary approach is usage of Plist coders. If a data type can't be encoded using Plist coders, value is passed directly to User Default. When creating property wrapper, you have to provide key. All properties wrapped in this property wrapper have to be optional. 
+
+```swift
+// Stored via User Default's method
+@DefaultsStore(key: "key.for.number") var number: Int?
+
+// Stored as `Data` encoded by Plist coder
+struct Person: Codable {
+    let age: Int
+    let name: String
+}
+@DefaultsStore(key: "key.for.person") var person: Person?
+```
+
+Data are stored into `UserDefaults.standard` instance as a default. This behavior may be changed, if user provides custom `UserDefaults` instance with custom configuration. The same approach applies for Plist encoder/decoder.
+
+User may provide `defaultValue` during initialization. This value is returned as the property wrapper's value, in case that decoding process failed and/or there is no such value in the store. 
+
+```swift
+// Stored via User Default's method
+@DefaultsStore(key: "key.for.number", defaultValue: 10) var number: Int?
+
+print(number) // Prints: Optional(10)
+number = 30
+print(number) // Prints: Optional(30)
+number = nil
+print(number) // Prints: Optional(10)
+```
+
 ### `StoredSubject<T>`
 TODO:
 
