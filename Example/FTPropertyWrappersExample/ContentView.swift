@@ -34,7 +34,7 @@ struct ContentView: View {
                 Button(action: {
                     do {
                         try self._data.loadFromKeychain()
-                        self.log += "Age: \(self.data!.age), PL: \(self.data!.powerLevel)\n"
+                        self.log += "Loaded: Age: \(self.data!.age), PL: \(self.data!.powerLevel)\n"
                     } catch {
                         self.log += "\(error.localizedDescription)\n"
                     }
@@ -43,8 +43,9 @@ struct ContentView: View {
                 }
                 Button(action: {
                     do {
-                        self.data?.age = self.numberOfSaves
+                        self.data = Hidden(age: self.numberOfSaves, powerLevel: self.data?.powerLevel ?? Int.random(in: 0...9001))
                         try self._data.saveToKeychain()
+                        self.log += "Saved: Age: \(self.data?.age), PL: \(self.data?.powerLevel)\n"
                     } catch {
                         self.log += "\(error.localizedDescription)\n"
                     }
