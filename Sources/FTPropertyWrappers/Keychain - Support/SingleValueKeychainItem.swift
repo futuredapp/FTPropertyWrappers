@@ -4,7 +4,11 @@ import Foundation
 ///
 /// This class provides following services to it's subclasses.:
 ///
-/// *Query composition and execution.* Queries are composed from three main sources of data. 1) `QueryElement` property wrappers. Data from wrapped values and it's metadata (like keys and constraints) are collected and composed into a query. When fetch query was executed, those properties are updated accordingly. Refer to `QueryElement` for more implementation details. 2) `itemClass` property. This propety's value is used as a value for key `kSecClass`. 3) `primaryKey` property contains list of kSecAttr**** identifiers which should be excluded from updates and are used to identify the keychain item in fetch, update and delte queries. *Query value and fetch resukts* are read and passed to `itemData` computed property.
+*Query composition and execution.* Queries are composed from three main sources of data.
+///
+/// 1. `QueryElement` property wrappers. Data from wrapped values and it's metadata (like keys and constraints) are collected and composed into a query. When fetch query was executed, those properties are updated accordingly. Refer to `QueryElement` for more implementation details.
+/// 2. `itemClass` property. This propety's value is used as a value for key `kSecClass`.
+/// 3. `primaryKey` property contains list of kSecAttr**** identifiers which should be excluded from updates and are used to identify the keychain item in fetch, update and delte queries. *Query value and fetch resukts* are read and passed to `itemData` computed property.
 ///
 /// *Overriding interface.* Subclasses are required to override propeties `itemClass`, `primaryKey` and `itemData`. Do not call base class implementations which would result in fatalError, since those properties have no implementation. Subclasses are not required to provide any additional `QueryElements`. This class should not be overriden directly outside of this module. Doing so would be futile, since all execution methods are marked as `internal`.
 ///

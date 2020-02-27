@@ -1,6 +1,6 @@
 import Foundation
 
-/// This class does not override all requirred properties, using this class as such will result in fatalError. Properties `itemClass` and `primaryKey` needs to be overriden.  Common property wrapper components based on services provided in `SingleValueKeychainItem`.  This class is responsible for providing bridge between binary-based keychain API and typed system. It is also responsible for synchronizing data and deciding which query should be executed.
+/// This class does not override all requirred properties, using this class as such will result in fatalError. Properties `itemClass` and `primaryKey` needs to be overriden. Common property wrapper components based on services provided in `SingleValueKeychainItem`. This class is responsible for providing bridge between binary-based keychain API and typed system. It is also responsible for synchronizing data and deciding which query should be executed.
 ///
 /// *Coding.* This class uses module-internal coder which ensures, that all "single value" values could be ancoded (with exception for floating point types). For compatibility purposes, if `T` is `Data`, coder does no coding or decoding. This behavior is implemented this way in order to enable user to access data, that are not encoded in a particular way, for example .utf16 encoded string, ultra wide integers or JSON strings.
 ///
