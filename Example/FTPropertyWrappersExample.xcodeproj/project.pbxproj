@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,6 +13,7 @@
 		BEFFBBE62407F851009C83FC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BEFFBBE52407F851009C83FC /* Assets.xcassets */; };
 		BEFFBBE92407F851009C83FC /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BEFFBBE82407F851009C83FC /* Preview Assets.xcassets */; };
 		BEFFBBEC2407F851009C83FC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BEFFBBEA2407F851009C83FC /* LaunchScreen.storyboard */; };
+		BEFFBBF82407F9A7009C83FC /* FTPropertyWrappers in Frameworks */ = {isa = PBXBuildFile; productRef = BEFFBBF72407F9A7009C83FC /* FTPropertyWrappers */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BEFFBBF82407F9A7009C83FC /* FTPropertyWrappers in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -44,6 +46,7 @@
 				BEFFBBDE2407F84F009C83FC /* FTPropertyWrappersExample */,
 				BEFFBBDD2407F84F009C83FC /* Products */,
 				BEFFBBF52407F8C8009C83FC /* FTPropertyWrappers */,
+				BEFFBBF62407F9A7009C83FC /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -77,6 +80,13 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		BEFFBBF62407F9A7009C83FC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -93,6 +103,9 @@
 			dependencies = (
 			);
 			name = FTPropertyWrappersExample;
+			packageProductDependencies = (
+				BEFFBBF72407F9A7009C83FC /* FTPropertyWrappers */,
+			);
 			productName = FTPropertyWrappersExample;
 			productReference = BEFFBBDC2407F84F009C83FC /* FTPropertyWrappersExample.app */;
 			productType = "com.apple.product-type.application";
@@ -342,6 +355,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BEFFBBF72407F9A7009C83FC /* FTPropertyWrappers */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FTPropertyWrappers;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = BEFFBBD42407F84F009C83FC /* Project object */;
 }
