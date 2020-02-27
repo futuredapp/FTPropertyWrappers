@@ -64,6 +64,27 @@ TODO:
 
 ### `Serialized<T>`
 
+Searialized is a naive implementation of thread local property based on Dispatch (GCD). Special thread is created upon initialization and all read/write operations are performed on the thread. By default, read and write operations are blocking, therefore if you use read and write operation (like += on Int) two blocking operations are dispatched. 
+
+User may provide custom label for the thread.
+
+```swift
+@Serialized var number: Int = 20
+@Serialized(customQueue: "my.queue.identifier") var otherNumber: Int = 30
+```
+
+If you want to make multiple operations, dispatching multiple sync operations (and possible dead-lock) may be avoided by using `asyncAccess(transform:)` method.
+
+```swift
+_number.asyncAccess { current -> Int in
+    var someAggregator = current
+    for 0...10 {
+        someAggregator += current
+    }
+    return someAggregator
+}
+```
+
 ### `GenericPassword<T>` 
 
 ### `InternetPassword<T>`
