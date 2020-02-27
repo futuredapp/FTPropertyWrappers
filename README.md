@@ -124,6 +124,71 @@ Internally, all keychain property wrappes use coders which encode single value t
 
 ### `InternetPassword<T>`
 
+Internet password is keychain item class which is aimed at storing and organizing password for various internet services. It takes a huge advantage of attributes however, lacks biometric authentication support.
+
+```swift 
+@InternetPassword(
+    server: "my.server",
+    account: "my.account",
+    domain: "my.domain",
+    aProtocol: kSecAttrProtocolSSH,
+    authenticationType: kSecAttrAuthenticationTypeHTMLForm,
+    port: 8080,
+    path: "/a/b/c"
+) var myPassword: String?
+```
+
+Notice, that each argument in example above is park of "primary key" and omitting any of them may result in ambiguity. Following example will demonstrate two property wrappers with different declarations however with only one record in keychain.
+
+
+```swift 
+@InternetPassword(
+    server: "my.server",
+    account: "my.account",
+    domain: "my.domain",
+    aProtocol: kSecAttrProtocolSSH,
+    authenticationType: kSecAttrAuthenticationTypeHTMLForm,
+    port: 8080,
+    path: "/a/b/c"
+) var declA: String?
+@InternetPassword(
+    server: "my.server",
+    account: "my.account"
+) var declB: String?
+
+declA = "The Valley Wind"
+print(declB) // Prints Optional("The Valley Wind")
+```
+
+But different run with properties swapped will have different results.
+
+```swift 
+declB = "The Valley Wind"
+print(declA) // Prints nil
+```
+
+Let's consider third example, where we have property named `declC` that deffers from `declA` at `aProtocol` attribute. This will result in two different records in keychain. Which value will be displayed by `declB`?
+
+```swift 
+@InternetPassword(
+    server: "my.server",
+    account: "my.account",
+    domain: "my.domain",
+    aProtocol: kSecAttrProtocolFTP,
+    authenticationType: kSecAttrAuthenticationTypeHTMLForm,
+    port: 8080,
+    path: "/a/b/c"
+) var declc: String?
+
+declC = "The Sixth Station"
+declA = "The Valley Wind"
+print(declB) // Prints Optional("The Sixth Station")
+try _declC.deleteKeychain()
+print(declB) // Prints Optional("The Valley Wind")
+```
+
+It appears, that in case of ambiguity, element with the oldest `creationDate` is selected as the result. This statement has no basis in documentation, however is tested in unit tests. Same considertation do apply for other keychain item classes.
+
 ## Contributors
 
 Current maintainer and main contributor is [Mikoláš Stuchlík](https://github.com/mikolasstuchlik), <mikolas.stuchlik@futured.app>.
