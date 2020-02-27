@@ -87,6 +87,41 @@ _number.asyncAccess { current -> Int in
 
 ### `GenericPassword<T>` 
 
+Generic Password is property wrappech which makes possible to store data in Keychain as `kSecClassGenericPassword` keychain item class. It allowes to store any `Codable` data type including single values like `Int` or `String`.  Our implementation has also some advanced features like inspecting and modifying attributes. However, the main aim is to avoid putting uneeded syntax burden on user. Just keep in mind, that some attributes, like `service` is required by implementation in order to identify data in keychain and provide stable property wrapper API.
+
+```swift
+@GenericPassword(service: "my.service") var myName: String?
+myName = "Peter Parker"
+@GenericPassword(service: "my.service") var otherProperty: String?
+print(otherProperty) // prints Optional("Peter Parker")
+```
+
+As you can see, property was loaded and stored upon access. It is possible to disable such a behavior. However, if you want inspect and modify attributes of the keychain item, like for example `comment`, you need to load the keychain item manually and store it manually. Due to limitations in C-based API, we're not able to reset (delete) an attribute once it's set. You would need to delete and re-insert the item into keychain.
+
+```swift
+@GenericPassword(service: "my.service") var myName: String?
+try _myName.loadFromKeychain()
+_myName.comment = "This is name of a secret hero! Do not show it on public!"
+try _myName.saveToKeychain()
+```
+
+If you want to delete item from keychain, simply set wrapped property to nil and save it to the keychain. You can also delete the item manually. 
+
+```swift
+@GenericPassword(service: "my.service") var myName: String?
+myName = nil // Deletes immediately since myName is saved upon access
+try _myName.saveToKeychain() // Deletes since wrapped property is nil
+try _myName.deleteKeychain() // Explicit delete.
+```
+
+TODO: Insert example of biometric authentication once example app is done.
+
+Internally, all keychain property wrappes use coders which encode single value types in a specific way (refer to `KeychainEncoder` and `KeychainDecoder` structures for more details) and for keyed value types or collections uses binary Plist. However, in case that default coding is not desired, using type `Data` as generic type will provide user with bare data as loaded and stored in keychain. Use this approarch, for example, to store or load Utf16 encoded strings or JSON encoded keyed containers.
+
+```swift
+@GenericPassword(service: "my.service") var myData: Data?
+```
+
 ### `InternetPassword<T>`
 
 ## Contributors
