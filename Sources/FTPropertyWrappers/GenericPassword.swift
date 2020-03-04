@@ -6,6 +6,12 @@ import Foundation
 @propertyWrapper
 open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
 
+    /// Arguments needed in order to create instance of `SecAccessControl`.
+    public struct AccessControlSettings {
+        public let access: CFString
+        public let flags: SecAccessControlCreateFlags
+    }
+
     /// `QueryElement` user visible account. Account may be a part of keychain item's primary key.
     /// - Note:
     ///  Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
@@ -17,6 +23,14 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
     ///  Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
     ///  Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrService) open private(set) var service: String?
+
+    /// Default value for access control attribute. This default value is applied upon saving in case, that
+    /// `accessControl` attribute is nil.
+    /// - Note:
+    /// Load operation may reset `accessControl` without filling appropriate value. When this default value
+    /// is used, save operation may trigger exception due to invalid contents of this property. Whether this value
+    /// is invalid can't be determined before runtime.
+    public let defaultAccessControl: AccessControlSettings?
 
     /// `QueryElement` accessControl. Access control overrides accesible property, which is hereby ignored.
     /// This is result of accessible's value being part of accessControl's value. Accessible is therefore not needed
@@ -50,40 +64,20 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
     ///   - refreshPolicy: Refresh policy for `wrappedProperty`.
     ///   - defaultValue: Default value for `wrappedProperty` in case, that no `cachedValue` is
     ///   present.
+    ///   - defaultProtection: Parameter containing options for kSecAttrAccessControl attribute. This
+    ///   attribute is set upon store operation in case, that current state of it's property is nil. Setting of the
+    ///   attribute may trigger exception and as a result abort saving.
     public init(
         service: String,
         account: String? = nil,
         refreshPolicy: KeychainDataRefreshPolicy = .onAccess,
-        defaultValue: T? = nil
+        defaultValue: T? = nil,
+        defaultProtection: AccessControlSettings? = nil
     ) {
+        self.defaultAccessControl = defaultProtection
         super.init(refreshPolicy: refreshPolicy, defaultValue: defaultValue)
         self.service = service
         self.account = account
-    }
-
-    /// Creates instance of generic password with specified access policy. If one or more primary key attributes are
-    /// ommited, make sure that there is at only one item that could be identified with such set of values of the
-    /// primary key. If not, keychain will work with the one with oldest creation date, though some behaviour of this
-    /// class may be undefined.
-    /// - Parameters:
-    ///   - service: Service attribute used as part of primary key.
-    ///   - account: Account attribute used as part of primary key.
-    ///   - refreshPolicy: Refresh policy for `wrappedProperty`.
-    ///   - defaultValue: Default value for `wrappedProperty` in case, that no `cachedValue` is
-    ///   present.
-    ///   - protection: Default value for `accessControl` constructed with `modifyAccess(using:flags:)`.
-    ///   Setting access during initialization is advised.
-    public convenience init(
-        service: String,
-        account: String? = nil,
-        refreshPolicy: KeychainDataRefreshPolicy = .onAccess,
-        defaultValue: T? = nil,
-        protection: (access: CFString, flags: SecAccessControlCreateFlags)? = nil
-    ) throws {
-        self.init(service: service, account: account, refreshPolicy: refreshPolicy, defaultValue: defaultValue)
-        if let protection = protection {
-            try self.modifyAccess(using: protection.access, flags: protection.flags)
-        }
     }
 
     /// Modifies `accessControl` property. This method may reject arguments. For more information refer to
@@ -110,6 +104,15 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
         }
 
         accessControl = access
+    }
+
+    override open func saveToKeychain() throws {
+        // Set default access control if current access control is nil.
+        if let defaultSettings = self.defaultAccessControl, accessControl == nil {
+            try modifyAccess(using: defaultSettings.access, flags: defaultSettings.flags)
+        }
+        
+        try super.saveToKeychain()
     }
 
 }
