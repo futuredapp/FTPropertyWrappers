@@ -62,8 +62,10 @@ public enum KeychainQueryPresenceConstraint {
 /// are resolved.
 public final class QueryElement<T>: WrappedConfiguringElement {
 
-    /// Value corresponding to the attribute key. *Notice: when a value of corresponding key is alredy present in
-    /// the keychain, setting wrapped value to nil will not unset this attribute in keychain.*
+    /// Value corresponding to the attribute key.
+    /// - Note:
+    /// When a value of corresponding key is alredy present in he keychain, setting wrapped value to nil will not
+    /// unset this attribute in keychain.
     public var wrappedValue: T?
 
     /// kSecAttr**** key at keychain query.
@@ -84,8 +86,9 @@ public final class QueryElement<T>: WrappedConfiguringElement {
     }
 
     /// Creates regular query element. Elements created with this initializer are written to queries and parsed from
-    /// responses. *Notice: when a value of corresponding key is alredy present in the keychain, setting wrapped
-    /// value to nil will not unset this attribute in keychain.*
+    /// responses.
+    /// - Note: When a value of corresponding key is alredy present in the keychain, setting wrapped value to
+    /// nil will not unset this attribute in keychain.
     /// - Parameters:
     ///   - key: Corresponding kSecAttr**** key at keychain query.
     ///   - constraints: Constraints are result of conditions described in Apple's documentation.
