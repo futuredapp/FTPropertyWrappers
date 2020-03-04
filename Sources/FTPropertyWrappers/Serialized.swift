@@ -14,7 +14,6 @@ public final class Serialized<Value> {
         }
     }
 
-
     /// Did set observer for stored property. Notice, that didSet event is called on the synchronization queue.
     /// You should free this thread as soon as possible with async call, since complex operations would slow down the synchrounous access
     /// to the property.
@@ -28,6 +27,18 @@ public final class Serialized<Value> {
         value = wrappedValue
     }
 
+    /// Initializes the property wrapper. Default value is NOT inserted on synchronization queue. This initializer
+    /// allows to provide custom queue. This initializer must be overloaded. If we use default value in
+    /// initializer, compiler can not syntetize default constructor for enclosing types that accepts generic type
+    /// - Warning:
+    /// Queue provided by programmer should not be concurrent!
+    /// - Parameters:
+    ///   - wrappedValue: Default value, not inserted on synchronization queue
+    ///   - queue: Custom synchronization queue.
+    public init(wrappedValue: Value, customQueue queue: DispatchQueue) {
+        self.queue = queue
+        self.value = wrappedValue
+    }
 
     /// Initializes the property wrapper. Default value is NOT inserted on synchronization queue. This initializer
     /// allows to specify custom queue name. This initializer must be overloaded. If we use default value in
