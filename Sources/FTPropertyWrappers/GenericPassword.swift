@@ -9,13 +9,13 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
     /// `QueryElement` user visible account. Account may be a part of keychain item's primary key.
     /// - Note:
     ///  Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
-    ///  Delete the item from keychain in order to reset this attribute.*
+    ///  Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrAccount) open private(set) var account: String?
 
     /// `QueryElement` user visible service. The service is part of the primary key of the keychain item.
     /// - Note:
     ///  Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
-    ///  Delete the item from keychain in order to reset this attribute.*
+    ///  Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrService) open private(set) var service: String?
 
     /// `QueryElement` accessControl. Access control overrides accesible property, which is hereby ignored.
@@ -26,7 +26,7 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
     /// item was deleted from keychain, this property must be set again afterwards.
     /// - Note:
     /// Once corresponding value stored in keychain, setting this property to `nil` will not have any effect. Delete
-    /// the item from keychain in order to reset this attribute.*
+    /// the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrAccessControl,
                   constraints: [.override(kSecAttrAccessible)]) open private(set) var accessControl: SecAccessControl?
 

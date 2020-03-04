@@ -15,9 +15,9 @@ import Foundation
 /// *Synchronization and query execution.* This class can be set to either refresh data when read
 /// or write operation is executed on `wrappedProperty` (notice, read-werite operation like += 1
 /// on Int will result in fetch and update operation at the same time) or manual operation execution using
-/// `try saveToKeychain()`, `try loadFromKeychain()` and `try deleteKeychain()`
+/// `try saveToKeychain()`, `try loadFromKeychain()` and `try deleteKeychain()`.
 ///  - Note:
-/// . If  nil is passed to `wrappedValue` and save operation is executed, item is going to be deleted from store.
+/// If  nil is passed to `wrappedValue` and save operation is executed, item is going to be deleted from store.
 open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
 
     /// Private encoder for keychain with specific calling convention for `Data`
