@@ -9,45 +9,45 @@ open class InternetPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
     /// `QueryElement` user visible server. Server is part of keychain item's primary key.
     /// - Note:
     ///  Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
-    ///  Delete the item from keychain in order to reset this attribute.*
+    ///  Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrServer) open private(set) var server: String?
 
     /// `QueryElement` user visible account. Account may be a part of keychain item's primary key.
     /// - Note:
     ///  Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
-    ///  Delete the item from keychain in order to reset this attribute.*
+    ///  Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrAccount) open private(set) var account: String?
 
     /// `QueryElement` user visible domain. Domain may be a part of keychain item's primary key.
     /// - Note:
     ///  Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
-    ///  Delete the item from keychain in order to reset this attribute.*
+    ///  Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrSecurityDomain) open private(set) var domain: String?
 
     /// `QueryElement` user visible protocol. Values of this attribute are listed in Keychain documentation.
     /// Protocol may be a part of keychain item's primary key.
     /// - Note:
     ///  Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
-    ///  Delete the item from keychain in order to reset this attribute.*
+    ///  Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrProtocol) open private(set) var aProtocol: CFString?
 
     /// `QueryElement` user visible server-side authentication type. Values of this attribute are listed in
     /// Keychain documentation. Authentication type may be a part of keychain item's primary key.
     /// - Note:
     ///  Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
-    ///  Delete the item from keychain in order to reset this attribute.*
+    ///  Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrAuthenticationType) open private(set) var authenticationType: CFString?
 
     /// `QueryElement` user visible port. Port may be a part of keychain item's primary key.
     /// - Note:
     ///  Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
-    ///  Delete the item from keychain in order to reset this attribute.*
+    ///  Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrPort) open private(set) var port: UInt16?
 
     /// `QueryElement` user visible path. Path may be a part of keychain item's primary key.
     /// - Note:
     ///  Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
-    ///  Delete the item from keychain in order to reset this attribute.*
+    ///  Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrPath) open private(set) var path: String?
 
 
