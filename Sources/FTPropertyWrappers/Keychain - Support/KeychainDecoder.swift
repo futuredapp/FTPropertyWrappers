@@ -46,10 +46,6 @@ struct KeychainDecoder {
             throw DecodingError.dataCorrupted(
                 DecodingError.Context(codingPath: [], debugDescription: "Decoding root type Float not supported!", underlyingError: nil)
             )
-        case is Float80.Type:
-            throw DecodingError.dataCorrupted(
-                DecodingError.Context(codingPath: [], debugDescription: "Decoding root type Float80 not supported!", underlyingError: nil)
-            )
         case is Double.Type:
             throw DecodingError.dataCorrupted(
                 DecodingError.Context(codingPath: [], debugDescription: "Decoding root type Double not supported!", underlyingError: nil)
