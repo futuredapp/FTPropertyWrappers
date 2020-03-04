@@ -16,7 +16,7 @@ public final class Serialized<Value> {
 
 
     /// Did set observer for stored property. Notice, that didSet event is called on the synchronization queue.
-    /// You should free this thread asap with async call, since complex operations would slow down sync access
+    /// You should free this thread as soon as possible with async call, since complex operations would slow down the synchrounous access
     /// to the property.
     public var didSet: ((Value) -> Void)?
 
@@ -41,7 +41,7 @@ public final class Serialized<Value> {
         value = wrappedValue
     }
 
-    /// Defaul access interface for enclodes property. Setter and getter are both dispatched sync on the queue.
+    /// Default access interface for enclodes property. Setter and getter are both dispatched sync on the queue.
     public var wrappedValue: Value {
         get { queue.sync { value } }
         set {

@@ -17,7 +17,7 @@ public final class DefaultsStore<Value: Codable> {
     /// domain.
     private let key: String
 
-    /// Default valure returned by enclodes property getter in case, that property is not found in the UserDefaults
+    /// Default value returned by enclosing property getter in case, that property is not found in the UserDefaults
     private let defaultValue: Value?
 
     /// Initializes the user defaults property wrapper.
@@ -39,7 +39,7 @@ public final class DefaultsStore<Value: Codable> {
 
     /// Getter and setter for enclosed property. Property itself is not stored in this class and is always returned and
     /// stored from/into UserDefaults. This computed property attempts to store/load type as if it was a complex
-    /// propety first. In case it is not encodable/decodable, this getter attemts to retrieve it it's raw form and cast it
+    /// propety first. In case it is not encodable/decodable, this getter attemts to retrieve if its in raw form and cast it
     /// into requested type, thus being able to store default primitive types such as int or other types such as String.
     /// If those attempts fail, default value is returned. Setter also tries to store enclosed type as encoded value,
     /// otherwise it calls default set(:forKey:) method, thus storing primitive types such as int.
