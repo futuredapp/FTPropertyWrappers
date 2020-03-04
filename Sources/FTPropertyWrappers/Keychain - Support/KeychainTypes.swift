@@ -163,35 +163,3 @@ public enum KeychainError: Error {
         }
     }
 }
-
-/// `AccesibleOption` encapsulates all constants for attribute kSecAttrAccessible, that are present in current
-/// OS versions.
-public enum AccesibleOption: CaseIterable {
-    case whenPasswordSetThisDeviceOnly
-    case whenUnlockedThisDeviceOnly
-    case whenUnlocked
-    case afterFirstUnlockThisDeviceOnly
-    case afterFirstUnlock
-
-    public var rawValue: CFString {
-        switch self {
-        case .whenPasswordSetThisDeviceOnly:
-            return kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
-        case .whenUnlockedThisDeviceOnly:
-            return kSecAttrAccessibleWhenUnlockedThisDeviceOnly
-        case .whenUnlocked:
-            return kSecAttrAccessibleWhenUnlocked
-        case .afterFirstUnlockThisDeviceOnly:
-            return kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-        case .afterFirstUnlock:
-            return kSecAttrAccessibleAfterFirstUnlock
-        }
-    }
-
-    public init?(rawValue: CFString) {
-        guard let value = AccesibleOption.allCases.first(where: { rawValue == $0.rawValue }) else {
-            return nil
-        }
-        self = value
-    }
-}

@@ -78,7 +78,7 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
         account: String? = nil,
         refreshPolicy: KeychainDataRefreshPolicy = .onAccess,
         defaultValue: T? = nil,
-        protection: (access: AccesibleOption, flags: SecAccessControlCreateFlags)? = nil
+        protection: (access: CFString, flags: SecAccessControlCreateFlags)? = nil
     ) throws {
         self.init(service: service, account: account, refreshPolicy: refreshPolicy, defaultValue: defaultValue)
         if let protection = protection {
@@ -97,10 +97,10 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
     ///   attribute may have been set before.
     ///   - flags: Access control flags, for more information visit Keychain documentation, since this argument
     ///   is used as-is.
-    public func modifyAccess(using accessible: AccesibleOption, flags: SecAccessControlCreateFlags) throws {
+    public func modifyAccess(using accessible: CFString, flags: SecAccessControlCreateFlags) throws {
         var error: Unmanaged<CFError>?
 
-        let access = SecAccessControlCreateWithFlags(nil, accessible.rawValue, flags, &error)
+        let access = SecAccessControlCreateWithFlags(nil, accessible, flags, &error)
         if let error = error?.takeRetainedValue() as Error? {
             throw KeychainError.accessControllError(status: error)
         }

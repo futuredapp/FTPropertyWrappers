@@ -67,16 +67,11 @@ open class SingleValueKeychainItem {
     /// Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrIsInvisible) open var isInvisible: Bool?
 
-
     /// `QueryElement` accessible specifies conditions for accessing this item.
     /// - Note:
     /// Once corresponding value stored in keychain, setting this property to `nil` will not have any effect.
     /// Delete the item from keychain in order to reset this attribute.
-    open var accesible: AccesibleOption? {
-        get { _raw_accesible.flatMap(AccesibleOption.init(rawValue:)) }
-        set { _raw_accesible = newValue?.rawValue }
-    }
-    @QueryElement(key: kSecAttrAccessible) private var _raw_accesible: CFString?
+    @QueryElement(key: kSecAttrAccessible) open var accesible: CFString?
 
     /// Read only `QueryElement` creation date.
     /// - Note:
