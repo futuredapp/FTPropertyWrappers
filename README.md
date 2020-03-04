@@ -2,7 +2,7 @@
 
 ![Swift](https://github.com/futuredapp/FTPropertyWrappers/workflows/Swift/badge.svg)
 
-Commonly used features implemented in Swift's property wrapper layer. This package contains wrappers for User Defaults, Keychain, Publisher and synchronization.
+Package featuring wrappers commonly used in our projects. This package contains property wrappers for User Defaults, Keychain, StoredSubject and synchronization.
 
 ## Installation
 
@@ -21,14 +21,14 @@ pod 'FTPropertyWrappers', '~> 1.0'
 
 The main aim of this package is to provide programmer with access to commonly used features or snippets with as easy API as possible. Runtime efficiency, while important, is not the main focus of this package. As for today, this package contains wrappers for following features:
 
-- `UserDefaults<T>` for storing a value inside Foundation's User Defaults
-- `StoredSubject<T>` which is simple multidelegate/observing primitive for Swift
-- `Serialized<T>` is naive implementation of property living on a certain thread using Dispatch
-- `GenericPassword<T>` and `InternetPassword<T>` are implementation of two classes storable in Keychain, with ability to inspect certain keychain item's attributes
+- `UserDefaults` for storing a value inside Foundation's User Defaults
+- `StoredSubject` which is simple multidelegate/observing primitive for Swift
+- `Serialized` is naive implementation of property living on a certain thread using Dispatch
+- `GenericPassword` and `InternetPassword` are implementation of two classes storable in Keychain, with ability to inspect certain keychain item's attributes
 
 ## Usage
 
-### `UserDefaults<T>`
+### `UserDefaults`
 
 User Defaults property wrapper uses two main approaches for storing data in User Defaults. Primary approach is usage of Plist coders. If a data type can't be encoded using Plist coders, value is passed directly to User Default. When creating property wrapper, you have to provide key. All properties wrapped in this property wrapper have to be optional. 
 
@@ -59,10 +59,10 @@ number = nil
 print(number) // Prints: Optional(10)
 ```
 
-### `StoredSubject<T>`
+### `StoredSubject`
 TODO:
 
-### `Serialized<T>`
+### `Serialized`
 
 Searialized is a naive implementation of thread local property based on Dispatch (GCD). Special thread is created upon initialization and all read/write operations are performed on the thread. By default, read and write operations are blocking, therefore if you use read and write operation (like += on Int) two blocking operations are dispatched. 
 
@@ -85,7 +85,7 @@ _number.asyncAccess { current -> Int in
 }
 ```
 
-### `GenericPassword<T>` 
+### `GenericPassword` 
 
 Generic Password is property wrappech which makes possible to store data in Keychain as `kSecClassGenericPassword` keychain item class. It allowes to store any `Codable` data type including single values like `Int` or `String`.  Our implementation has also some advanced features like inspecting and modifying attributes. However, the main aim is to avoid putting uneeded syntax burden on user. Just keep in mind, that some attributes, like `service` is required by implementation in order to identify data in keychain and provide stable property wrapper API.
 
@@ -122,7 +122,7 @@ Internally, all keychain property wrappes use coders which encode single value t
 @GenericPassword(service: "my.service") var myData: Data?
 ```
 
-### `InternetPassword<T>`
+### `InternetPassword`
 
 Internet password is keychain item class which is aimed at storing and organizing password for various internet services. It takes a huge advantage of attributes however, lacks biometric authentication support.
 
