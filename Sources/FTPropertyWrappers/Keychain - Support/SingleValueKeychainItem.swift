@@ -19,11 +19,11 @@ import Foundation
 ///      fetch, update and delte queries. *Query value and fetch resukts* are read
 ///      and passed to `itemData` computed property.
 ///
-/// * *Overriding interface.* Subclasses are required to override propeties `itemClass`, `primaryKey` and
-///  `itemData`. Do not call base class implementations which would result in fatalError, since those properties
-///  have no implementation. Subclasses are not required to provide any additional `QueryElements`. This class
-///   should not be overriden directly outside of this module. Doing so would be futile, since all execution methods
-///   are marked as `internal`.
+/// * *Overriding interface.* Subclasses are required to override propeties `itemClass` and `primaryKey`.
+///  Do not call base class implementations which would result in fatalError, since those properties have no
+///  implementation. Subclasses are not required to provide any additional `QueryElements`. This class
+///  should not be overriden directly outside of this module. Doing so would be futile, since all execution methods
+///  are marked as `internal`.
 ///
 /// * *Override runtime support.* Override runtime support is used to support query composition mentioned in
 /// previous points. This class uses reflection in order to collect data from `QueryElement` propeties, which is
@@ -96,15 +96,6 @@ open class SingleValueKeychainItem {
     /// This property requires override. Do not call this class's implementation.
     open var primaryKey: Set<CFString> { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty keys!") }
 
-    /// Data fetched from keychain are delegated to this computed propety and data for `kSecValueData` key
-    /// is extracted from this computed property.
-    /// - Warning:
-    /// This property requires override. Do not call this class's implementation.
-    open var itemData: Data {
-        get { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty data!") }
-        set { fatalError("FTPropertyWrappers SingleValueKeychainItem: error: empty data!") }
-    }
-
     /// This method extracts data of each `QueryElement` property in the subclass hiearchy using reflection.
     /// Thiss method is responsible for correct resolving of contraints.
     private func composeQueryElements() -> [String: Any] {
@@ -148,7 +139,7 @@ open class SingleValueKeychainItem {
 
     /// Configure all `QueryElement` properties in this class and it's subclasses using reflection.
     /// - Parameter searchResult: Response copied from keychain.
-    private func configure(from searchResult: [String: Any]) {
+    private func configure(from searchResult: [String: Any]) -> Data? {
         Mirror(reflecting: self).forEachChildInClassHiearchy { child in
             // Checking whether child is `QueryElement`
             guard var element = child.value as? WrappedConfiguringElement else {
@@ -157,24 +148,20 @@ open class SingleValueKeychainItem {
             element.wrappedAsAnonymous = searchResult[element.key]
         }
 
-        // Set data
-        if let data = searchResult[kSecValueData as String] as? Data {
-            itemData = data
-        } else {
-            print("FTPropertyWrappers KeychainItem insertQuery: warning: update request without data")
-        }
+        return searchResult[kSecValueData as String] as? Data
     }
 
     /// Insert query comprises of data extracted from `QueryElement` properties, data and `kSecClass`
     /// identifier.
-    private var insertQuery: [String: Any] {
-        composeQueryElements()
+    /// - Parameter itemData: Data which will be stored into keychain.
+    private func insertQuery(with itemData: Data) -> [String: Any] {
+        return composeQueryElements()
             .merging([kSecClass as String: itemClass, kSecValueData as String: itemData]) { lhs, _ in lhs }
     }
 
     /// Fetch query comprises of data extracted from `QueryElement` properties which keys are listed in
     /// `primaryKey`, `kSecClass` identifier, `kSecMatchLimit` set to match one and copy data and attributes.
-    private var fetchQuery: [String: Any] {
+    private func fetchQuery() -> [String: Any] {
         var query: [String: Any] = composeQueryElements().filter { primaryKey.contains($0.key as CFString) }
 
         query[kSecClass as String] = itemClass
@@ -187,22 +174,23 @@ open class SingleValueKeychainItem {
 
     /// Identifying subquery for update  comprises of data extracted from `QueryElement` properties which
     /// keys are listed in `primaryKey` and `kSecClass` identifier.
-    private var updateFetchQuery: [String: Any] {
-        composeQueryElements()
+    private func updateFetchQuery() -> [String: Any] {
+        return composeQueryElements()
             .filter { primaryKey.contains($0.key as CFString) }
             .merging([kSecClass as String: itemClass]) { lhs, _ in lhs }
     }
 
     /// Data subquery for update  comprises of data extracted from `QueryElement` properties and data.
-    private var updateAttributesQuery: [String: Any] {
-        composeQueryElements()
+    /// - Parameter itemData: Data which will be stored into keychain.
+    private func updateAttributesQuery(with itemData: Data) -> [String: Any] {
+        return composeQueryElements()
             .merging([kSecValueData as String: itemData]) { lhs, _ in lhs }
     }
 
     /// Delete query comprises of data extracted from `QueryElement` properties which keys are listed in
     /// `primaryKey` and `kSecClass` identifier.
     private var deleteQuery: [String: Any] {
-        composeQueryElements()
+        return composeQueryElements()
             .filter { primaryKey.contains($0.key as CFString) }
             .merging([kSecClass as String: itemClass]) { lhs, _ in lhs }
     }
@@ -219,8 +207,8 @@ open class SingleValueKeychainItem {
 
     // https://developer.apple.com/documentation/security/keychain_services/keychain_items/adding_a_password_to_the_keychain
     /// Executes insert query.
-    func executeInsertQuery() throws {
-        let status = SecItemAdd(insertQuery as CFDictionary, nil)
+    func executeInsertQuery(storing data: Data) throws {
+        let status = SecItemAdd(insertQuery(with: data) as CFDictionary, nil)
         guard status == errSecSuccess else {
             throw KeychainError(fromOSStatus: status)
         }
@@ -228,9 +216,9 @@ open class SingleValueKeychainItem {
 
     // https://developer.apple.com/documentation/security/keychain_services/keychain_items/searching_for_keychain_items
     /// Executed fetch query.
-    func executeFetchQuery() throws {
+    func executeFetchQuery() throws -> Data? {
         var item: CFTypeRef?
-        let status = SecItemCopyMatching(fetchQuery as CFDictionary, &item)
+        let status = SecItemCopyMatching(fetchQuery() as CFDictionary, &item)
 
         guard status == errSecSuccess else {
             throw KeychainError(fromOSStatus: status)
@@ -240,14 +228,14 @@ open class SingleValueKeychainItem {
             throw KeychainError.unexpectedFormat
         }
 
-        configure(from: response)
+        return configure(from: response)
     }
 
     // https://developer.apple.com/documentation/security/keychain_services/keychain_items/updating_and_deleting_keychain_items
     /// Exected update query.
-    func executeUpdateQuery() throws {
-        let fetchQuery = updateFetchQuery
-        let attributeQuery = updateAttributesQuery.filter { key, value in fetchQuery[key] == nil }
+    func executeUpdateQuery(storing data: Data) throws {
+        let fetchQuery = updateFetchQuery()
+        let attributeQuery = updateAttributesQuery(with: data).filter { key, value in fetchQuery[key] == nil }
         let status = SecItemUpdate(fetchQuery as CFDictionary, attributeQuery as CFDictionary)
 
         guard status == errSecSuccess else {

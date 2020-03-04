@@ -127,7 +127,10 @@ public enum KeychainDataRefreshPolicy {
 
 /// `KeychainError` encapsulates common errors throws by enclosed services.
 public enum KeychainError: Error {
-    case unexpectedFormat, generalEncodingFailure, generalDecodingFailure
+    case unexpectedFormat
+    case generalEncodingFailure
+    case generalDecodingFailure
+    case loadSucceededWithoutData
     case accessControllErrorUnknown
     case accessControllError(status: Error)
     case osSecure(status: OSStatus)
