@@ -1,13 +1,27 @@
 import Foundation
 
+/// Internal encoder for keychain property wrapper. This encoder uses generic type T to decide at runtime,
+/// which encoding method should be used. Please refer to each individual encoding method for implementation
+/// details.
 struct KeychainEncoder {
 
+    /// Property list encoder is used for encoding if type `T` has no explicit decoding method.
     private let encoder: PropertyListEncoder = {
         let newEncoder = PropertyListEncoder()
         newEncoder.outputFormat = .binary
         return newEncoder
     }()
 
+    /// Encode value `T`. This method uses different method for each `T` which could be considered as a
+    /// "single value". Collection and other `Encodable` types are encoded using `PropertyListEncoder`.
+    /// - Note:
+    /// In rare instances (like string) `PropertyListEncoder` and this encoder's encoding strategy may
+    /// produce the same result. This is not an intended feature, however. This method is not implemented for
+    /// floating point types.
+    /// - Note:
+    /// *Calling convention*: if this method is called with type `Data` as a generic type T, this method should
+    /// return the argument as-is without any changes.
+    /// - Parameter value: Value to be encoded.
     func encode<T: Encodable>(_ value: T) throws -> Data {
         switch value {
         case let value as Int:
@@ -33,10 +47,6 @@ struct KeychainEncoder {
         case is Float.Type:
             throw EncodingError.invalidValue( value,
                 EncodingError.Context(codingPath: [], debugDescription: "Encoding root type Float not supported!", underlyingError: nil)
-            )
-        case is Float80.Type:
-            throw EncodingError.invalidValue( value,
-                EncodingError.Context(codingPath: [], debugDescription: "Encoding root type Float80 not supported!", underlyingError: nil)
             )
         case is Double.Type:
             throw EncodingError.invalidValue( value,
