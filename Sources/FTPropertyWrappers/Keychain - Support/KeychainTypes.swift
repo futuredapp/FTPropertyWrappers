@@ -56,8 +56,8 @@ public enum KeychainQueryPresenceConstraint {
 /// results are being parsed, properties of this type are going to be scanned by mirror reflecting enclosing class
 /// instance. At this time, wrapped properties and constrains are being read or written to. Notice, that if you have
 /// more than one `QueryElement` in hiearchy with the same key, behavior may be undefined. In such a case
-/// only guarantee is, that if at least one of such properties is not nil, this key will be written to query before contraints
-/// are resolved.
+/// only guarantee is, that if at least one of such properties is not nil, this key will be written to query before
+/// contraints are resolved.
 public final class QueryElement<T>: WrappedConfiguringElement {
 
     /// Value corresponding to the attribute key.
