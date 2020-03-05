@@ -3,71 +3,118 @@ import FTPropertyWrappers
 
 struct ContentView: View {
 
-    struct Hidden: Codable {
-        var age: Int
-        var powerLevel: UInt64
+    // Codable structure that will be used for storing values in keychain
+    struct Hidden: Codable, CustomDebugStringConvertible {
+        var debugDescription: String {
+            return "Text: \(text), Number: \(number), Updates: \(numberOfUpdates)"
+        }
+
+        // Text inserted by user
+        var text: String
+
+        // Number inserted by user
+        var number: Int
+
+        // Number of updates since last deletion counted by application
+        var numberOfUpdates: UInt64
     }
 
+    // Generic password with Access Control. Notice, that refresh policy is manual. This is recommended when Access Conrol is used.
     @GenericPassword(
         service: "app.futured.ftpropertywrappers.example.name",
         account: "example@futred.com",
         refreshPolicy: .manual,
+        // Visit Apple's documentation to learn more about following value
         accessOption: kSecAttrAccessibleWhenUnlocked,
+        // Following combination should use any biometry with fallback for device passcode (though this behavior may be default for biometry option).
         accessFlags: [.biometryAny, .or, .devicePasscode]
     ) var data: Hidden?
 
+    // State stroring output
     @State var log: String = ""
-    @State var numberOfSaves: Int = 0
+
+    // Field for user-input string (using TextField)
+    @State var text: String = ""
+    // Field for user-input number (using stepper)
+    @State var number: Int = 0
+
+    // Field for number of saves since last deletion
+    @State var numberOfUpdates: UInt64 = 0
 
     var body: some View {
-
         VStack {
-            Text(log)
-            HStack(alignment: .center, spacing: 10) {
-                Button(action: {
-                    do {
-                        try self._data.loadFromKeychain()
-                        if let data = self.data {
-                            self.log += "Loaded: Age: \(data.age), PL: \(data.powerLevel)\n"
-                        } else {
-                            self.log += "Loaded: <null>\n"
-                        }
-                    } catch {
-                        self.log += "\(error.localizedDescription)\n"
-                    }
-                }) {
-                    Text("Load")
+            VStack {
+                HStack {
+                    TextField("Enter text", text: $text).background(Color.gray)
+                    Stepper("", value: $number)
+                    Text("\(number)")
                 }
-                Button(action: {
-                    do {
-                        self.numberOfSaves += 1
-                        self.data = Hidden(age: self.numberOfSaves, powerLevel: self.data?.powerLevel ?? UInt64.random(in: 0...9001))
-                        try self._data.saveToKeychain()
-                        self.log += "Saved: Age: \(self.data!.age), PL: \(self.data!.powerLevel)\n"
-                    } catch {
-                        self.log += "\(error.localizedDescription)\n"
+                HStack(alignment: .center, spacing: 10) {
+                    Button(action: load) {
+                        Text("Load")
                     }
-                }) {
-                    Text("Save")
-                }
-                Button(action: {
-                    do {
-                        try self._data.deleteKeychain()
-                        self.log += "<deleted>\n"
-                        self.numberOfSaves = 0
-                    } catch {
-                        self.log += "\(error.localizedDescription)\n"
+                    Button(action: save) {
+                        Text("Save")
                     }
-                }) {
-                    Text("Delete")
-                }
-                Button(action: {
-                    self.log = ""
-                }) {
-                    Text("Clean Log")
+                    Button(action: delete) {
+                        Text("Delete")
+                    }
+                    Button(action: clean) {
+                        Text("Clean Log")
+                    }
+                    Button(action: hideKeyboard) {
+                        Text("HideKeyboard")
+                    }
                 }
             }
+            Text(log)
         }
+    }
+
+    func save() {
+        do {
+            self.numberOfUpdates += 1
+            self.data = Hidden(text: text,
+                               number: number,
+                               numberOfUpdates: numberOfUpdates)
+            // In manual mode, data are not stored into keychain after updates to wrapped property, therefore we have to save data manually.
+            try self._data.saveToKeychain()
+            self.log += "[Saved] \(data!)\n"
+        } catch {
+            self.log += "\(error.localizedDescription)\n"
+        }
+    }
+
+    func load() {
+        do {
+            try self._data.loadFromKeychain()
+            if let data = self.data {
+                self.log += "[Loaded] \(data)\n"
+            } else {
+                self.log += "Loaded: <null>\n"
+            }
+        } catch {
+            self.log += "\(error.localizedDescription)\n"
+        }
+    }
+
+    func delete() {
+        do {
+            try self._data.deleteKeychain()
+            self.log += "[deleted]\n"
+            self.numberOfUpdates = 0
+        } catch {
+            self.log += "\(error.localizedDescription)\n"
+        }
+    }
+
+    // Following support for UI
+    func clean() {
+        self.log = ""
+    }
+
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
