@@ -108,7 +108,7 @@ open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
     open func loadFromKeychain() throws {
         resetQueryElementsExcludedKeys()
         do {
-            if let decoded = try (try executeFetchQuery()).flatMap({ try self.decoder.decode(T.self, from: $0)}) {
+            if let decoded = try executeFetchQuery().flatMap({ try self.decoder.decode(T.self, from: $0)}) {
                 cachedValue = decoded
             } else {
                 throw KeychainError.loadSucceededWithoutData
