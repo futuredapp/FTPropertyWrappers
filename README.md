@@ -66,8 +66,8 @@ where a simple delegate is not sufficient and you want to notify more objects. I
 for those projects where Combine is not available or other reactive programming frameworks
 would be an over-kill.
 
-Suppose we want to observe all the changes to logged in user- wee need to implement some
-object (in zthis case service) which handles all the user-related logic. We need to expose
+Suppose we want to observe all the changes to logged in user we need to implement some
+object (in this case service) which handles all the user-related logic. We need to expose
 the observe method, since the property wrapper is private.
 
 ```swift
