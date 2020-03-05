@@ -20,26 +20,6 @@ extension Disposable {
     }
 }
 
-private final class AnyDisposable: Disposable {
-    let closure: () -> Void
-
-    init(closure: @escaping () -> Void) {
-        self.closure = closure
-    }
-
-    deinit {
-        closure()
-    }
-}
-
-private final class Observer<Value> {
-    let subscription: Subscription<Value>
-
-    init(subscription: @escaping Subscription<Value>) {
-        self.subscription = subscription
-    }
-}
-
 @propertyWrapper
 public final class StoredSubject<Value> {
 
@@ -69,5 +49,25 @@ public final class StoredSubject<Value> {
         observe({ _, newValue in
             subscription(newValue)
         })
+    }
+}
+
+private final class AnyDisposable: Disposable {
+    let closure: () -> Void
+
+    init(closure: @escaping () -> Void) {
+        self.closure = closure
+    }
+
+    deinit {
+        closure()
+    }
+}
+
+private final class Observer<Value> {
+    let subscription: Subscription<Value>
+
+    init(subscription: @escaping Subscription<Value>) {
+        self.subscription = subscription
     }
 }
