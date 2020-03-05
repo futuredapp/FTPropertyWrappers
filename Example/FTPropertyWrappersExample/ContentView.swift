@@ -2,32 +2,25 @@ import SwiftUI
 import FTPropertyWrappers
 
 struct ContentView: View {
-/*
-    @GenericPassword(
-        service: "app.futured.ftpropertywrappers.example.name",
-        account: "example@futred.com",
-        refreshPolicy: .manual
-    ) var myName: String?
-*/
+
     struct Hidden: Codable {
         var age: Int
         var powerLevel: UInt64
     }
 
-    @GenericPassword var data: Hidden?
-
-    init() {
-        _data = try! GenericPassword<Hidden>(
-            serviceIdentifier: "app.futured.ftpropertywrappers.example.data",
-            account: "example@futred.com", refreshPolicy: .manual,
-            protection: (access: .whenUnlocked, flags: [.biometryAny, .or, .devicePasscode])
-        )
-    }
+    @GenericPassword(
+        service: "app.futured.ftpropertywrappers.example.name",
+        account: "example@futred.com",
+        refreshPolicy: .manual,
+        accessOption: kSecAttrAccessibleWhenUnlocked,
+        accessFlags: [.biometryAny, .or, .devicePasscode]
+    ) var data: Hidden?
 
     @State var log: String = ""
     @State var numberOfSaves: Int = 0
 
     var body: some View {
+
         VStack {
             Text(log)
             HStack(alignment: .center, spacing: 10) {
@@ -48,10 +41,6 @@ struct ContentView: View {
                 Button(action: {
                     do {
                         self.numberOfSaves += 1
-                        if self.data == nil {
-
-                            try self._data.modifyAccess(using: .whenUnlocked, flags: [.biometryAny, .or, .devicePasscode])
-                        }
                         self.data = Hidden(age: self.numberOfSaves, powerLevel: self.data?.powerLevel ?? UInt64.random(in: 0...9001))
                         try self._data.saveToKeychain()
                         self.log += "Saved: Age: \(self.data!.age), PL: \(self.data!.powerLevel)\n"

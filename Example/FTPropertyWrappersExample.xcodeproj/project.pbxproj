@@ -61,23 +61,10 @@
 		BEFFBBDE2407F84F009C83FC /* FTPropertyWrappersExample */ = {
 			isa = PBXGroup;
 			children = (
-				BEFFBBDF2407F84F009C83FC /* AppDelegate.swift */,
-				BEFFBBE12407F84F009C83FC /* SceneDelegate.swift */,
 				BEFFBBE32407F84F009C83FC /* ContentView.swift */,
-				BEFFBBE52407F851009C83FC /* Assets.xcassets */,
-				BEFFBBEA2407F851009C83FC /* LaunchScreen.storyboard */,
-				BEFFBBED2407F851009C83FC /* Info.plist */,
-				BEFFBBE72407F851009C83FC /* Preview Content */,
+				BEFFBC2424111958009C83FC /* Supporting */,
 			);
 			path = FTPropertyWrappersExample;
-			sourceTree = "<group>";
-		};
-		BEFFBBE72407F851009C83FC /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				BEFFBBE82407F851009C83FC /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 		BEFFBBF62407F9A7009C83FC /* Frameworks */ = {
@@ -85,6 +72,19 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		BEFFBC2424111958009C83FC /* Supporting */ = {
+			isa = PBXGroup;
+			children = (
+				BEFFBBDF2407F84F009C83FC /* AppDelegate.swift */,
+				BEFFBBE12407F84F009C83FC /* SceneDelegate.swift */,
+				BEFFBBE52407F851009C83FC /* Assets.xcassets */,
+				BEFFBBEA2407F851009C83FC /* LaunchScreen.storyboard */,
+				BEFFBBED2407F851009C83FC /* Info.plist */,
+				BEFFBBE82407F851009C83FC /* Preview Assets.xcassets */,
+			);
+			path = Supporting;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -300,14 +300,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_ASSET_PATHS = "\"FTPropertyWrappersExample/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "FTPropertyWrappersExample/Supporting/Preview\\ Assets.xcassets";
+				DEVELOPMENT_TEAM = 5YRLLDH355;
 				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = FTPropertyWrappersExample/Info.plist;
+				INFOPLIST_FILE = FTPropertyWrappersExample/Supporting/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = app.futured.FTPropertyWrappersExample;
+				PRODUCT_BUNDLE_IDENTIFIER = cz.miki.FTPropertyWrappersExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -319,14 +320,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_ASSET_PATHS = "\"FTPropertyWrappersExample/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "FTPropertyWrappersExample/Supporting/Preview\\ Assets.xcassets";
+				DEVELOPMENT_TEAM = 5YRLLDH355;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = FTPropertyWrappersExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = app.futured.FTPropertyWrappersExample;
+				PRODUCT_BUNDLE_IDENTIFIER = cz.miki.FTPropertyWrappersExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
