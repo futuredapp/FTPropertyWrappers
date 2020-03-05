@@ -150,7 +150,7 @@ myName = nil // Deletes immediately since myName is saved upon access
 try _myName.saveToKeychain() // Deletes since wrapped property is nil
 try _myName.deleteKeychain() // Explicit delete.
 ```
-Access control enables you to specify which authentication methos should be used before access to keychain item's data is granted. For example, app may create it's own password or require biometric authentication. Generic password wrapper allows you to modify access parameters of an item. Two different approaches are possible. Define new access control modifiers before each write or define default access control parameters for the wrapper instance. In the latter case, access control modifiers are instantiated upon save when kSecAccessControl attribute is nil. This may result in exception resulting in save operation abortion. Example of Generic password with access control can be found in example project in this repository.
+Access control enables you to specify which authentication method should be used before access to data of keychain item is granted. For example, app may create its own password or require biometric authentication. Generic password wrapper allows you to modify access parameters of an item. Two different approaches are possible. Define new access control modifiers before each write or define default access control parameters for the wrapper instance. In the latter case, access control modifiers are instantiated upon save when `kSecAccessControl` attribute is nil. This may result in exception resulting in save operation abortion. Example of generic password with access control can be found in the example project in this repository.
 
 ```swift
 // Example declaration of GenericPassword with access control from exaple project

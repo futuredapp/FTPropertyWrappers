@@ -22,7 +22,7 @@ struct ContentView: View {
     // Generic password with Access Control. Notice, that refresh policy is manual. This is recommended when Access Conrol is used.
     @GenericPassword(
         service: "app.futured.ftpropertywrappers.example.name",
-        account: "example@futred.com",
+        account: "your@futured.app",
         refreshPolicy: .manual,
         // Visit Apple's documentation to learn more about following value
         accessOption: kSecAttrAccessibleWhenUnlocked,
@@ -30,7 +30,7 @@ struct ContentView: View {
         accessFlags: [.biometryAny, .or, .devicePasscode]
     ) var data: Hidden?
 
-    // State stroring output
+    // State storing output
     @State var log: String = ""
 
     // Field for user-input string (using TextField)
