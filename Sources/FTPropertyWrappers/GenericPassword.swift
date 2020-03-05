@@ -81,10 +81,11 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
     }
 
     /// Creates instance of generic password. If one or more primary key attributes are ommited, make sure that
-    /// there is only one item that could be identified with such set of values of the primary key. If not, keychain will
-    /// work with the one with oldest creation date, though some behaviour of this class may be undefined.
+    /// there is only one item that could be identified with such set of values of the primary key. If not, keychain
+    /// will work with the one with oldest creation date, though some behaviour of this class may be undefined.
     /// * Note:
-    ///  If you're interested in Access Control, use `init(service:account:refreshPolicy:defaultValue:accessOption:accessFlags:)`
+    ///  If you're interested in Access Control, use
+    ///  `init(service:account:refreshPolicy:defaultValue:accessOption:accessFlags:)`
     ///  instead. The other initializer will set Access Control default value which will prevent the value from being
     ///  reset to `nil` upon loading or deleting.
     /// - Parameters:
@@ -106,7 +107,6 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
         defaultValue: defaultValue,
         accessControl: nil)
     }
-
 
     /// Creates instance of generic password. This initializer is intended for keychain items with Access Control
     /// functionality. Provided "access" properties will be stored and used whenever kSecAccessControl attribute
