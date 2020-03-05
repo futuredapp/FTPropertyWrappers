@@ -60,7 +60,44 @@ print(number) // Prints: Optional(10)
 ```
 
 ### `StoredSubject`
-TODO:
+
+Stored subject is a simple implementation of observer/listener pattern. Solves a problem,
+where a simple delegate is not sufficient and you want to notify more objects. It is designated
+for those projects where Combine is not available or other reactive programming frameworks
+would be an over-kill.
+
+Suppose we want to observe all the changes to logged in user we need to implement some
+object (in this case service) which handles all the user-related logic. We need to expose
+the observe method, since the property wrapper is private.
+
+```swift
+class UserService {
+    @StoredSubject var user: User = User()
+
+    func observeUser(subscription: @escaping (User) -> Void) -> Disposable {
+        _user.observe(subscription)
+    }
+}
+```
+
+At the place where we want to listen to the changes of the user we need to hold the dispose bag.
+In this dispose bag we put the subscription. The changes are received until the dispose bag is retained.
+
+```swift
+class LoginController {
+    let userService: UserService
+
+    private let bag = DisposeBag()
+
+    init(userService: UserService) {
+        self.userService = userService
+
+        userService.observeUser { user in
+            ...
+        }.dispose(in: bag)
+    }
+}
+```
 
 ### `Serialized`
 

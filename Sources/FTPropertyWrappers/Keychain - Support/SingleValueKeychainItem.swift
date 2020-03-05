@@ -198,13 +198,15 @@ open class SingleValueKeychainItem {
     /// This method resets all `QueryElement` properties in this class and all subclasses to nil.
     func resetQueryElementsExcludedKeys() {
         Mirror(reflecting: self).forEachChildInClassHiearchy { child in
-            guard var element = child.value as? WrappedConfiguringElement, !primaryKey.contains(element.key as CFString) else {
+            guard var element = child.value as? WrappedConfiguringElement,
+                  !primaryKey.contains(element.key as CFString) else {
                 return
             }
             element.wrappedAsAnonymous = nil
         }
     }
 
+    //swiftlint:disable:next line_length
     // https://developer.apple.com/documentation/security/keychain_services/keychain_items/adding_a_password_to_the_keychain
     /// Executes insert query.
     func executeInsertQuery(storing data: Data) throws {
@@ -223,7 +225,7 @@ open class SingleValueKeychainItem {
         guard status == errSecSuccess else {
             throw KeychainError(fromOSStatus: status)
         }
-        
+
         guard let response = item as? [String: Any] else {
             throw KeychainError.unexpectedFormat
         }
@@ -231,11 +233,12 @@ open class SingleValueKeychainItem {
         return configure(from: response)
     }
 
+    //swiftlint:disable:next line_length
     // https://developer.apple.com/documentation/security/keychain_services/keychain_items/updating_and_deleting_keychain_items
     /// Exected update query.
     func executeUpdateQuery(storing data: Data) throws {
         let fetchQuery = updateFetchQuery()
-        let attributeQuery = updateAttributesQuery(with: data).filter { key, value in fetchQuery[key] == nil }
+        let attributeQuery = updateAttributesQuery(with: data).filter { key, _ in fetchQuery[key] == nil }
         let status = SecItemUpdate(fetchQuery as CFDictionary, attributeQuery as CFDictionary)
 
         guard status == errSecSuccess else {
@@ -243,6 +246,7 @@ open class SingleValueKeychainItem {
         }
     }
 
+    //swiftlint:disable:next line_length
     // https://developer.apple.com/documentation/security/keychain_services/keychain_items/updating_and_deleting_keychain_items
     /// Executes delete query.
     func executeDeleteQuery() throws {

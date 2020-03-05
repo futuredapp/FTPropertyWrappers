@@ -1,10 +1,6 @@
 name: Swift
 
-on:
-  pull_request:
-    branches:
-    - develop
-    - master
+on: [pull_request]
 
 jobs:
   build:
@@ -13,6 +9,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install and run SwiftLint
+      run: | 
+        brew install swiftlint
+        swiftlint   
     - name: Build
       run: swift build -v
     - name: Run tests
