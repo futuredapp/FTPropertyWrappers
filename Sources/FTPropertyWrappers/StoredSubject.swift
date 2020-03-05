@@ -5,7 +5,7 @@
 ///   - newValue: Current value after the last update.
 public typealias Subscription<Value> = (_ oldValue: Value, _ newValue: Value) -> Void
 
-/// Object which stores all the disposables for reference-counting.
+/// Object which stores all the disposables for reference counting.
 /// It is designed to store all the stored subject disposables.
 /// These observers are add by calling `dispose(in:)` method on them.
 public final class DisposeBag {
