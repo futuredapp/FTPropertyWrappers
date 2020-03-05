@@ -200,4 +200,3 @@ We want to thank other contributors, namely:
 ## License
 
 FTPropertyWrappers is available under the MIT license. See the [LICENSE file](LICENSE) for more information.
->>>>>>> develop
