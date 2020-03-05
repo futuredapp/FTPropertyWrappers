@@ -64,20 +64,83 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
     ///   - refreshPolicy: Refresh policy for `wrappedProperty`.
     ///   - defaultValue: Default value for `wrappedProperty` in case, that no `cachedValue` is
     ///   present.
-    ///   - defaultProtection: Parameter containing options for kSecAttrAccessControl attribute. This
+    ///   - accessControl: Parameter containing options for kSecAttrAccessControl attribute. This
     ///   attribute is set upon store operation in case, that current state of it's property is nil. Setting of the
     ///   attribute may trigger exception and as a result abort saving.
-    public init(
+    private init(
+        service: String,
+        account: String?,
+        refreshPolicy: KeychainDataRefreshPolicy,
+        defaultValue: T?,
+        accessControl: AccessControlSettings?
+    ) {
+        self.defaultAccessControl = accessControl
+        super.init(refreshPolicy: refreshPolicy, defaultValue: defaultValue)
+        self.service = service
+        self.account = account
+    }
+
+    /// Creates instance of generic password. If one or more primary key attributes are ommited, make sure that
+    /// there is only one item that could be identified with such set of values of the primary key. If not, keychain will
+    /// work with the one with oldest creation date, though some behaviour of this class may be undefined.
+    /// * Note:
+    ///  If you're interested in Access Control, use `init(service:account:refreshPolicy:defaultValue:accessOption:accessFlags:)`
+    ///  instead. The other initializer will set Access Control default value which will prevent the value from being
+    ///  reset to `nil` upon loading or deleting.
+    /// - Parameters:
+    ///   - service: Service attribute used as  part of primary key.
+    ///   - account: Account attribute used as part of primary key.
+    ///   - refreshPolicy: Refresh policy for `wrappedProperty`.
+    ///   - defaultValue: Default value for `wrappedProperty` in case, that no `cachedValue` is
+    ///   present.
+    public convenience init(
+        service: String,
+        account: String? = nil,
+        refreshPolicy: KeychainDataRefreshPolicy = .onAccess,
+        defaultValue: T? = nil
+    ) {
+        self.init(
+        service: service,
+        account: account,
+        refreshPolicy: refreshPolicy,
+        defaultValue: defaultValue,
+        accessControl: nil)
+    }
+
+
+    /// Creates instance of generic password. This initializer is intended for keychain items with Access Control
+    /// functionality. Provided "access" properties will be stored and used whenever kSecAccessControl attribute
+    /// may be nil. If one or more primary key attributes are ommited, make sure that there is only one item that
+    /// could be identified with such set of values of the primary key. If not, keychain will work with the one with
+    /// oldest creation date, though some behaviour of this class may be undefined.
+    /// * Warning:
+    ///   A kSecAttrAccessControl attribute is set upon store operation in case, that current state of it's property
+    ///   is nil. Creating new instance of SecAccessControl based on data stored in `defaultAccessControl`
+    ///   may trigger a runtime excteption and abort any save operation.
+    /// - Parameters:
+    ///   - service: Service attribute used as  part of primary key.
+    ///   - account: Account attribute used as part of primary key.
+    ///   - refreshPolicy: Refresh policy for `wrappedProperty`.
+    ///   - defaultValue: Default value for `wrappedProperty` in case, that no `cachedValue` is
+    ///   present.
+    ///   - accessOption: Parameter of kSecAttrAccessible**** string class. This option is not used for
+    ///   kSecAttrAccessible but as one element for creation kSecAccessControl.
+    ///   - accessFlags: Access control flags used for creation of SecAccessControl.
+    public convenience init(
         service: String,
         account: String? = nil,
         refreshPolicy: KeychainDataRefreshPolicy = .onAccess,
         defaultValue: T? = nil,
-        defaultProtection: AccessControlSettings? = nil
+        accessOption: CFString,
+        accessFlags: SecAccessControlCreateFlags
     ) {
-        self.defaultAccessControl = defaultProtection
-        super.init(refreshPolicy: refreshPolicy, defaultValue: defaultValue)
-        self.service = service
-        self.account = account
+
+        self.init(
+        service: service,
+        account: account,
+        refreshPolicy: refreshPolicy,
+        defaultValue: defaultValue,
+        accessControl: AccessControlSettings(access: accessOption, flags: accessFlags))
     }
 
     /// Modifies `accessControl` property. This method may reject arguments. For more information refer to
