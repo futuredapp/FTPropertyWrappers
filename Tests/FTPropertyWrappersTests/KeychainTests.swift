@@ -1,4 +1,4 @@
-//swiftlint:disable all
+//swiftlint:disable line_length function_body_length force_try type_body_length
 
 import XCTest
 @testable import FTPropertyWrappers
@@ -366,4 +366,4 @@ final class KeychainTests: XCTestCase {
     ]
 }
 
-//swiftlint:enable all
+//swiftlint:enable line_length function_body_length force_try type_body_length
