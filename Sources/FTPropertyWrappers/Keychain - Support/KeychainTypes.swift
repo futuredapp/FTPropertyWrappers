@@ -1,6 +1,5 @@
 import Foundation
 
-
 extension Mirror {
 
     /// Child is any property inside a class. This convenience function provides you access to each property of a
@@ -49,7 +48,6 @@ public enum KeychainQueryPresenceConstraint {
     /// When attribute with this key is present in query, this `Query Element` is removed from the query.
     case overridenBy(CFString)
 }
-
 
 @propertyWrapper
 /// Query element is envelope for a single value that represents a kSecAttr**** inside a keychain query or a

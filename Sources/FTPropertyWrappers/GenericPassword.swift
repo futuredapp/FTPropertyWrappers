@@ -111,7 +111,7 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
         if let defaultSettings = self.defaultAccessControl, accessControl == nil {
             try modifyAccess(using: defaultSettings.access, flags: defaultSettings.flags)
         }
-        
+
         try super.saveToKeychain()
     }
 

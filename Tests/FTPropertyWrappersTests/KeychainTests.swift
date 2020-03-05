@@ -270,8 +270,8 @@ final class KeychainTests: XCTestCase {
                         "delta@account.my",
                         "eta@account.my",
                         "theta@account.my"]
-        let values = ["🌞","🌚","🌜","🌎","☀️","☃️","🌬"]
-        let combinations = zip(accounts.shuffled(), values.map{ $0.data(using: .utf8)! }.shuffled())
+        let values = ["🌞", "🌚", "🌜", "🌎", "☀️", "☃️", "🌬"]
+        let combinations = zip(accounts.shuffled(), values.map { $0.data(using: .utf8)! }.shuffled())
 
         XCTAssertNoThrow(try accounts.forEach {
             try GenericPassword<Data>(service: path + ".g", account: $0, refreshPolicy: .manual).deleteKeychain()
@@ -291,7 +291,7 @@ final class KeychainTests: XCTestCase {
         XCTAssertNoThrow(try general.loadFromKeychain())
         XCTAssertEqual(first!.wrappedValue, general.wrappedValue)
 
-        XCTAssertNoThrow(try combinations.dropFirst().forEach { (account: String, value: Data) in
+        XCTAssertNoThrow(try combinations.dropFirst().forEach { (account: String, _: Data) in
             let wrapper = GenericPassword<Data>(service: path + ".g", account: account, refreshPolicy: .manual)
             try wrapper.loadFromKeychain()
             XCTAssertNotEqual(wrapper.wrappedValue, general.wrappedValue)
@@ -309,8 +309,8 @@ final class KeychainTests: XCTestCase {
                         "delta@account.my",
                         "eta@account.my",
                         "theta@account.my"]
-        let values = ["🌞","🌚","🌜","🌎","☀️","☃️","🌬"]
-        let combinations = zip(accounts.shuffled(), values.map{ $0.data(using: .utf8)! }.shuffled())
+        let values = ["🌞", "🌚", "🌜", "🌎", "☀️", "☃️", "🌬"]
+        let combinations = zip(accounts.shuffled(), values.map { $0.data(using: .utf8)! }.shuffled())
 
         XCTAssertNoThrow(try accounts.forEach {
             try InternetPassword<Data>(server: path + ".i", account: $0, refreshPolicy: .manual).deleteKeychain()
@@ -330,7 +330,7 @@ final class KeychainTests: XCTestCase {
         XCTAssertNoThrow(try general.loadFromKeychain())
         XCTAssertEqual(first!.wrappedValue, general.wrappedValue)
 
-        XCTAssertNoThrow(try combinations.dropFirst().forEach { (account: String, value: Data) in
+        XCTAssertNoThrow(try combinations.dropFirst().forEach { (account: String, _: Data) in
             let wrapper = InternetPassword<Data>(server: path + ".i", account: account, refreshPolicy: .manual)
             try wrapper.loadFromKeychain()
             XCTAssertNotEqual(wrapper.wrappedValue, general.wrappedValue)

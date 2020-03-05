@@ -223,7 +223,7 @@ open class SingleValueKeychainItem {
         guard status == errSecSuccess else {
             throw KeychainError(fromOSStatus: status)
         }
-        
+
         guard let response = item as? [String: Any] else {
             throw KeychainError.unexpectedFormat
         }
@@ -235,7 +235,7 @@ open class SingleValueKeychainItem {
     /// Exected update query.
     func executeUpdateQuery(storing data: Data) throws {
         let fetchQuery = updateFetchQuery()
-        let attributeQuery = updateAttributesQuery(with: data).filter { key, value in fetchQuery[key] == nil }
+        let attributeQuery = updateAttributesQuery(with: data).filter { key, _ in fetchQuery[key] == nil }
         let status = SecItemUpdate(fetchQuery as CFDictionary, attributeQuery as CFDictionary)
 
         guard status == errSecSuccess else {
