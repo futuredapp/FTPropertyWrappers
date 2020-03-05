@@ -62,8 +62,10 @@ public enum KeychainQueryPresenceConstraint {
 /// are resolved.
 public final class QueryElement<T>: WrappedConfiguringElement {
 
-    /// Value corresponding to the attribute key. *Notice: when a value of corresponding key is alredy present in
-    /// the keychain, setting wrapped value to nil will not unset this attribute in keychain.*
+    /// Value corresponding to the attribute key.
+    /// - Note:
+    /// When a value of corresponding key is alredy present in he keychain, setting wrapped value to nil will not
+    /// unset this attribute in keychain.
     public var wrappedValue: T?
 
     /// kSecAttr**** key at keychain query.
@@ -84,8 +86,9 @@ public final class QueryElement<T>: WrappedConfiguringElement {
     }
 
     /// Creates regular query element. Elements created with this initializer are written to queries and parsed from
-    /// responses. *Notice: when a value of corresponding key is alredy present in the keychain, setting wrapped
-    /// value to nil will not unset this attribute in keychain.*
+    /// responses.
+    /// - Note: When a value of corresponding key is alredy present in the keychain, setting wrapped value to
+    /// nil will not unset this attribute in keychain.
     /// - Parameters:
     ///   - key: Corresponding kSecAttr**** key at keychain query.
     ///   - constraints: Constraints are result of conditions described in Apple's documentation.
@@ -124,7 +127,10 @@ public enum KeychainDataRefreshPolicy {
 
 /// `KeychainError` encapsulates common errors throws by enclosed services.
 public enum KeychainError: Error {
-    case unexpectedFormat, generalEncodingFailure, generalDecodingFailure
+    case unexpectedFormat
+    case generalEncodingFailure
+    case generalDecodingFailure
+    case loadSucceededWithoutData
     case accessControllErrorUnknown
     case accessControllError(status: Error)
     case osSecure(status: OSStatus)
@@ -158,37 +164,5 @@ public enum KeychainError: Error {
         default:
             self = .osSecure(status: status)
         }
-    }
-}
-
-/// `AccesibleOption` encapsulates all constants for attribute kSecAttrAccessible, that are present in current
-/// OS versions.
-public enum AccesibleOption: CaseIterable {
-    case whenPasswordSetThisDeviceOnly
-    case whenUnlockedThisDeviceOnly
-    case whenUnlocked
-    case afterFirstUnlockThisDeviceOnly
-    case afterFirstUnlock
-
-    public var rawValue: CFString {
-        switch self {
-        case .whenPasswordSetThisDeviceOnly:
-            return kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
-        case .whenUnlockedThisDeviceOnly:
-            return kSecAttrAccessibleWhenUnlockedThisDeviceOnly
-        case .whenUnlocked:
-            return kSecAttrAccessibleWhenUnlocked
-        case .afterFirstUnlockThisDeviceOnly:
-            return kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-        case .afterFirstUnlock:
-            return kSecAttrAccessibleAfterFirstUnlock
-        }
-    }
-
-    public init?(rawValue: CFString) {
-        guard let value = AccesibleOption.allCases.first(where: { rawValue == $0.rawValue }) else {
-            return nil
-        }
-        self = value
     }
 }

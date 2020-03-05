@@ -73,35 +73,6 @@ open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
         }
     }
 
-    /// Requirred override. This class has to ensure, that cached value is not nil, when method triggering read or
-    /// write of this property is called.
-    /// - Note:
-    /// *Future proposition*: Remove itemData property and modify triggering methods to accept data as
-    /// argument and returining as return value.
-    override open var itemData: Data {
-        get {
-            guard let cachedValue = cachedValue else {
-                print("FTPropertyWrappers KeychainItemPropertyWrapper: error: invalid calling convention, cached value is nil")
-                return Data()
-            }
-            do {
-                return try encoder.encode(cachedValue)
-            } catch {
-                print("FTPropertyWrappers KeychainItemPropertyWrapper encoding: error: \(error)")
-                return Data()
-            }
-        }
-        set {
-            do {
-                cachedValue = try decoder.decode(T.self, from: newValue)
-            } catch {
-                print("FTPropertyWrappers KeychainItemPropertyWrapper decoding: error: \(error)")
-                cachedValue = nil
-            }
-
-        }
-    }
-
     /// Creates instance in order to configure read only properties. This class should not be instantiated, since it
     /// does not override all requirred properties.
     /// - Parameters:
@@ -117,15 +88,15 @@ open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
     /// If not, insert operation is executed. In case, that such an item is already in keychain
     /// (`osSecureDuplicitItem` error is thrown), update query is executed.
     open func saveToKeychain() throws {
-        guard cachedValue != nil else {
+        guard let cachedValue = cachedValue else {
             try deleteKeychain()
             return
         }
 
         do {
-            try executeInsertQuery()
+            try executeInsertQuery(storing: try encoder.encode(cachedValue))
         } catch KeychainError.osSecureDuplicitItem {
-            try executeUpdateQuery()
+            try executeUpdateQuery(storing: try encoder.encode(cachedValue))
         }
 
         wrappedValueUnchanged = true
@@ -137,7 +108,11 @@ open class KeychainItemPropertyWrapper<T: Codable>: SingleValueKeychainItem {
     open func loadFromKeychain() throws {
         resetQueryElementsExcludedKeys()
         do {
-            try executeFetchQuery()
+            if let decoded = try executeFetchQuery().flatMap({ try self.decoder.decode(T.self, from: $0)}) {
+                cachedValue = decoded
+            } else {
+                throw KeychainError.loadSucceededWithoutData
+            }
         } catch KeychainError.osSecureNoSuchItem {
             cachedValue = nil
         }

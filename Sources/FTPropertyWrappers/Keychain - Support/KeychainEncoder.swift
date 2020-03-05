@@ -48,10 +48,6 @@ struct KeychainEncoder {
             throw EncodingError.invalidValue( value,
                 EncodingError.Context(codingPath: [], debugDescription: "Encoding root type Float not supported!", underlyingError: nil)
             )
-        case is Float80.Type:
-            throw EncodingError.invalidValue( value,
-                EncodingError.Context(codingPath: [], debugDescription: "Encoding root type Float80 not supported!", underlyingError: nil)
-            )
         case is Double.Type:
             throw EncodingError.invalidValue( value,
                 EncodingError.Context(codingPath: [], debugDescription: "Encoding root type Double not supported!", underlyingError: nil)
