@@ -56,8 +56,8 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
     }
 
     /// Creates instance of generic password. If one or more primary key attributes are ommited, make sure that
-    /// there is only one item that could be identified with such set of values of the primary key. If not, keychain will
-    /// work with the one with oldest creation date, though some behaviour of this class may be undefined.
+    /// there is only one item that could be identified with such set of values of the primary key. If not, keychain
+    /// will work with the one with oldest creation date, though some behaviour of this class may be undefined.
     /// - Parameters:
     ///   - service: Service attribute used as  part of primary key.
     ///   - account: Account attribute used as part of primary key.
@@ -111,7 +111,7 @@ open class GenericPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
         if let defaultSettings = self.defaultAccessControl, accessControl == nil {
             try modifyAccess(using: defaultSettings.access, flags: defaultSettings.flags)
         }
-        
+
         try super.saveToKeychain()
     }
 

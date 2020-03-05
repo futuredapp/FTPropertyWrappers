@@ -15,8 +15,8 @@ public final class Serialized<Value> {
     }
 
     /// Did set observer for stored property. Notice, that didSet event is called on the synchronization queue.
-    /// You should free this thread as soon as possible with async call, since complex operations would slow down the synchrounous access
-    /// to the property.
+    /// You should free this thread as soon as possible with async call, since complex operations would slow down
+    /// the synchrounous access to the property.
     public var didSet: ((Value) -> Void)?
 
     /// Inserting initial value to the property. Notice, that this operation is NOT DONE on the synchronization queue.

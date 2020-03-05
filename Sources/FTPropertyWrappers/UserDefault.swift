@@ -29,7 +29,13 @@ public final class DefaultsStore<Value: Codable> {
     ///   the UserDefaults
     ///   - encoder: Encoder used to encode complex types
     ///   - decoder: Dencoder used to decode complex types
-    public init(key: String, defaultValue: Value? = nil, defaults: UserDefaults = .standard, encoder: PropertyListEncoder = PropertyListEncoder(), decoder: PropertyListDecoder = PropertyListDecoder()) {
+    public init(
+        key: String,
+        defaultValue: Value? = nil,
+        defaults: UserDefaults = .standard,
+        encoder: PropertyListEncoder = PropertyListEncoder(),
+        decoder: PropertyListDecoder = PropertyListDecoder()
+    ) {
         self.key = key
         self.defaults = defaults
         self.encoder = encoder
@@ -39,10 +45,10 @@ public final class DefaultsStore<Value: Codable> {
 
     /// Getter and setter for enclosed property. Property itself is not stored in this class and is always returned and
     /// stored from/into UserDefaults. This computed property attempts to store/load type as if it was a complex
-    /// propety first. In case it is not encodable/decodable, this getter attemts to retrieve if its in raw form and cast it
-    /// into requested type, thus being able to store default primitive types such as int or other types such as String.
-    /// If those attempts fail, default value is returned. Setter also tries to store enclosed type as encoded value,
-    /// otherwise it calls default set(:forKey:) method, thus storing primitive types such as int.
+    /// propety first. In case it is not encodable/decodable, this getter attemts to retrieve if its in raw form and
+    /// cast it into requested type, thus being able to store default primitive types such as int or other types such
+    /// as String. If those attempts fail, default value is returned. Setter also tries to store enclosed type as
+    /// encoded value, otherwise it calls default set(:forKey:) method, thus storing primitive types such as int.
     public var wrappedValue: Value? {
         get {
             if let data = defaults.data(forKey: key), let value = try? decoder.decode(Value.self, from: data) {

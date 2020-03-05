@@ -7,6 +7,7 @@ struct KeychainDecoder {
     /// Property list decoder is used for decoding if type `T` has no explicit decoding method.
     private let decoder: PropertyListDecoder = PropertyListDecoder()
 
+    //swiftlint:disable force_cast
     /// Decode type `T` from provided `Data`. This method uses different method for each `T` which could be
     /// considered as a "single value". Collection and other `Decodable` types are decoded using
     /// `PropertyListDecoder`.
@@ -20,6 +21,7 @@ struct KeychainDecoder {
     /// - Parameters:
     ///   - type: Type used for inferring decodation strategy and return type.
     ///   - data: Binary data to decode.
+    //swiftlint:disable:next function_body_length cyclomatic_complexity
     func decode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
         switch type {
         case let type as Int.Type:
@@ -44,11 +46,15 @@ struct KeychainDecoder {
             return try decode(type, from: data) as! T
         case is Float.Type:
             throw DecodingError.dataCorrupted(
-                DecodingError.Context(codingPath: [], debugDescription: "Decoding root type Float not supported!", underlyingError: nil)
+                DecodingError.Context(codingPath: [],
+                                      debugDescription: "Decoding root type Float not supported!",
+                                      underlyingError: nil)
             )
         case is Double.Type:
             throw DecodingError.dataCorrupted(
-                DecodingError.Context(codingPath: [], debugDescription: "Decoding root type Double not supported!", underlyingError: nil)
+                DecodingError.Context(codingPath: [],
+                                      debugDescription: "Decoding root type Double not supported!",
+                                      underlyingError: nil)
             )
         case let type as Bool.Type:
             return try decode(type, from: data) as! T
@@ -62,6 +68,7 @@ struct KeychainDecoder {
             return try decoder.decode(T.self, from: data)
         }
     }
+    //swiftlint:enable force_cast
 
     private func decode(_ type: Int.Type, from data: Data) throws -> Int {
         switch data.count {

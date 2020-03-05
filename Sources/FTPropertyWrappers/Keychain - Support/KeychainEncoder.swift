@@ -22,6 +22,7 @@ struct KeychainEncoder {
     /// *Calling convention*: if this method is called with type `Data` as a generic type T, this method should
     /// return the argument as-is without any changes.
     /// - Parameter value: Value to be encoded.
+    //swiftlint:disable:next function_body_length cyclomatic_complexity
     func encode<T: Encodable>(_ value: T) throws -> Data {
         switch value {
         case let value as Int:
@@ -46,11 +47,15 @@ struct KeychainEncoder {
             return encode(value)
         case is Float.Type:
             throw EncodingError.invalidValue( value,
-                EncodingError.Context(codingPath: [], debugDescription: "Encoding root type Float not supported!", underlyingError: nil)
+                EncodingError.Context(codingPath: [],
+                                      debugDescription: "Encoding root type Float not supported!",
+                                      underlyingError: nil)
             )
         case is Double.Type:
             throw EncodingError.invalidValue( value,
-                EncodingError.Context(codingPath: [], debugDescription: "Encoding root type Double not supported!", underlyingError: nil)
+                EncodingError.Context(codingPath: [],
+                                      debugDescription: "Encoding root type Double not supported!",
+                                      underlyingError: nil)
             )
         case let value as Bool:
             return encode(value)

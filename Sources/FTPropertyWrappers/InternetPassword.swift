@@ -50,7 +50,6 @@ open class InternetPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
     ///  Delete the item from keychain in order to reset this attribute.
     @QueryElement(key: kSecAttrPath) open private(set) var path: String?
 
-
     override open var itemClass: CFString { kSecClassInternetPassword }
 
     override open var primaryKey: Set<CFString> { [
@@ -60,7 +59,7 @@ open class InternetPassword<T: Codable>: KeychainItemPropertyWrapper<T> {
         kSecAttrProtocol,
         kSecAttrAuthenticationType,
         kSecAttrPort,
-        kSecAttrPath,
+        kSecAttrPath
     ] }
 
     override open var wrappedValue: T? {
