@@ -1,3 +1,5 @@
+//swiftlint:disable all
+
 import XCTest
 @testable import FTPropertyWrappers
 
@@ -363,3 +365,5 @@ final class KeychainTests: XCTestCase {
         ("testAccountExclusivityInternetStorage", testAccountExclusivityInternetStorage)
     ]
 }
+
+//swiftlint:enable all
