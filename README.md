@@ -237,6 +237,15 @@ print(declB) // Prints Optional("The Valley Wind")
 
 It appears, that in case of ambiguity, element with the oldest `creationDate` is selected as the result. This statement has no basis in documentation, however is tested in unit tests. Same considertation do apply for other keychain item classes.
 
+## Migration notes
+
+### 0.2.0 ~> 1.0.0
+During this migration process, code breaking changes were made only to Keychain property wrappers. Other changes were additive. In order to successfully migrate your Keychain related code, you have to take four steps.
+1) Represent all instances of `KeychainStore`, `CodableKeychainAdapter` or `KeychainAdapter` for `@GenericPassword`.
+2) The `key` you provided to old implementation represents `account` of the `GenericPassword` in the new implementation.
+3) The `service` attribute under new implementation is represented by `serviceIdentifier` in old implementation. It's value is  `Bundle.main.bundleIdentifier! + ".securedomain.default"` in case you use `CodableKeychainAdapter.defaultDomain`.
+4) In case you use coding implementation of `CodableKeychainAdapter` for composed types, you'll need to provide decoding code yourself, since the new implementation uses Plist instead of JSON. Simply use type `Data` as the generic parameter for the new `GenericPassword` property wrapper and use any coding method you need. _You'll find additional information on that matter above._
+
 ## Contributors
 
 Current maintainer and main contributor is [Mikoláš Stuchlík](https://github.com/mikolasstuchlik), <mikolas.stuchlik@futured.app>.
