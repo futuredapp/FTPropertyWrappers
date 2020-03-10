@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FTPropertyWrappers"
-  s.version      = "0.1.0"
+  s.version      = "1.0.0"
   s.summary      = "Commonly used property wrappers"
   s.description  = <<-DESC
     Property wrappers for common use-cases such as User Defaults, Serialization,
