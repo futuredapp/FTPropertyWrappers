@@ -10,9 +10,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install and run SwiftLint
-      run: | 
+      run: |
         brew install swiftlint
-        swiftlint   
+        swiftlint
+    - name: Lint pod lib
+      run: |
+        gem install cocoapods
+        pod lib lint
     - name: Build
       run: swift build -v
     - name: Run tests
