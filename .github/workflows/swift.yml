@@ -1,0 +1,19 @@
+name: Swift
+
+on: [pull_request]
+
+jobs:
+  build:
+
+    runs-on: macos
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install and run SwiftLint
+      run: | 
+        brew install swiftlint
+        swiftlint   
+    - name: Build
+      run: swift build -v
+    - name: Run tests
+      run: swift test -v

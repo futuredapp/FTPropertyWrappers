@@ -16,7 +16,11 @@ struct UserDefaultsTestStruct {
     @DefaultsStore(key: "person") var person: Person?
 
     init() {
-        self._constructed = DefaultsStore(key: "constructed", defaultValue: 45, defaults: .standard, encoder: PropertyListEncoder(), decoder: PropertyListDecoder())
+        self._constructed = DefaultsStore(key: "constructed",
+                                          defaultValue: 45,
+                                          defaults: .standard,
+                                          encoder: PropertyListEncoder(),
+                                          decoder: PropertyListDecoder())
     }
 }
 
@@ -157,6 +161,6 @@ final class UserDefaultsTests: XCTestCase {
         ("testUserDefaults", testUserDefaults),
         ("testUserDefaultsCollection", testUserDefaultsCollection),
         ("testCodableUserDefault", testCodableUserDefault),
-        ("testPromitiveValues", testPromitiveValues),
+        ("testPromitiveValues", testPromitiveValues)
     ]
 }
