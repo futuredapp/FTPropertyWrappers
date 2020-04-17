@@ -1,3 +1,5 @@
+![Title](Documentation/wrapper.svg)
+
 # FTPropertyWrappers
 
 ![Swift](https://github.com/futuredapp/FTPropertyWrappers/workflows/Swift/badge.svg)
