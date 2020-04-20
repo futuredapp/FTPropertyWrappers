@@ -1,4 +1,4 @@
-![Title](Documentation/wrapper.svg)
+![Logo](Documentation/wrapper.svg)
 
 # FTPropertyWrappers
 
