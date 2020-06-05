@@ -1,4 +1,4 @@
-![Logo](Documentation/wrapper.svg)
+<img alt="FTPropertyWrappers logo" align="right" src="Documentation/wrapper.svg">
 
 # FTPropertyWrappers
 
