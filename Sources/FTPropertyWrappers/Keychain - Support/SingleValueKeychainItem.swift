@@ -206,7 +206,7 @@ open class SingleValueKeychainItem {
         }
     }
 
-    //swiftlint:disable:next line_length
+    // swiftlint:disable:next line_length
     // https://developer.apple.com/documentation/security/keychain_services/keychain_items/adding_a_password_to_the_keychain
     /// Executes insert query.
     func executeInsertQuery(storing data: Data) throws {
@@ -233,7 +233,7 @@ open class SingleValueKeychainItem {
         return configure(from: response)
     }
 
-    //swiftlint:disable:next line_length
+    // swiftlint:disable:next line_length
     // https://developer.apple.com/documentation/security/keychain_services/keychain_items/updating_and_deleting_keychain_items
     /// Exected update query.
     func executeUpdateQuery(storing data: Data) throws {
@@ -246,7 +246,7 @@ open class SingleValueKeychainItem {
         }
     }
 
-    //swiftlint:disable:next line_length
+    // swiftlint:disable:next line_length
     // https://developer.apple.com/documentation/security/keychain_services/keychain_items/updating_and_deleting_keychain_items
     /// Executes delete query.
     func executeDeleteQuery() throws {

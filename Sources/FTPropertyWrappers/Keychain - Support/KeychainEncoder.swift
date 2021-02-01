@@ -22,7 +22,7 @@ struct KeychainEncoder {
     /// *Calling convention*: if this method is called with type `Data` as a generic type T, this method should
     /// return the argument as-is without any changes.
     /// - Parameter value: Value to be encoded.
-    //swiftlint:disable:next function_body_length cyclomatic_complexity
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     func encode<T: Encodable>(_ value: T) throws -> Data {
         switch value {
         case let value as Int:

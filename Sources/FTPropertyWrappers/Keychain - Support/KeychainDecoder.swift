@@ -7,7 +7,7 @@ struct KeychainDecoder {
     /// Property list decoder is used for decoding if type `T` has no explicit decoding method.
     private let decoder: PropertyListDecoder = PropertyListDecoder()
 
-    //swiftlint:disable force_cast
+    // swiftlint:disable force_cast
     /// Decode type `T` from provided `Data`. This method uses different method for each `T` which could be
     /// considered as a "single value". Collection and other `Decodable` types are decoded using
     /// `PropertyListDecoder`.
@@ -21,7 +21,7 @@ struct KeychainDecoder {
     /// - Parameters:
     ///   - type: Type used for inferring decodation strategy and return type.
     ///   - data: Binary data to decode.
-    //swiftlint:disable:next function_body_length cyclomatic_complexity
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     func decode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
         switch type {
         case let type as Int.Type:
@@ -68,7 +68,7 @@ struct KeychainDecoder {
             return try decoder.decode(T.self, from: data)
         }
     }
-    //swiftlint:enable force_cast
+    // swiftlint:enable force_cast
 
     private func decode(_ type: Int.Type, from data: Data) throws -> Int {
         switch data.count {
