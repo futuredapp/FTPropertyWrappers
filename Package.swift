@@ -8,7 +8,6 @@ let package = Package(
             name: "FTPropertyWrappers",
             targets: ["FTPropertyWrappers"])
     ],
-    dependencies: [],
     targets: [
         .target(
             name: "FTPropertyWrappers",
