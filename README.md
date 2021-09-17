@@ -24,7 +24,6 @@ pod 'FTPropertyWrappers', '~> 1.0'
 The main aim of this package is to provide programmer with access to commonly used features or snippets with as easy API as possible. Runtime efficiency, while important, is not the main focus of this package. As for today, this package contains wrappers for following features:
 
 - `UserDefaults` for storing a value inside Foundation's User Defaults
-- `StoredSubject` which is simple multidelegate/observing primitive for Swift
 - `Serialized` is naive implementation of property living on a certain thread using Dispatch
 - `GenericPassword` and `InternetPassword` are implementation of two classes storable in Keychain, with ability to inspect certain keychain item's attributes
 
@@ -61,46 +60,6 @@ number = 30
 print(number) // Prints: Optional(30)
 number = nil
 print(number) // Prints: Optional(10)
-```
-
-### `StoredSubject`
-
-Stored subject is a simple implementation of observer/listener pattern. Solves a problem,
-where a simple delegate is not sufficient and you want to notify more objects. It is designated
-for those projects where Combine is not available or other reactive programming frameworks
-would be an over-kill.
-
-Suppose we want to observe all the changes to logged in user we need to implement some
-object (in this case service) which handles all the user-related logic. We need to expose
-the observe method, since the property wrapper is private.
-
-```swift
-class UserService {
-    @StoredSubject var user: User = User()
-
-    func observeUser(subscription: @escaping (User) -> Void) -> Disposable {
-        _user.observe(subscription)
-    }
-}
-```
-
-At the place where we want to listen to the changes of the user we need to hold the dispose bag.
-In this dispose bag we put the subscription. The changes are received until the dispose bag is retained.
-
-```swift
-class LoginController {
-    let userService: UserService
-
-    private let bag = DisposeBag()
-
-    init(userService: UserService) {
-        self.userService = userService
-
-        userService.observeUser { user in
-            ...
-        }.dispose(in: bag)
-    }
-}
 ```
 
 ### `Serialized`
