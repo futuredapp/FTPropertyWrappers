@@ -32,6 +32,8 @@ The main aim of this package is to provide programmer with access to commonly us
 
 ### `UserDefaults`
 
+_Deprecated in favor of [`AppStorage`](https://developer.apple.com/documentation/swiftui/appstorage/)._
+
 User Defaults property wrapper uses two main approaches for storing data in User Defaults. Primary approach is usage of Plist coders. If a data type can't be encoded using Plist coders, value is passed directly to User Default. When creating property wrapper, you have to provide key. All properties wrapped in this property wrapper have to be optional. 
 
 ```swift

@@ -2,6 +2,10 @@ import Foundation
 
 /// Property wrapper for storing Codable values in UserDefaults store.
 @propertyWrapper
+@available(iOS, deprecated: 14.0, message: "Deprecated in favor of AppStorage")
+@available(tvOS, deprecated: 14.0, message: "Deprecated in favor of AppStorage")
+@available(macOS, deprecated: 11.0, message: "Deprecated in favor of AppStorage")
+@available(watchOS, deprecated: 7.0, message: "Deprecated in favor of AppStorage")
 public final class DefaultsStore<Value: Codable> {
 
     /// User defaults store used for this property
