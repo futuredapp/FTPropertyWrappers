@@ -12,7 +12,7 @@ When using Swift package manager install using Xcode 11+
 or add following line to your dependencies:
 
 ```swift
-.package(url: "https://github.com/futuredapp/FTPropertyWrappers.git", from: "1.0.0")
+.package(url: "https://github.com/futuredapp/FTPropertyWrappers.git", from: "1.2.0")
 ```
 When using CocoaPods add following line to your `Podfile`:
 
@@ -168,7 +168,13 @@ It appears, that in case of ambiguity, element with the oldest `creationDate` is
 
 ## Migration notes
 
-### 0.2.0 ~> 1.0.0
+### 1.2.0
+
+`@UserDefaults` was removed in favor of  [`@AppStorage`](https://developer.apple.com/documentation/swiftui/appstorage/) in iOS 14+.
+`@StoredSubject` was removed in favor of  [`CurrentValueSubject`](https://developer.apple.com/documentation/combine/currentvaluesubject) in iOS 13+.
+
+### 1.0.0
+
 During this migration process, code breaking changes were made only to Keychain property wrappers. Other changes were additive. In order to successfully migrate your Keychain related code, you have to take four steps.
 
 1. Change all `KeychainStore`, `CodableKeychainAdapter` or `KeychainAdapter` variables to `@GenericPassword`.
