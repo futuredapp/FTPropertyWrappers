@@ -168,7 +168,7 @@ It appears, that in case of ambiguity, element with the oldest `creationDate` is
 
 ## Migration notes
 
-### 1.2.0
+### 2.0.0
 
 `@UserDefaults` was removed in favor of  [`@AppStorage`](https://developer.apple.com/documentation/swiftui/appstorage/) in iOS 14+.
 `@StoredSubject` was removed in favor of  [`CurrentValueSubject`](https://developer.apple.com/documentation/combine/currentvaluesubject) in iOS 13+.
