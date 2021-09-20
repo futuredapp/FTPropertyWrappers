@@ -1,10 +1,9 @@
 Pod::Spec.new do |s|
   s.name         = "FTPropertyWrappers"
-  s.version      = "1.1.0"
+  s.version      = "2.0.0"
   s.summary      = "Commonly used property wrappers"
   s.description  = <<-DESC
-    Property wrappers for common use-cases such as User Defaults, Serialization,
-    Keychain storage and Observing
+    Property wrappers for common use-cases such as Serialization and Keychain storage
   DESC
   s.homepage     = "https://github.com/futuredapp/FTPropertyWrappers"
   s.license      = { :type => "MIT", :file => "LICENSE" }
