@@ -2,6 +2,7 @@ import Foundation
 
 /// This class provides user with easy way to serialize access to a property in multiplatform environment.
 @propertyWrapper
+@available(swift, deprecated: 5.5, message: "Use actors instead")
 public final class Serialized<Value> {
 
     /// Synchronization queue for the property. Read or write to the property must be perforimed on this queue
